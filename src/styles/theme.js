@@ -8,6 +8,23 @@ export const theme = createTheme({
             'Mina',
             'sans-serif'
         ].join(',')
-    }
+    },
+    palette:{
+        secondary:{
+            main:'#0271c5'
+        }
+    },
+    components:{
+        MuiLink:{
+            styleOverrides:{
+                root:{
+                    textDecoration:'none',
+                    color: 'gray',   
+                    fontSize: '1rem',
+                },
+
+            }
+        }
+    },
     
 })

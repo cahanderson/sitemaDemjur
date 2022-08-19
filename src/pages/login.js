@@ -1,12 +1,14 @@
 import AuthSessionStatus from '@/components/AuthSessionStatus'
 import AuthValidationErrors from '@/components/AuthValidationErrors'
 import Button from '@/components/Button'
+import GuestLayout from '@/components/Layouts/GuestLayout'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/auth'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Avatar, Box, Checkbox, Container, CssBaseline, FormControlLabel, Grid, TextField, Typography } from '@mui/material'
+import { Avatar, Box, Checkbox, CssBaseline, FormControlLabel, Grid, TextField, Typography } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+
 
 const Login = () => {
     const router = useRouter()
@@ -36,91 +38,98 @@ const Login = () => {
     }
 
     return (
-        <Container component="main" maxWidth="xs">
-            <CssBaseline />
-            <Box sx={{
-                marginTop: 8,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                }}
-            >
-                <Link href="/">
-                    <a>
-                        <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                            <LockOutlinedIcon />
-                        </Avatar>
+        <>
+            <GuestLayout>
+                <CssBaseline />
+                <Box 
+                    bgcolor='#fff'
+                    display= 'flex'
+                    flexDirection= 'column'
+                    alignItems= 'center'
+                    maxWidth='490px'
+                    padding= '77px 55px 77px 55px'
+                    borderRadius={5}
 
-                    </a>
-                </Link>
+                >
+                    <Link href="/">
+                        <a>
+                            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                                <LockOutlinedIcon />
+                            </Avatar>
 
-                {/* Session Status */}
-                <AuthSessionStatus className="mb-4" status={status} />
+                        </a>
+                    </Link>
 
-                {/* Validation Errors */}
-                <AuthValidationErrors className="mb-4" errors={errors} />
+                    {/* Session Status */}
+                    <AuthSessionStatus className="mb-4" status={status} />
 
-                <Typography component="h1" variant="h5">
-                    Sign in
-                </Typography>
+                    {/* Validation Errors */}
+                    <AuthValidationErrors className="mb-4" errors={errors} />
 
-                <Box component="form" onSubmit={submitForm} noValidate sx={{ mt: 3 }}>
-                    <TextField
-                        sx={{ border : 0 }}
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
-                        autoFocus
-                        value={email}
-                        onChange={event => setEmail(event.target.value)}
-                    />
-                    <TextField
-                        
-                        type="password"
-                        value={password}
-                        onChange={event => setPassword(event.target.value)}
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Password"
-                        autoComplete="current-password"
-                    />     
+                    <Typography component="h1" variant="h5">
+                        Sign in
+                    </Typography>
 
-                    <FormControlLabel
-                        control={<Checkbox value="remember" color="primary" />}
-                        label="Remember me"
-                    />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        sx={{ mt: 3, mb: 2 }}
-                    >
-                        Sign In
-                    </Button>
-                    <Grid container>
-                        <Grid item xs>
-                            <Link href="/forgot-password" variant="body2">
-                                <a>
-                                    Esqueceu a senha?
-                                </a>
-                            </Link>
+                    <Box component="form" onSubmit={submitForm} noValidate sx={{ mt: 3 }}>
+                        <TextField
+                            sx={{ mb : 3 }}
+                            variant='standard'
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="email"
+                            label="Email"
+                            name="email"
+                            autoComplete="email"
+                            autoFocus
+                            value={email}
+                            onChange={event => setEmail(event.target.value)}
+                        />
+                        <TextField
+                            variant='standard'
+                            type="password"
+                            value={password}
+                            onChange={event => setPassword(event.target.value)}
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="password"
+                            label="Senha"
+                            autoComplete="current-password"
+                        />     
+
+                        <FormControlLabel
+                            control={<Checkbox value="remember" color="primary" />}
+                            label="Remember me"
+                        />
+                        <Button
+                            type="submit"
+                            fullWidth
+                            sx={{ mt: 5, mb: 3, borderRadius:3}}
+                            variant="contained"
+                        >
+                            Login
+                        </Button>
+                        <Grid container>
+                            <Grid item xs>
+                                <Link href="/forgot-password" variant="body2">
+                                    <a>
+                                        Esqueceu a senha?
+                                    </a>
+                                </Link>
+                            </Grid>
+                            <Grid item>
+                                <Link href="/register" variant="body2">
+                                    <a>
+                                        Criar nova conta
+                                    </a>
+                                </Link>
+                            </Grid>
                         </Grid>
-                        <Grid item>
-                            <Link href="/register" variant="body2">
-                                <a>
-                                    Criar nova conta
-                                </a>
-                            </Link>
-                        </Grid>
-                    </Grid>
-                </Box>
-            </Box>  
-        </Container>
+                    </Box>
+                </Box>  
+            </GuestLayout>
+        </>
     )
 }           
 export default Login

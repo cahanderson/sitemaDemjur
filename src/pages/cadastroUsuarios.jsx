@@ -12,14 +12,14 @@ import AppLayout from '@/components/Layouts/AppLayout'
 export default function Usuarios() {
 
     const [openModal, setOpenModal] = useState(false);
-    const[usuario, setUsuario ] = useState([]);
+    const[usuario, setUsuario ] = useState({});
     const [data, setData] = useState([]);
     const [filter, setFilter] = useState([]);
     const[busca, setBusca] = useState();
 
     const [openSnakebar, setOpenSnakebar] = useState(false);
     const[message, setMessage] = useState('');
-    const[statusSnake, setStatusSnake] = useState('')
+    const[statusSnake, setStatusSnake] = useState('success')
 
         useEffect(()=>{
             onLoad()
@@ -61,11 +61,10 @@ export default function Usuarios() {
                     setOpenSnakebar(true)
                     setMessage(result.message)
                     setStatusSnake('error')
-                    console.log(data);
                     return;
                 }
                 setOpenModal(false)
-                setUsuario('')
+                setUsuario([])
                 onLoad()
             })   
         }else{
@@ -78,7 +77,7 @@ export default function Usuarios() {
                         return;
                     }
                 setOpenModal(false)
-                setUsuario('')
+                setUsuario([])
                 onLoad()
             })
         }
@@ -125,16 +124,17 @@ export default function Usuarios() {
         <CssBaseline />
             <Box className={styles.container}>
                 <Box className={styles.text}>
-                    <Typography variant='h4' component='h1'>
-                        Lista de Usuários
+                    <Typography variant='h4' component='h1' color='secondary'>
+                        Lista de usuários
                     </Typography>
                     <Typography variant='caption' component='h3'>
                         Aqui você pode gerenciar os usuários que acessam o sistema
                     </Typography>
+                    
                 </Box>
                 <Box alignItems='center' display='flex'>
                     <Button 
-                        onClick={() => setOpenModal(true)}
+                        onClick={() => {setUsuario({}); setOpenModal(true)}}
                         
                     >
                         Adicionar

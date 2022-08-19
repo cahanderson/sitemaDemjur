@@ -1,16 +1,25 @@
+import { Box, Container } from '@mui/material'
 import Head from 'next/head'
 
 const GuestLayout = ({ children }) => {
     return (
-        <div>
+        <Box>
             <Head>
                 <title>Laravel</title>
             </Head>
 
-            <div className="font-sans text-gray-900 antialiased">
+            <Box 
+                maxWidth='100%'
+                minHeight='100vh'
+                bgcolor='#f2f2f2'
+                display='flex'
+                justifyContent='center'
+                alignItems='center'
+                padding='10px'
+            >
                 {children}
-            </div>
-        </div>
+            </Box>
+        </Box>
     )
 }
 

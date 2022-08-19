@@ -1,9 +1,3 @@
-import ApplicationLogo from '@/components/ApplicationLogo'
-import Dropdown from '@/components/Dropdown'
-import Link from 'next/link'
-import NavLink from '@/components/NavLink'
-import ResponsiveNavLink, { ResponsiveNavButton } from '@/components/ResponsiveNavLink'
-import { DropdownButton } from '@/components/DropdownLink'
 import { useAuth } from '@/hooks/auth'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -13,7 +7,16 @@ import PersonAdd from '@mui/icons-material/PersonAdd'
 import Settings from '@mui/icons-material/Settings'
 import Logout from '@mui/icons-material/Logout'
 
+
 const Navigation = ({ user }) => {
+    //Contatena as inicias do Usuario
+    function stringAvatar(name) {
+        return {
+          children: `${name?.split(' ')[0][0]}${name?.split(' ')[1][0]}`,
+        };
+      }  
+
+    console.log(user);
     const router = useRouter()
 
     const { logout } = useAuth()
@@ -35,26 +38,26 @@ const Navigation = ({ user }) => {
     return (
         <Box component='header' bgcolor='white'>
             {/* Primary Navigation Menu */}
-            <Box maxWidth='80rem' width='100%'  mx='auto'>
+            <Box width='100vw' justifyContent='space-between' maxWidth='1316px' mx='auto' >
                 <Toolbar>
-                        <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
-                            comSistema
-                        </Typography>
+                    <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
+                        comSistema
+                    </Typography>
 
-                        <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
-                            <Tooltip title="Account settings">
-                                <IconButton
-                                    onClick={handleClick}
-                                    size="small"
-                                    sx={{ ml: 2 }}
-                                    aria-controls={open ? "account-menu" : undefined}
-                                    aria-haspopup="true"
-                                    aria-expanded={open ? "true" : undefined}
-                                >
-                                    <Avatar sx={{ width: 32, height: 32 }}>M</Avatar>
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
+                        <Tooltip title="Account settings">
+                            <IconButton
+                                onClick={handleClick}
+                                size="small"
+                                sx={{ ml: 2 }}
+                                aria-controls={open ? "account-menu" : undefined}
+                                aria-haspopup="true"
+                                aria-expanded={open ? "true" : undefined}
+                            >
+                                <Avatar sx={{}} {...stringAvatar(user?.name)} />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
 
                         <MenuMui 
                             anchorEl={anchorEl}
@@ -119,7 +122,7 @@ const Navigation = ({ user }) => {
                         </MenuMui>
                 </Toolbar>
             </Box>
-            <Divider style={{bgcolor:'red'}}/>    
+            <Divider />    
         </Box>
     )
 }

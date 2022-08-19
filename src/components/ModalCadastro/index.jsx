@@ -30,7 +30,6 @@ const permissoes = [
     'Cadastro, edição e exclusão de variáveis',
 ]
 
-
 export function ModalCadastro(props){
 
     const [name, setName] = useState('');
@@ -46,6 +45,7 @@ export function ModalCadastro(props){
             setName('');
             setEmail('');
         }
+        console.log(props.usuario.id);
     },[props.usuario.id])
 
     const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -57,7 +57,6 @@ export function ModalCadastro(props){
           border: 0,
         },
       }));
-
     return(
         <>
             
@@ -123,7 +122,6 @@ export function ModalCadastro(props){
                                     aria-describedby="component-helper-text"
                                     onChange={(e)=> setPassword(e.target.value)}
                                     
-                                    
                                 />
                             </Grid>    
                             <Grid item xs={6}>
@@ -131,7 +129,6 @@ export function ModalCadastro(props){
                                     className={styles.inputData}
                                     fullWidth
                                     label='Confirme a Senha'
-                                    
                                     name='passwordConfirmation'
                                     type="password"
                                     required

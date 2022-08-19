@@ -2,12 +2,15 @@ import Navigation from '@/components/Layouts/Navigation'
 import { useAuth } from '@/hooks/auth'
 import { Box } from '@mui/material'
 import { NavBar } from './NavBar'
+import Head from 'next/head'
 
 const AppLayout = ({ header, children }) => {
     const { user } = useAuth({ middleware: 'auth' })
 
     return (
+
         <Box minHeight='100vh' bgcolor='#F5F5F9' width='100%'>
+            <Head>laravel</Head>
             <Navigation user={user} />
 
             {/* Page Heading */}

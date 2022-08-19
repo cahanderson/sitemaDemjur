@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/auth'
 import { useState } from 'react'
 import { Avatar, Box, Container, CssBaseline, Grid, TextField, Typography } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import GuestLayout from '@/components/Layouts/GuestLayout'
 
 const Register = () => {
     const { register } = useAuth({
@@ -25,14 +26,18 @@ const Register = () => {
     }
 
     return (
-        <Container component="main" maxWidth="xs">
+        <GuestLayout>
             <CssBaseline   />
-            <Box sx={{
-                marginTop: 8,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-            }}>
+            <Box 
+                bgcolor='#fff'
+                display= 'flex'
+                flexDirection= 'column'
+                alignItems= 'center'
+                maxWidth='490px'
+                padding= '77px 55px 77px 55px'
+                borderRadius={5}
+
+            >
                 <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
                     <LockOutlinedIcon />
                 </Avatar>
@@ -44,10 +49,9 @@ const Register = () => {
 
                 <Box component="form" onSubmit={submitForm} noValidate sx={{ mt: 3 }}>
                     {/* Name */}
-                    <div>
+                    
 
-                        <TextField
-                            sx={{ border : 0 }}
+                        <TextField q
                             id="name"
                             type="text"
                             value={name}
@@ -60,25 +64,22 @@ const Register = () => {
                             autoComplete="Name"
                             autoFocus
                         />
-                    </div>
+                    
 
                     {/* Email Address */}
-                    <div className="mt-4">
                         <TextField
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={event => setEmail(event.target.value)}
+                            margin="normal"
                             required
                             fullWidth
-                            margin="normal"
-                            name="email"
+                            id="email"
                             label="Email"
+                            name="email"
+                            autoComplete="email"
+                            autoFocus
+                            onChange={event => setEmail(event.target.value)}
                         />
-                    </div>
 
                     {/* Password */}
-                    <div className="mt-4">
                         <TextField
                             id="password"
                             type="password"
@@ -92,10 +93,8 @@ const Register = () => {
                             autoComplete="new-password"
 
                         />
-                    </div>
 
                     {/* Confirm Password */}
-                    <div className="mt-4">
                         <TextField
                             id="passwordConfirmation"
                             type="password"
@@ -108,7 +107,15 @@ const Register = () => {
                             label="Password Confirmation"
                             margin="normal"
                         />
-                    </div>
+
+                        <Button
+                            type="submit"
+                            fullWidth
+                            sx={{ mt: 5, mb: 3, borderRadius:3}}
+                            variant="contained"
+                        >
+                            Register
+                        </Button>
 
                     <Grid container sx={{mt:3}}>
                         <Grid item xs>
@@ -118,15 +125,10 @@ const Register = () => {
                                 </a>
                             </Link>
                         </Grid>
-                        <Grid item xs>
-                            <Button className="ml-4">Register</Button>
-                        </Grid>
-
-
                     </Grid>
                 </Box>
-            </Box>
-        </Container>        
+            </Box>    
+        </GuestLayout>
     )
 }
 
