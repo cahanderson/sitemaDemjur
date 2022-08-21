@@ -1,16 +1,17 @@
-import ApplicationLogo from '@/components/ApplicationLogo'
-import AuthCard from '@/components/AuthCard'
+
 import AuthSessionStatus from '@/components/AuthSessionStatus'
 import AuthValidationErrors from '@/components/AuthValidationErrors'
-import Button from '@/components/Button'
-import GuestLayout from '@/components/Layouts/GuestLayout'
-import Input from '@/components/Input'
 import Label from '@/components/Label'
-import Link from 'next/link'
+import GuestLayout from '@/components/Layouts/GuestLayout'
 import { useAuth } from '@/hooks/auth'
+import { Box, Button, Divider, Input, TextField, Typography } from '@mui/material'
+import { borderRadius } from '@mui/system'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 
+
 const ForgotPassword = () => {
+    const router = useRouter()
     const { forgotPassword } = useAuth({ middleware: 'guest' })
 
     const [email, setEmail] = useState('')
@@ -25,48 +26,56 @@ const ForgotPassword = () => {
 
     return (
         <GuestLayout>
-            <AuthCard
-                logo={
-                    <Link href="/">
-                        <a>
-                            <ApplicationLogo className="w-20 h-20 fill-current text-gray-500" />
-                        </a>
-                    </Link>
-                }>
+            <Box mb='20px' component='div'>
+                <Typography variant='h5' component='h1' mb='10px'>
+                    Esqueceu sua conta?
+                </Typography>    
+                <Divider/>
+            </Box>
+            <Box>
+                <Typography variant='body1' component='div'>
+                    Esqueceu sua senha? Sem problemas. Apenas deixe-nos saber seu
+                    endereço de e-mail e nós lhe enviaremos um link de redefinição 
+                    de senha que lhe permitirá escolher um novo.
+                </Typography>
+            </Box>
 
-                <div className="mb-4 text-sm text-gray-600">
-                    Forgot your password? No problem. Just let us know your
-                    email address and we will email you a password reset link
-                    that will allow you to choose a new one.
-                </div>
+            {/* Session Status */}
+            <AuthSessionStatus className="mb-4" status={status} />
 
-                {/* Session Status */}
-                <AuthSessionStatus className="mb-4" status={status} />
+            {/* Validation Errors */}
+            <AuthValidationErrors className="mb-4" errors={errors} />
 
-                {/* Validation Errors */}
-                <AuthValidationErrors className="mb-4" errors={errors} />
+            <Box component="form" onSubmit={submitForm} noValidate sx={{ mt: 10 }}>
+                {/* Email Address */}
+                <TextField
+                    id="email"
+                    type="email"
+                    name="email"
+                    fullWidth
+                    variant='outlined'
+                    value={email}
+                    label='Email'
+                    onChange={event => setEmail(event.target.value)}
+                    required
+                    autoFocus
+                />
 
-                <form onSubmit={submitForm}>
-                    {/* Email Address */}
-                    <div>
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            name="email"
-                            value={email}
-                            className="block mt-1 w-full"
-                            onChange={event => setEmail(event.target.value)}
-                            required
-                            autoFocus
-                        />
-                    </div>
-
-                    <div className="flex items-center justify-end mt-4">
-                        <Button>Email Password Reset Link</Button>
-                    </div>
-                </form>
-            </AuthCard>
+                <Box display='flex' justifyContent='right' gap='1.5rem' mt='35px' >
+                    <Button
+                        type="submit"
+                        fullWidth
+                        sx={{ mt: 5, mb: 3, borderRadius:3}}
+                        variant="contained"
+                    >
+                        Enviar
+                    </Button>
+                </Box>
+                <Box display='flex' justifyContent='right' gap='1.5rem' mt='35px' >
+                    <Button size='large'>Cancel</Button>
+                </Box>
+                
+            </Box>
         </GuestLayout>
     )
 }

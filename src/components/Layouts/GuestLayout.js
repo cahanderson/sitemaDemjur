@@ -17,7 +17,16 @@ const GuestLayout = ({ children }) => {
                 alignItems='center'
                 padding='10px'
             >
-                {children}
+                <Box
+                    bgcolor='#fff'
+                    display= 'flex'
+                    flexDirection= 'column'
+                    maxWidth='490px'
+                    padding= '77px 55px 77px 55px'
+                    borderRadius={5}
+                >
+                    {children}
+                </Box>
             </Box>
         </Box>
     )

@@ -148,7 +148,7 @@ export function ModalCadastro(props){
                                 <TableBody>
                                     {permissoes.map(permissao => (
                                     <StyledTableRow key={permissao}>
-                                        <TableCell sx={{padding:0}} align='left'><Checkbox/> {permissao}</TableCell>
+                                        <TableCell sx={{padding:0}} align='left'><Checkbox/>{permissao}</TableCell>
                                     </StyledTableRow>
                                     ))}
                                 </TableBody>

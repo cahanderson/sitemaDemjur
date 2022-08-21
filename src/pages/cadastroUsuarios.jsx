@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 
-import { Box, Typography, Paper, TextField, Snackbar, CssBaseline, Alert, Divider} from '@mui/material'
+import { Box, Typography, Paper, TextField, Snackbar, CssBaseline, Alert} from '@mui/material'
 import { Table } from '@/components/Table'
 import { ModalCadastro } from '@/components/ModalCadastro'
 import { UsuariosService } from '../lib/usuarios/UsuariosService'
 
 import Button from '@/components/Button'
-import styles from '../styles/home.module.scss'
 import AppLayout from '@/components/Layouts/AppLayout'
 
 export default function Usuarios() {
@@ -64,7 +63,6 @@ export default function Usuarios() {
                     return;
                 }
                 setOpenModal(false)
-                setUsuario([])
                 onLoad()
             })   
         }else{
@@ -119,11 +117,21 @@ export default function Usuarios() {
     
 
   return (
-    <>
     <AppLayout>
         <CssBaseline />
-            <Box className={styles.container}>
-                <Box className={styles.text}>
+            <Box
+                display= 'flex'
+                padding='2px'
+                height='8rem'
+                justifyContent='space-between'
+             >
+                <Box
+                    // className={styles.text}
+                    display='flex'
+                    flexDirection='column'
+                    justifyContent='center'
+                        
+                >
                     <Typography variant='h4' component='h1' color='secondary'>
                         Lista de usuários
                     </Typography>
@@ -186,7 +194,6 @@ export default function Usuarios() {
                 onSave = {(id,data)=> onSave(id,data)}
                 keyDown = {(event, data) => handleKeyDown(event, data)}
             /> 
-    </AppLayout>
-    </>           
+    </AppLayout>       
   )
 }

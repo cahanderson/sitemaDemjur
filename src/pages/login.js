@@ -6,8 +6,7 @@ import Link from 'next/link'
 import { useAuth } from '@/hooks/auth'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Avatar, Box, Checkbox, CssBaseline, FormControlLabel, Grid, TextField, Typography } from '@mui/material'
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { Box, Checkbox, CssBaseline, FormControlLabel, Grid, TextField, Typography } from '@mui/material'
 
 
 const Login = () => {
@@ -41,98 +40,83 @@ const Login = () => {
         <>
             <GuestLayout>
                 <CssBaseline />
-                <Box 
-                    bgcolor='#fff'
-                    display= 'flex'
-                    flexDirection= 'column'
-                    alignItems= 'center'
-                    maxWidth='490px'
-                    padding= '77px 55px 77px 55px'
-                    borderRadius={5}
-
-                >
-                    <Link href="/">
-                        <a>
-                            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                                <LockOutlinedIcon />
-                            </Avatar>
-
-                        </a>
-                    </Link>
-
-                    {/* Session Status */}
-                    <AuthSessionStatus className="mb-4" status={status} />
-
-                    {/* Validation Errors */}
-                    <AuthValidationErrors className="mb-4" errors={errors} />
-
+                <Box display='flex' justifyContent='center'>
                     <Typography component="h1" variant="h5">
-                        Sign in
+                        Sign up
                     </Typography>
+                </Box>
+                <Box display='flex' justifyContent='center'>
 
-                    <Box component="form" onSubmit={submitForm} noValidate sx={{ mt: 3 }}>
-                        <TextField
-                            sx={{ mb : 3 }}
-                            variant='standard'
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="email"
-                            label="Email"
-                            name="email"
-                            autoComplete="email"
-                            autoFocus
-                            value={email}
-                            onChange={event => setEmail(event.target.value)}
-                        />
-                        <TextField
-                            variant='standard'
-                            type="password"
-                            value={password}
-                            onChange={event => setPassword(event.target.value)}
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="Senha"
-                            autoComplete="current-password"
-                        />     
+                </Box>
+                {/* Session Status */}
+                <AuthSessionStatus className="mb-4" status={status} />
 
-                        <FormControlLabel
-                            control={<Checkbox value="remember" color="primary" />}
-                            label="Remember me"
-                        />
-                        <Button
-                            type="submit"
-                            fullWidth
-                            sx={{ mt: 5, mb: 3, borderRadius:3}}
-                            variant="contained"
-                        >
-                            Login
-                        </Button>
-                        <Grid container>
-                            <Grid item xs>
-                                <Link href="/forgot-password" variant="body2">
-                                    <a>
-                                        Esqueceu a senha?
-                                    </a>
-                                </Link>
-                            </Grid>
-                            <Grid item>
-                                <Link href="/register" variant="body2">
-                                    <a>
-                                        Criar nova conta
-                                    </a>
-                                </Link>
-                            </Grid>
+                {/* Validation Errors */}
+                <AuthValidationErrors className="mb-4" errors={errors} />
+        
+
+                <Box component="form" onSubmit={submitForm} noValidate sx={{ mt: 3 }}>
+                    <TextField
+                        sx={{ mb : 3 }}
+                        variant='standard'
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        value={email}
+                        onChange={event => setEmail(event.target.value)}
+                    />
+                    <TextField
+                        variant='standard'
+                        type="password"
+                        value={password}
+                        onChange={event => setPassword(event.target.value)}
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Senha"
+                        autoComplete="current-password"
+                    />     
+
+                    <FormControlLabel
+                        control={<Checkbox value="remember" color="primary" />}
+                        label="Remember me"
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        sx={{ mt: 5, mb: 3, borderRadius:3}}
+                        variant="contained"
+                    >
+                        Login
+                    </Button>
+                    <Grid container>
+                        <Grid item xs>
+                            <Link href="/forgot-password" variant="body2">
+                                <a>
+                                    Esqueceu a senha?
+                                </a>
+                            </Link>
                         </Grid>
-                    </Box>
-                </Box>  
+                        <Grid item>
+                            <Link href="/register" variant="body2">
+                                <a>
+                                    Criar nova conta
+                                </a>
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </Box> 
             </GuestLayout>
         </>
     )
-}           
-export default Login
+}  
+export default Login         
 
 
 
