@@ -1,55 +1,69 @@
 import { useEffect, useState } from 'react'
-
+import DeleteIcon from '@mui/icons-material/Delete';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { Box, Typography, Paper, TextField, Snackbar, CssBaseline, Alert} from '@mui/material'
 import { Table } from '@/components/Table'
 import { ModalCadastro } from '@/components/ModalCadastro'
 import { UsuariosService } from '../lib/usuarios/UsuariosService'
-
 import Button from '@/components/Button'
 import AppLayout from '@/components/Layouts/AppLayout'
+import { GridActionsCellItem } from '@mui/x-data-grid'
 
 export default function Usuarios() {
+    
+    const [state, setState] = useState({
+        openModal:false,
+        usuario:[],
+        data:'',
+        filter:[],
+        busca:'',
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
+        checktableCheckbox:true,
+    });
 
-    const [openModal, setOpenModal] = useState(false);
-    const[usuario, setUsuario ] = useState({});
-    const [data, setData] = useState([]);
-    const [filter, setFilter] = useState([]);
-    const[busca, setBusca] = useState();
+    useEffect(()=>{
+        onLoad()
+    },[])
 
-    const [openSnakebar, setOpenSnakebar] = useState(false);
-    const[message, setMessage] = useState('');
-    const[statusSnake, setStatusSnake] = useState('success')
+    const columns = [
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'name', headerName: 'Nome', width: 130 },
+        { field: 'email', headerName: 'Email', width: 180 },
+        { field: 'actions',type:'actions',getActions: (params) => [
+              <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
+              <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params.id)} label="edit" />,
+            ]
+        }  
+    ]
 
-        useEffect(()=>{
-            onLoad()
-        },[])
+    const rows = state.filter.map((row)=>({
+        id:row.id,
+        name:row.name,
+        email:row.email,
+        action:null,
+    }));
 
     function onLoad(){
         UsuariosService.getAll()
         .then((result)=>{
             if(result instanceof Error){
-                setOpenSnakebar(true)
-                setMessage(result.message)
-                setStatusSnake('error')
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setBusca('')
-            setData(result.data.data)
-            setFilter(result.data.data)
+            setState({...state, data:result.data.data, filter:result.data.data, busca:''})
         }) 
     }
 
-
     function onEdit(id){
-        setOpenModal(true);
-        UsuariosService.getById(id)
-        .then(result => {
+        setState({...state, openModal:true});
+        UsuariosService.getById(id).
+        then(result => {
             if(result instanceof Error){
-                setOpenSnakebar(true)
-                setMessage(result.message)
-                setStatusSnake('error')
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
             }
-            setUsuario(result.data);
+            setState({...state, usuario:result.data});
         })
     }
 
@@ -57,25 +71,19 @@ export default function Usuarios() {
         if(id){
             UsuariosService.updateById(id, data).then((result)=>{
                 if(result instanceof Error){
-                    setOpenSnakebar(true)
-                    setMessage(result.message)
-                    setStatusSnake('error')
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
                 }
-                setOpenModal(false)
+                setState({...state,openModal:false})
                 onLoad()
             })   
         }else{
             UsuariosService.create(data).then((result)=>{
                 if(result instanceof Error){
-                    setOpenSnakebar(true)
-                    setMessage(result.message)
-                    setStatusSnake('error')
-                        
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
                         return;
                     }
-                setOpenModal(false)
-                setUsuario([])
+                setState({...state, openModal:false})
                 onLoad()
             })
         }
@@ -86,35 +94,28 @@ export default function Usuarios() {
             UsuariosService.deleteById(id)
             .then(result => {
                 if(result instanceof Error){
-                    setOpenSnakebar(true)
-                    setMessage(result.message)
-                    setStatusSnake('error')
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});  
                 }else{
-                    setOpenSnakebar(true)
-                    setMessage('Apagado com Sucesso')
-                    setStatusSnake('success')
+                    setState({...state, openSnakebar:true, message:'Apagado com Sucesso', statusSnake:'success'});  
                 }    
                 onLoad()
-            }
-            )    
+            })    
         }else return;   
     }
 
-    function Pesquisar(busca){
-        setFilter(data.filter((data)=>data.name.toUpperCase().startsWith(busca.toUpperCase())))
+    function pesquisar(busca){
+        setState({...state, filter: data.filter((data)=>data.name.toUpperCase().startsWith(busca.toUpperCase()))})
     }
 
     function handleKeyDown(event, data){
         if(event.keyCode === 13){
-            onSave(usuario.id,data)
+            onSave(state.usuario.id,data)
         }
     }
     
     function closeSnakebar(){
-        setOpenSnakebar(false)
+        setState({...state, openSnakebar:false})
     }
-
-    
 
   return (
     <AppLayout>
@@ -126,7 +127,6 @@ export default function Usuarios() {
                 justifyContent='space-between'
              >
                 <Box
-                    // className={styles.text}
                     display='flex'
                     flexDirection='column'
                     justifyContent='center'
@@ -141,15 +141,14 @@ export default function Usuarios() {
                     
                 </Box>
                 <Box alignItems='center' display='flex'>
-                    <Button 
-                        onClick={() => {setUsuario({}); setOpenModal(true)}}
-                        
+                    <Button
+                        onClick={() => {setState({...state, usuario:{}, openModal:true})}} 
                     >
                         Adicionar
                     </Button>
                 </Box>
                 <Snackbar 
-                    open={openSnakebar} 
+                    open={state.openSnakebar} 
                     autoHideDuration={3000} 
                     onClose={closeSnakebar}
                     anchorOrigin={{
@@ -157,8 +156,8 @@ export default function Usuarios() {
                         vertical: "top",
                     }}
                 >
-                    <Alert onClose={closeSnakebar} severity={statusSnake} sx={{ width: '100%' }}>
-                        {message}
+                    <Alert onClose={closeSnakebar} severity={state.statusSnake} sx={{ width: '100%' }}>
+                        {state.message}
                     </Alert>
                 </Snackbar>
 
@@ -170,27 +169,27 @@ export default function Usuarios() {
                         id="outlined-size-normal"
                         label="Nome"
                         // fullWidth
-                        onChange={(e) => setBusca(e.target.value)}
+                        onChange={(e) => setState({...state, busca: e.target.value})}
                     />
                     <Button
-                        onClick={()=> Pesquisar(busca)}
+                        onClick={()=> pesquisar(state.busca)}
                         variant="outlined"  
                     >
                         Pesquisar
                     </Button>
                 </Box>   
                 <Table
-                    onEdit={(id)=>onEdit(id)}
-                    onDelete={(id)=>onDelete(id)}
-                    data = {filter}
+                    columns = {columns}
+                    rows = {rows}
+                    check={state.tableCheckbox}
                 />
             </Box>
     
     
             <ModalCadastro 
-                openModal={openModal} 
-                onClose={() => setOpenModal(false)} 
-                usuario={usuario}
+                openModal={state.openModal} 
+                onClose={() => setState({...state, openModal: false})} 
+                usuario={state.usuario}
                 onSave = {(id,data)=> onSave(id,data)}
                 keyDown = {(event, data) => handleKeyDown(event, data)}
             /> 

@@ -15,8 +15,6 @@ const Navigation = ({ user }) => {
           children: `${name?.split(' ')[0][0]}${name?.split(' ')[1][0]}`,
         };
       }  
-
-    console.log(user);
     const router = useRouter()
 
     const { logout } = useAuth()

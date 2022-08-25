@@ -31,21 +31,29 @@ const permissoes = [
 ]
 
 export function ModalCadastro(props){
-
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('')
-    const [passwordConfirmation, setPasswordConfirmation] = useState('')
+    const [state, setState] = useState({
+        name:'',
+        email:'',
+        password:'',
+        passwordConfirmation:'',
+    })
+    // const [name, setName] = useState('');
+    // const [email, setEmail] = useState('');
+    // const [password, setPassword] = useState('')
+    // const [passwordConfirmation, setPasswordConfirmation] = useState('')
 
     useEffect(()=>{
          if(props.usuario.id != null|| props.usuario.id != undefined){
-            setName(props.usuario.name);
-            setEmail(props.usuario.email);
+            // setName(props.usuario.name);
+            // setEmail(props.usuario.email);
+            setState({...state, name:props.usuario.name})
+            setState({...state, email:props.usuario.email})
         }else{
-            setName('');
-            setEmail('');
+            // setName('');
+            // setEmail('');
+            setState({...state, name:''})
+            setState({...state, email:''})
         }
-        console.log(props.usuario.id);
     },[props.usuario.id])
 
     const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -91,11 +99,12 @@ export function ModalCadastro(props){
                                     fullWidth
                                     type="text"
                                     name='nome'
-                                    onChange={(e)=> setName(e.target.value)}
-                                    value={name}
                                     aria-describedby="component-helper-text"
-                                    onKeyDown={(event) => props.keyDown(event, {name, email, password, passwordConfirmation})}
-                                />
+                                    // onKeyDown={(event) => props.keyDown(event, {name, email, password, passwordConfirmation})}
+                                    // onChange={(e)=> setName(e.target.value)}
+                                    onChange={(e)=> setState({...state, name:e.target.value})}
+                                    value={state.name}
+                                    />
                             </Grid>
                             <Grid item xs={6}>
                                 <TextField
@@ -105,10 +114,11 @@ export function ModalCadastro(props){
                                     name='email'
                                     type="email"
                                     required
-                                    onChange={(e)=> setEmail(e.target.value)}
-                                    value={email}
                                     aria-describedby="component-helper-text"
-                                    onKeyDown={(event) => props.keyDown(event, {name, email, password, passwordConfirmation})}
+                                    // onKeyDown={(event) => props.keyDown(event, {name, email, password, passwordConfirmation})}
+                                    // onChange={(e)=> setEmail(e.target.value)}
+                                    onChange={(e)=> setState({...state, email:e.target.value})}
+                                    value={state.email}
                                 />
                             </Grid>
                         
@@ -120,7 +130,8 @@ export function ModalCadastro(props){
                                     type="password"
                                     name='senha'
                                     aria-describedby="component-helper-text"
-                                    onChange={(e)=> setPassword(e.target.value)}
+                                    onChange={(e)=> setState({...state, password:e.target.value})}
+                                    // onChange={(e)=> setPassword(e.target.value)}
                                     
                                 />
                             </Grid>    
@@ -133,7 +144,8 @@ export function ModalCadastro(props){
                                     type="password"
                                     required
                                     aria-describedby="component-helper-text"
-                                    onChange={(e)=> setPasswordConfirmation(e.target.value)}
+                                    onChange={(e)=> setState({...state, passwordConfirmation:e.target.value})}
+                                    // onChange={(e)=> setPasswordConfirmation(e.target.value)}
                                 />
                             </Grid>
                         </Grid>
@@ -159,7 +171,7 @@ export function ModalCadastro(props){
 
                     <Box display='flex' justifyContent={"end"} gap='10px' p={2} backgroundColor='#F5F5F9' borderRadius={3}>
                         <Button variant="text" onClick={()=>props.onClose()}> Cancelar Edição</Button>
-                        <Button variant="contained" onClick={() => props.onSave(props.usuario.id,{name, email, password, passwordConfirmation})}> Salvar</Button>
+                        <Button variant="contained" onClick={() => props.onSave(props.usuario.id,state)}> Salvar</Button>
                     </Box>
                 </Box>
         </Modal>

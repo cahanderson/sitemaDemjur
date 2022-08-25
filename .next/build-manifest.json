@@ -30,10 +30,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/cadastroUsuarios.js"
     ],
-    "/solicitacoes": [
+    "/login": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/solicitacoes.js"
+      "static/chunks/pages/login.js"
     ]
   },
   "ampFirstPages": []

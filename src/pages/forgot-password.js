@@ -1,11 +1,9 @@
 
 import AuthSessionStatus from '@/components/AuthSessionStatus'
 import AuthValidationErrors from '@/components/AuthValidationErrors'
-import Label from '@/components/Label'
 import GuestLayout from '@/components/Layouts/GuestLayout'
 import { useAuth } from '@/hooks/auth'
-import { Box, Button, Divider, Input, TextField, Typography } from '@mui/material'
-import { borderRadius } from '@mui/system'
+import { Box, Button, Divider, TextField, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
@@ -14,6 +12,11 @@ const ForgotPassword = () => {
     const router = useRouter()
     const { forgotPassword } = useAuth({ middleware: 'guest' })
 
+    // const [state, setState] = useState({
+    //     email:'',
+    //     errors:'',
+    //     status:'',
+    // })
     const [email, setEmail] = useState('')
     const [errors, setErrors] = useState([])
     const [status, setStatus] = useState(null)
