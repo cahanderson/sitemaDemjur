@@ -7,7 +7,7 @@ import Backdrop from '@mui/material/Backdrop'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
-import { Checkbox, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from '@mui/material';
+import { Checkbox, Divider, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from '@mui/material';
 import { useEffect, useState } from "react";
 import { styled } from '@mui/material/styles';
 const style = {
@@ -44,15 +44,9 @@ export function ModalCadastro(props){
 
     useEffect(()=>{
          if(props.usuario.id != null|| props.usuario.id != undefined){
-            // setName(props.usuario.name);
-            // setEmail(props.usuario.email);
-            setState({...state, name:props.usuario.name})
-            setState({...state, email:props.usuario.email})
+            setState({...state, name:props.usuario.name, email:props.usuario.email})
         }else{
-            // setName('');
-            // setEmail('');
-            setState({...state, name:''})
-            setState({...state, email:''})
+            setState({...state, name:'', email:''})
         }
     },[props.usuario.id])
 
@@ -65,11 +59,11 @@ export function ModalCadastro(props){
           border: 0,
         },
       }));
+      console.log(props.usuario);
     return(
         <>
             
             <Modal
-                // style={style}
                 open={props.openModal}
                 onClose={()=>props.onClose()}
                 aria-labelledby="transition-modal-title"

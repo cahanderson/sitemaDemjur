@@ -22,7 +22,7 @@ export function NavBar(){
   };
   const clickMenu = (e) => {
     if(e === 'Solicitações'){
-      router.push('/solicitacao/solicitacoes')
+      router.push('/solicitacao')
     }else if(e === 'Usuários'){
       router.push('/cadastroUsuarios')
     }  
