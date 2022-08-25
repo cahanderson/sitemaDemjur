@@ -24,7 +24,7 @@ export function NavBar(){
     if(e === 'Solicitações'){
       router.push('/solicitacao')
     }else if(e === 'Usuários'){
-      router.push('usuario')
+      router.push('/usuario')
     }  
 
   };
