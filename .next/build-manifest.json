@@ -25,15 +25,35 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/solicitacao": [
+    "/fornecedor": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/solicitacao.js"
+      "static/chunks/pages/fornecedor.js"
     ],
-    "/solicitacao/form": [
+    "/inventario": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/solicitacao/form.js"
+      "static/chunks/pages/inventario.js"
+    ],
+    "/movimentacao": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/movimentacao.js"
+    ],
+    "/movimentacao/form_Entrada": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/movimentacao/form_Entrada.js"
+    ],
+    "/movimentacao/form_Saida": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/movimentacao/form_Saida.js"
+    ],
+    "/movimentacao/form_SaidaPaciente": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/movimentacao/form_SaidaPaciente.js"
     ]
   },
   "ampFirstPages": []

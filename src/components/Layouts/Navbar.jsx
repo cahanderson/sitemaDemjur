@@ -8,7 +8,7 @@ import { Link } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-const menu = ['Solicitações', 'Bairros', 'Indicadores', 'Variáveis', 'Usuários'];
+const menu = ['Solicitações', 'Itens', 'Movimentação', 'Fornecedores', 'Usuários', 'Inventário'];
 
 export function NavBar(){
   const router = useRouter();
@@ -17,7 +17,7 @@ export function NavBar(){
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
-  const handleCloseNavMenu = () => {
+  const handleMenu = () => {
     // if(event.target.value)
   };
   const clickMenu = (e) => {
@@ -25,8 +25,15 @@ export function NavBar(){
       router.push('/solicitacao')
     }else if(e === 'Usuários'){
       router.push('/usuario')
-    }  
-
+    }else if(e === 'Itens'){
+      router.push('/item')  
+    }else if(e === 'Movimentação'){
+      router.push('/movimentacao')  
+    }else if(e === 'Fornecedores'){
+      router.push('/fornecedor')  
+    }else if(e === 'Inventário'){
+      router.push('/inventario')  
+    }
   };
 
   return (
@@ -55,13 +62,13 @@ export function NavBar(){
             horizontal: "left"
           }}
           open={Boolean(anchorElNav)}
-          onClose={handleCloseNavMenu}
+          onClose={handleMenu}
           sx={{
             display: { xs: "block", md: "none" }
           }}
         >
           {menu.map((page) => (
-            <MenuItem key={page} onClick={handleCloseNavMenu}>
+            <MenuItem key={page} onClick={handleMenu}>
               <Typography textAlign="center">{page}</Typography>
             </MenuItem>
           ))}

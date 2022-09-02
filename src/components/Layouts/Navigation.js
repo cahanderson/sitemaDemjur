@@ -39,7 +39,7 @@ const Navigation = ({ user }) => {
             <Box width='100vw' justifyContent='space-between' maxWidth='1316px' mx='auto' >
                 <Toolbar>
                     <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
-                        comSistema
+                        Sistema
                     </Typography>
 
                     <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>

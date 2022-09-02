@@ -1,11 +1,14 @@
 import DataGrid from './DataGrid'
 
 export function Table(props){
-
+    const style = {
+        height: props.height,
+        width:'100%'
+    }
      
 
     return(
-        <div style={{ height:400, width: '100%', }}>
+        <div style={style}>
                 <DataGrid
                     isLoading={!props.rows}
                     rows={props.rows}
