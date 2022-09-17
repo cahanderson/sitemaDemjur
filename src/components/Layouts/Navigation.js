@@ -10,11 +10,11 @@ import Logout from '@mui/icons-material/Logout'
 
 const Navigation = ({ user }) => {
     //Contatena as inicias do Usuario
-    function stringAvatar(name) {
-        return {
-          children: `${name?.split(' ')[0][0]}${name?.split(' ')[1][0]}`,
-        };
-      }  
+    // function stringAvatar(name) {
+    //     return {
+    //       children: `${name?.split(' ')[0][0]}${name?.split(' ')[1][0]}`,
+    //     };
+    //   }  
     const router = useRouter()
 
     const { logout } = useAuth()
@@ -52,7 +52,8 @@ const Navigation = ({ user }) => {
                                 aria-haspopup="true"
                                 aria-expanded={open ? "true" : undefined}
                             >
-                                <Avatar sx={{}} {...stringAvatar(user?.name)} />
+                                {/* <Avatar sx={{}} {...stringAvatar(user?.name)} /> */}
+                                <Avatar>CA</Avatar>
                             </IconButton>
                         </Tooltip>
                     </Box>
