@@ -40,7 +40,7 @@ export function Modal(props){
                     <Divider />
                     <Box display='flex' justifyContent={"end"} gap='10px' p={2} backgroundColor='#F5F5F9' borderRadius={3}>
                         <Button variant="text" onClick={()=>props.onClose()}> Cancelar Edição</Button>
-                        <Button variant="contained" onClick={() => props.onSave()}> Salvar</Button>
+                        <Button type='submit' variant="contained" onClick={() => props.onSave()}> Salvar</Button>
                     </Box>
                 <Box>
                 </Box>

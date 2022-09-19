@@ -20,8 +20,6 @@ const tipo = [
         "nome":"Referencial",
     },
 ]
-
-
 export default function Item(){
     const [state, setState] = useState({
         codigo: '',

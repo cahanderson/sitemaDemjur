@@ -7,6 +7,7 @@ import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import ClearIcon from '@mui/icons-material/Clear';
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Solicitacao } from "@/lib/Solicitacao";
+import { NovoPrescritor } from "@/components/Modal/novoPrescritor";
 
 
 export default function NovaSolicitacao(){
@@ -20,44 +21,19 @@ export default function NovaSolicitacao(){
     const [prescritor, setPrescritor] = useState(['']);
     const [sexo, setSexo] = useState([''])
     const [freq, setFreq] = useState([''])
+    const [solicitacao, setSolicitacao]=useState({})
+    const [beneficiario, setBeneficiario] = useState({})
+    const [openModal, setOpenModal] = useState(false)
     const [pessoa, setPessoa] = useState({
         "is_beneficiario": false,
         "is_prescritor": true,
-        "is_fornecedor": false
-    })
-   
-    const onSubmit = (e)=>{
-        setBeneficiario(e.beneficiario)
-        console.log(e);
-    }
-    const [message, setMessage] = useState({
-        openSnakebar:false,
-        message:'',
-        statusSnake:'success'
-    })
-    const [beneficiario, setBeneficiario] = useState({
-        nome:'',
-        nomeMae:'',
-        cep:'',
-        rua: '',
-        numero: '',
-        bairro: '',
-        cpf:'',
-        dtNascimento:'',
-        sexo:'',
-        cns:'',
-        rg:'',
-        telefone:'',
-        email:'',
-        complemento:'',
-
+        "is_fornecedor": false,
     })
     const [item, setItem] = useState([{
-        item:'',
-        qtdMensal:'',
-        PrevDt:'',
-        FreqEntrega:'',
-        qtdLimite:''
+        item_id:'',
+        quantidade_mensal:'',
+        d_frequencia_entrega:'',
+        quantidade_limite:''
     }])
     const [processo, setProcesso] = useState({
         n_solicitacao:'',
@@ -76,8 +52,17 @@ export default function NovaSolicitacao(){
         local_tratamento:'',
         dt_atendimento:''
     })
+    const onSubmit = (e)=>{
+        setSolicitacao({e,item})
+        
+        console.log(e);     
+    }
 
-    console.log(beneficiario);
+    const [message, setMessage] = useState({
+        openSnakebar:false,
+        message:'',
+        statusSnake:'success'
+    })
 
     function checkCpf(){
         data.map( data => {
@@ -176,20 +161,20 @@ export default function NovaSolicitacao(){
     //funções para adicionar novas linhas aos Itens
     function onAddItem(){
         // setItem([...item, ''])
-        setItem([...item,{ item:'',qtdMensal:'',PrevDt:'',FreqEntrega:''}])
+        setItem([...item,{ item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
     }
     function onSetItem(e,index){
-        if(e.target.name === 'item'){
-            item[index].item = e.target.value;
+        if(e.target.name === 'item_id'){
+            item[index].item_id = e.target.value;
             setItem([...item])
-        }else if(e.target.name === 'QtdMensal'){
-            item[index].qtdMensal = e.target.value;
+        }else if(e.target.name === 'quantidade_mensal'){
+            item[index].quantidade_mensal = e.target.value;
             setItem([...item])
-        }else if(e.target.name === 'PrevDt'){
-            item[index].PrevDt = e.target.value;
+        }else if(e.target.name === 'd_frequencia_entrega'){
+            item[index].d_frequencia_entrega = e.target.value;
             setItem([...item])
-        }else if(e.target.name === 'FreqEntrega'){
-            item[index].FreqEntrega = e.target.value;
+        }else if(e.target.name === 'quantidade_limite'){
+            item[index].quantidade_limite = e.target.value;
             setItem([...item])
         }
         console.log(item);
@@ -200,12 +185,15 @@ export default function NovaSolicitacao(){
             setItem([...item.filter((item,index) => index !== position)])
         }else{
             // setItem([...item.filter((item,index) => index !== position)])
-            setItem([{ item:'',qtdMensal:'',PrevDt:'',FreqEntrega:''}])
+            setItem([{ item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
         }
     }
     useEffect(()=>{
         onLoad(pessoa)
     },[])
+    function salvarPrescritor(data){
+        console.log({data,pessoa});
+    }
 
     return(
         <AppLayout>
@@ -237,7 +225,7 @@ export default function NovaSolicitacao(){
                             <TextField
                                 type='text'
                                 name='numero_solicitacao'
-                                {...register("numero_solicitacao")}
+                                {...register("processo.numero_solicitacao")}
                                 label="Nº da solicitação"
                                 fullWidth
                                 variant="outlined"
@@ -414,11 +402,12 @@ export default function NovaSolicitacao(){
 
                     <Typography variant='h5' component='h1' my={2}>
                         Solicitante
+                        <IconButton onClick={()=>{setOpenModal(true)}}><AddCircleSharpIcon  /></IconButton>
                     </Typography>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            value={beneficiario.cpf}
+                            // value={beneficiario.cpf}
                             onBlur={()=>checkCpf()}
                             name="cpf"
                             label="CPF"
@@ -429,18 +418,18 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <TextField
-                            value={beneficiario.nome}
+                            // value={beneficiario.nome}
                             name="nome_mae"
                             label="Nome"
                             fullWidth
                             variant="outlined"
 
-                            {...register('nome')}
+                            {...register('beneficiario.nome')}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <TextField
-                            value={beneficiario.nomeMae}
+                            // value={beneficiario.nomeMae}
                             name="nome_mae"
                             label='Nome da mãe'
                             fullWidth
@@ -452,7 +441,7 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            value={beneficiario.dtNascimento}
+                            // value={beneficiario.dtNascimento}
                             type='date'
                             name="data_nascimento"
                             label="Data de nascimento"
@@ -530,7 +519,6 @@ export default function NovaSolicitacao(){
                             label="CEP"
                             fullWidth
                             variant="outlined"
-
                             {...register('beneficiario.cep')}
                             />
                         </Grid>
@@ -589,14 +577,14 @@ export default function NovaSolicitacao(){
                             <Grid item xs={11} container spacing={3}>
                                 <Grid item xs={5}>
                                     <TextField
-                                        // value={item.item}
+                                        value={item.item}
                                         id="item"
                                         name="item_id"
                                         label='Item'
                                         fullWidth
                                         variant="outlined"
                                         onChange={(e)=> onSetItem(e,index)}
-                                        {...register('item_id')}
+                                        // {...register('item_id')}
                                     />
                                 </Grid>
                                 <Grid item xs={1}>
@@ -611,34 +599,35 @@ export default function NovaSolicitacao(){
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
-                                    {...register('quantidade_mensal')}
+                                    // {...register('quantidade_mensal')}
                                 />
                                 </Grid>
                                 <Grid item xs={2}>
                                     <TextField
+                                        value={item.FreqEntrega}
                                         select
                                         name="d_frequencia_entrega"
                                         label='Freq da entrega'
                                         fullWidth
                                         variant="outlined"
                                         onChange={(e)=> onSetItem(e,index)}
-                                        {...register('d_frequencia_entrega')}
+                                        // {...register('d_frequencia_entrega')}
                                     >
                                         {freq.map((f, index)=>(
-                                        <MenuItem key={index} value={f.id}>{f.descricao}</MenuItem>
+                                        <MenuItem key={index} value={f.descricao}>{f.descricao}</MenuItem>
                                         ))}
                                     </TextField>
                                 </Grid>
                                 <Grid item xs={4}>
                                     <TextField
-                                        value={item.qtdLimite}
+                                        // value={item.quantidade_limite}
                                         id="QtdLimite"
-                                        name="QtdLimite"
+                                        name="quantidade_limite"
                                         label='Qtd limite'
                                         fullWidth
                                         variant="outlined"
                                         onChange={(e)=> onSetItem(e,index)}
-                                        {...register('nome')}
+                                        // {...register('nome')}
                                     />
                                 </Grid>
                             </Grid>
@@ -669,9 +658,15 @@ export default function NovaSolicitacao(){
 
                     <Box display='flex' justifyContent={"end"} gap='10px' p={2}>
                         <Button variant="text" onClick={()=> router.push('/solicitacao')}>Cancelar alterações</Button>
-                        <Button type="submit" variant="contained" > Salvar</Button>
+                        <Button type="submit" variant="contained" onClick={()=>onSave()} > Salvar</Button>
                     </Box>
                 </Box>
+                <NovoPrescritor
+                    openModal={openModal} 
+                    onClose={() => setOpenModal(false)} 
+                    Save = {(data)=> salvarPrescritor(data)}
+                    // keyDown = {(event, data) => handleKeyDown(event, data)}
+                />
             </Box>
 
         </AppLayout>

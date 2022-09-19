@@ -1,10 +1,12 @@
-import AppLayout from "@/components/Layouts/AppLayout";
-import { NovoFornecedor } from "@/components/Modal/fonecedores";
-import { Table } from "@/components/Table";
-import { Fornecedores } from "@/lib/usuarios/fornecedores";
+import { useEffect,useState } from "react";
+import DeleteIcon from '@mui/icons-material/Delete';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { Box, Button, CssBaseline, Grid, Paper, TextField, Typography } from "@mui/material";
-import { useEffect } from "react";
-import { useState } from "react";
+import AppLayout from "@/components/Layouts/AppLayout";
+import { NovoFornecedor } from "@/components/Modal/fonecedor";
+import { Table } from "@/components/Table";
+import { Fornecedor } from "@/lib/Fornecedor";
+import { GridActionsCellItem } from "@mui/x-data-grid";
 
 export default function Item(){
 
@@ -14,58 +16,96 @@ export default function Item(){
         buscaTelefone: '',
         tableCheckbox: false,
         data:[],
-        filter: [],
         openModal:false,
+        fornecedor:[],
+    });
+    const [pessoa, setPessoa] = useState({
+        "is_beneficiario": false,
+        "is_prescritor": false,
+        "is_fornecedor": true,
     });
 
-    function onLoad(){
-        Fornecedores.getAll()
+    function onLoad(pessoa){
+        Fornecedor.getPessoa(pessoa)
         .then((result)=>{
             if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setState({...state, data:result.data, filter:result.data, busca:''})
-        }) 
+            setState({...state, data:result.data.data})
+            // console.log(result.data.data);
+            
+
+    })}
+
+    function onDelete(id){
+        if(confirm('Realmente deseja apagar?')){
+            Fornecedor.deleteById(id)
+            .then(result => {
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});  
+                }else{
+                    // setState({...state, openSnakebar:true, message:'Apagado com Sucesso', statusSnake:'success'});  
+                }    
+                onLoad(pessoa)
+            })    
+        }else return;   
     }
 
-    useEffect(()=>{
-        onLoad();
-    },[state.openModal])
-    const columns = [
-        { field: 'id', headerName: '#', width: 210 },
-        { field: 'cpfCnpj', headerName: 'CPF/CNPJ', width: 210 },
-        { field: 'nome', headerName: 'Nome/Fornecedor', width: 210 },
-        { field: 'telefone', headerName: 'Telefone', width: 210 },
-    ]
-    const rows = state.filter.map((row)=>({
-        id:row.id,
-        cpfCnpj:row.cpfCnpj,
-        nome:row.nome,
-        telefone:row.telefone,
-    }));
-    console.log(state.data);
+    function onEdit(id){
+        Fornecedor.getById(id).
+        then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+            }
+            setState({...state, fornecedor:result.data, openModal:true})
+        })
+    }
 
-    function onSave(fornecedor){
-        // if(data.id){
-        //     // console.log(data.id)
-        //     Itens.updateById(data.id, data).
-        //     then((result)=>{
-        //         if(result instanceof Error){
-        //             setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-        //             return;
-        //         }
-        //         setState({...state,openModal:false})
-        //     })   
-        // }else{
-        Fornecedores.create(fornecedor).then((result)=>{
+    function onSave(fornecedor,id){
+        if(id){
+            Fornecedor.updateById(id, fornecedor).
+            then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                    return;
+                }
+                setState({...state,openModal:false})
+            })   
+        }else{
+        Fornecedor.create(fornecedor).then((result)=>{
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
                     return;
                 }
             setState({...state, openModal:false})
         })
+        }
     }
+
+    const columns = [
+        { field: 'nome', headerName: 'Nome/Fornecedor', width: 300 },
+        { field: 'cpf', headerName: 'CPF', width: 280 },
+        { field: 'cnpj', headerName: 'CNPJ', width: 280 },
+        { field: 'telefone', headerName: 'Telefone', width: 280 },
+        { field: 'actions',type:'actions',getActions: (params) => [
+            <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
+            <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params.id)} label="edit" />,
+          ]
+        }
+
+    ]
+    const rows = state.data.map((row)=>({
+        id:row.id,
+        cpf:row.cpf,
+        cnpj: row.cnpj,
+        nome:row.nome,
+        telefone:row.telefone,
+    }));
+
+    useEffect(()=>{
+        onLoad(pessoa);
+    },[state.openModal])
     // }
 
     // function pesquisar(buscaCodigo,buscaDescricao,buscaPrincAtivo,buscaLote,buscaValidade,buscaCategoria){
@@ -109,7 +149,7 @@ export default function Item(){
                 <Box alignItems='center' display='flex'>
                     <Button 
                         variant="outlined"
-                        onClick={() => {setState({...state, openModal:true})}}   
+                        onClick={() => {setState({...state,fornecedor:[], openModal:true})}}   
                     >
                          Novo Fornecedor
                     </Button>
@@ -154,8 +194,8 @@ export default function Item(){
                 <NovoFornecedor
                     openModal={state.openModal} 
                     onClose={() => setState({...state, openModal: false})} 
-                    // usuario={state.usuario}
-                    Save = {(fornecedor)=> onSave(fornecedor)}
+                    fornecedor={state.fornecedor}
+                    Save = {(fornecedor,id)=> onSave(fornecedor,id)}
                     // keyDown = {(event, data) => handleKeyDown(event, data)}
                 />
             </Box>

@@ -97,9 +97,11 @@ const getCids = async () =>{
   }
 };
 const getPessoa = async (dados) =>{
+  console.log(dados);
   try {
       const{data} = await axios.post('/api/pessoa/index',dados)
       if(data){
+        console.log(data);
         
         return{
           data
@@ -141,6 +143,22 @@ const getFrequenciaEntrega = async () =>{
       return error;
   }
 };
+const createPrescritor = async (dados) => {
+  await csrf()
+  console.log(dados);
+  try {
+    const { data } = await axios.post('/api/itens', dados);
+
+    if (data) {
+      return data.id;
+    }
+
+    // return new Error('Erro ao criar o registro.');
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao consultar o registro.');
+  }
+};
 
 export const Solicitacao = {
   getAll,
@@ -152,4 +170,5 @@ export const Solicitacao = {
   getPessoa,
   getSexo,
   getFrequenciaEntrega,
+  createPrescritor,
 };
