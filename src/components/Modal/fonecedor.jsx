@@ -1,10 +1,10 @@
-import { Box, CssBaseline, Grid, Paper, TextField } from "@mui/material";
+import { Box, Button, CssBaseline, Grid, Paper, TextField } from "@mui/material";
 import { useEffect,useState } from "react";
 import { useForm } from "react-hook-form";
 import { Modal } from '../Layouts/modal';   
 
 export function NovoFornecedor(props){
-    const {register, handleSubmit} = useForm()
+    const {register, handleSubmit, setValue, reset} = useForm();
     const [state, setState] = useState({
         nome:'',
         email:'',
@@ -20,11 +20,8 @@ export function NovoFornecedor(props){
         "is_fornecedor": true
     })
     const onSubmit = (e)=>{
-        console.log(e);     
-    }
-    
-    
-    
+       console.log(e);
+    }   
     function checkCep(){
         if(state.cep){
             
@@ -41,22 +38,12 @@ export function NovoFornecedor(props){
         }
     }
     function limparFornecedor(){
-        setState({nome:'',email:'',telefone:'', cpf:'',cnpj:'',cep:'',rua:'',numero:'', bairro:'',"is_beneficiario": false,"is_prescritor": false,"is_fornecedor": true })
+        reset()
     }
     useEffect(()=>{
         if(props.fornecedor.id != null|| props.fornecedor.id != undefined){
-           setState({ 
-                nome:props.fornecedor.nome, 
-                email:props.fornecedor.email, 
-                telefone:props.fornecedor.telefone, 
-                cpf:props.fornecedor.cpf,
-                cnpj:props.fornecedor.cnpj,
-                cep:props.fornecedor.cep,
-                rua:props.fornecedor.rua,
-                numero:props.fornecedor.numero,
-                bairro:props.fornecedor.bairro,
-            })
-       }
+            setValue('form',props.fornecedor)
+        }
        else{
         limparFornecedor()
        }
@@ -67,8 +54,7 @@ export function NovoFornecedor(props){
             open={props.openModal}
             onClose={()=>{props.onClose(), limparFornecedor()}}
             header='Novo Fornecedor'
-            // onSave = {()=>props.Save(state,props.fornecedor.id)}
-            onSave = {()=>{console.log(state),onSubmit(e)}}
+            onSave = {()=>{props.Save(state,props.fornecedor?.id)}}
 
         >
             <CssBaseline />
@@ -80,9 +66,9 @@ export function NovoFornecedor(props){
                                 id="nome"
                                 name="nome"
                                 label="Nome"
-                                value={state.nome}
-                                onChange={(e) => setState({...state, nome: e.target.value})}
-                                // {...register("nome",{value:state.nome})}
+                                // value={state.nome}
+                                // onChange={(e) => setState({...state, nome: e.target.value})}
+                                {...register("form.nome")}
                                 fullWidth
                                 variant="outlined"
                             />
@@ -92,9 +78,9 @@ export function NovoFornecedor(props){
                             id="email"
                             name="email"
                             label="E-mail"
-                            value={state.email}
-                            onChange={(e) => setState({...state, email: e.target.value})}
-                            // {...register("email")}
+                            // value={state.email}
+                            // onChange={(e) => setState({...state, email: e.target.value})}
+                            {...register("form.email")}
                             fullWidth
                             variant="outlined"
                             />
@@ -104,9 +90,9 @@ export function NovoFornecedor(props){
                             id="cnpj"
                             name="cnpj"
                             label='CNPJ'
-                            value={state.cnpj}
-                            onChange={(e) => setState({...state, cnpj: e.target.value})}
-                            // {...register("cnpj")}
+                            // value={state.cnpj}
+                            // onChange={(e) => setState({...state, cnpj: e.target.value})}
+                            {...register("form.cnpj")}
                             fullWidth
                             autoComplete="shipping address-line2"
                             variant="outlined"
@@ -117,9 +103,9 @@ export function NovoFornecedor(props){
                             id="telefone"
                             name="telefone"
                             label='Telefone'
-                            value={state.telefone}
-                            onChange={(e) => setState({...state, telefone: e.target.value})}
-                            // {...register("telefone")}
+                            // value={state.telefone}
+                            // onChange={(e) => setState({...state, telefone: e.target.value})}
+                            {...register("form.telefone")}
                             fullWidth
                             autoComplete="shipping address-line2"
                             variant="outlined"
@@ -130,25 +116,25 @@ export function NovoFornecedor(props){
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            value={state.cep}
+                            // value={state.cep}
                             onBlur={()=>checkCep()}
                             id="cep"
                             name="cep"
                             label="CEP"
                             fullWidth
                             variant="outlined"
-                            onChange={(e) => setState({...state, cep:e.target.value})}
-                            // {...register("cep")}
+                            // onChange={(e) => setState({...state, cep:e.target.value})}
+                            {...register("form.cep")}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <TextField
                             id="rua"
                             name="rua"
-                            value={state.rua}
+                            // value={state.rua}
                             label="Rua"
-                            onChange={(e) => setState({...state, rua:e.target.value})}
-                            // {...register("rua")}
+                            // onChange={(e) => setState({...state, rua:e.target.value})}
+                            {...register("form.rua")}
                             fullWidth
                             variant="outlined"
                             />
@@ -158,9 +144,9 @@ export function NovoFornecedor(props){
                             id="numero"
                             name="numero"
                             label='Nº'
-                            value={state.numero}
-                            onChange={(e) => setState({...state, numero:e.target.value})}
-                            // {...register("numero")}
+                            // value={state.numero}
+                            // onChange={(e) => setState({...state, numero:e.target.value})}
+                            {...register("form.numero")}
                             fullWidth
                             variant="outlined"
                             />
@@ -170,13 +156,14 @@ export function NovoFornecedor(props){
                             id="bairro"
                             name="bairro"
                             label='Bairro'
-                            value={state.bairro}
-                            onChange={(e) => setState({...state, bairro:e.target.value})}
-                            {...register("bairro")}
+                            // value={state.bairro}
+                            // onChange={(e) => setState({...state, bairro:e.target.value})}
+                            {...register("form.bairro")}
                             fullWidth
                             variant="outlined"
                             />
-                        </Grid>  
+                        </Grid>
+                        <Button name='enviarFormulario' type='submit'></Button>
                     </Grid>
                     
                 </Box>

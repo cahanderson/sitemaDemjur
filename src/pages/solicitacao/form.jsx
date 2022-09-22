@@ -2,17 +2,20 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { Box, Button, CssBaseline, Divider, Grid, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
-// import useSolicitacaoStore from "@/hooks/solicitacao";
+import useSolicitacaoStore from "@/hooks/solicitacao";
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import ClearIcon from '@mui/icons-material/Clear';
 import AppLayout from "@/components/Layouts/AppLayout";
-import { Solicitacao } from "@/lib/Solicitacao";
+import { Solicitacao } from "@/lib/solicitacao";
 import { NovoPrescritor } from "@/components/Modal/novoPrescritor";
 
 
 export default function NovaSolicitacao(){
+    const datas = useSolicitacaoStore(state=>state.datas);
     const router = useRouter();
-    const {register, handleSubmit} = useForm()
+    console.log(datas);
+
+    const {register, handleSubmit, setValue} = useForm()
     const [estabelecimento, setEstabelecimento] = useState([''])
     const [acao, setAcao] = useState(['']);
     const [representante, setRepresentante] = useState(['']);
@@ -21,49 +24,29 @@ export default function NovaSolicitacao(){
     const [prescritor, setPrescritor] = useState(['']);
     const [sexo, setSexo] = useState([''])
     const [freq, setFreq] = useState([''])
-    const [solicitacao, setSolicitacao]=useState({})
+    const [solicitacao, setSolicitacao]=useState([])
     const [beneficiario, setBeneficiario] = useState({})
     const [openModal, setOpenModal] = useState(false)
+
     const [pessoa, setPessoa] = useState({
         "is_beneficiario": false,
         "is_prescritor": true,
         "is_fornecedor": false,
     })
-    const [item, setItem] = useState([{
+    const [itens, setItens] = useState([{
         item_id:'',
         quantidade_mensal:'',
         d_frequencia_entrega:'',
         quantidade_limite:''
     }])
-    const [processo, setProcesso] = useState({
-        n_solicitacao:'',
-        t_acao:'',
-        representante:'',
-        vara:'',
-        juiz:'',
-        reu_acao:'',
-        dt_entrada:'',
-        cid:'',
-        estabelecimento:'',
-        prescritor:'',
-        conselho_reginal:'',
-        n_registro_conselho:'',
-        registro_do_conselho:'',
-        local_tratamento:'',
-        dt_atendimento:''
-    })
-    const onSubmit = (e)=>{
-        setSolicitacao({e,item})
-        
-        console.log(e);     
+    const onSubmit = (data)=>{
+        setSolicitacao(data)
     }
-
     const [message, setMessage] = useState({
         openSnakebar:false,
         message:'',
         statusSnake:'success'
     })
-
     function checkCpf(){
         data.map( data => {
             if(beneficiario.cpf === data.cpf){
@@ -160,40 +143,67 @@ export default function NovaSolicitacao(){
     }
     //funções para adicionar novas linhas aos Itens
     function onAddItem(){
-        // setItem([...item, ''])
-        setItem([...item,{ item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
-    }
-    function onSetItem(e,index){
-        if(e.target.name === 'item_id'){
-            item[index].item_id = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'quantidade_mensal'){
-            item[index].quantidade_mensal = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'd_frequencia_entrega'){
-            item[index].d_frequencia_entrega = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'quantidade_limite'){
-            item[index].quantidade_limite = e.target.value;
-            setItem([...item])
-        }
-        console.log(item);
-        
+        setItens([...itens,{ item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
     }
     function onDeleteItem(position){
-        if(item.length > 1){
-            setItem([...item.filter((item,index) => index !== position)])
+        if(itens.length > 1){
+            setItens([...itens.filter((item,index) => index !== position)])
         }else{
             // setItem([...item.filter((item,index) => index !== position)])
-            setItem([{ item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
+            setItens([{ item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
         }
     }
+    function onSave(data,id){
+        // if(id){
+        //     Fornecedor.updateById(id, fornecedor).
+        //     then((result)=>{
+        //         if(result instanceof Error){
+        //             setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+        //             return;
+        //         }
+        //         setState({...state,openModal:false})
+        //     })   
+        // }else{
+            Solicitacao.create(data).
+            then((result)=>{
+            if(result instanceof Error){
+                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                    return;
+                }
+            // setState({...state, openModal:false})
+            })
+        // }
+    }
+    function salvarPrescritor(data){
+        Solicitacao.createPrescritor(data).
+        then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setOpenModal(false)
+        })  
+    }
+    function onLoadEdit(){
+        if(datas){
+            setValue('beneficiario',datas)
+        }
+    }
+
     useEffect(()=>{
         onLoad(pessoa)
-    },[])
-    function salvarPrescritor(data){
-        console.log({data,pessoa});
-    }
+    },[openModal])
+
+    // useEffect(()=>{
+    //     onSave(solicitacao)
+    // },[solicitacao])
+
+    useEffect(()=>{
+        onLoadEdit()
+    },[datas])
+
+
+
 
     return(
         <AppLayout>
@@ -225,7 +235,7 @@ export default function NovaSolicitacao(){
                             <TextField
                                 type='text'
                                 name='numero_solicitacao'
-                                {...register("processo.numero_solicitacao")}
+                                {...register("numero_solicitacao")}
                                 label="Nº da solicitação"
                                 fullWidth
                                 variant="outlined"
@@ -298,6 +308,7 @@ export default function NovaSolicitacao(){
                         <Grid item xs={12} sm={2}>
                             {/* <Typography>Data de entrada</Typography> */}
                             <TextField
+                            type='date'
                             name="data_entrada"
                             label='data de entrada'
                             fullWidth
@@ -375,6 +386,11 @@ export default function NovaSolicitacao(){
                             disabled
                             />
                         </Grid>
+                        <Grid item xs={12} sm={2}>
+                            <Box display='flex' p={1}>
+                                <Button onClick={()=>setOpenModal(true)} variant='contained'> Novo Prescritor</Button>
+                            </Box>
+                        </Grid>
                         <Grid item xs={12} sm={5}>
                             <TextField
                             name="local_tratamento"
@@ -402,7 +418,6 @@ export default function NovaSolicitacao(){
 
                     <Typography variant='h5' component='h1' my={2}>
                         Solicitante
-                        <IconButton onClick={()=>{setOpenModal(true)}}><AddCircleSharpIcon  /></IconButton>
                     </Typography>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={2}>
@@ -458,7 +473,7 @@ export default function NovaSolicitacao(){
                         <Grid item xs={12} sm={2}>
                             <TextField
                             select
-                            name="sexo"
+                            name="d_sexo"
                             label="Sexo"
                             fullWidth
                             autoComplete="shipping address-line2"
@@ -467,7 +482,7 @@ export default function NovaSolicitacao(){
                             {...register('beneficiario.sexo')}
                             >
                                 {sexo.map((s, index)=>(
-                                <MenuItem key={index} value={s.id}>{s.descricao}</MenuItem>
+                                <MenuItem key={index} value={s.descricao}>{s.descricao}</MenuItem>
                                 ))}
                             </TextField>
                         </Grid>
@@ -572,46 +587,47 @@ export default function NovaSolicitacao(){
                         </Typography>
                     </Box>      
                     
-                    {item.map((item, index)=>(
+                    {itens.map((itens, index)=>(
                         <Grid key={index} container mb={2}>
                             <Grid item xs={11} container spacing={3}>
                                 <Grid item xs={5}>
                                     <TextField
-                                        value={item.item}
-                                        id="item"
+                                        // value={itens.item_id}
+                                        id="item_id"
                                         name="item_id"
                                         label='Item'
                                         fullWidth
                                         variant="outlined"
-                                        onChange={(e)=> onSetItem(e,index)}
-                                        // {...register('item_id')}
+                                        // onChange={(e)=> onSetItem(e,index)}
+                                        {...register(`itens.${index}.item_id`)}
                                     />
                                 </Grid>
                                 <Grid item xs={1}>
                                     <TextField
-                                    value={item.qtdMensal}
-                                    id="QtdMensal"
+                                    // value={itens.quantidade_mensal}
+                                    id="quantidade_mensal"
                                     name="quantidade_mensal"
                                     label='Qtd Mensal'
                                     fullWidth
                                     variant="outlined"
-                                    onChange={(e)=> onSetItem(e,index)}
+                                    // onChange={(e)=> onSetItem(e,index)}
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
-                                    // {...register('quantidade_mensal')}
+                                    {...register(`itens.${index}.quantidade_mensal`)}
                                 />
                                 </Grid>
                                 <Grid item xs={2}>
                                     <TextField
-                                        value={item.FreqEntrega}
+                                        // value={itens.d_frequencia_entrega}
                                         select
+                                        id='d_frequencia_entrega'
                                         name="d_frequencia_entrega"
                                         label='Freq da entrega'
                                         fullWidth
                                         variant="outlined"
-                                        onChange={(e)=> onSetItem(e,index)}
-                                        // {...register('d_frequencia_entrega')}
+                                        // onChange={(e)=> onSetItem(e,index)}
+                                        {...register(`itens.${index}.d_frequencia_entrega`)}
                                     >
                                         {freq.map((f, index)=>(
                                         <MenuItem key={index} value={f.descricao}>{f.descricao}</MenuItem>
@@ -620,14 +636,13 @@ export default function NovaSolicitacao(){
                                 </Grid>
                                 <Grid item xs={4}>
                                     <TextField
-                                        // value={item.quantidade_limite}
-                                        id="QtdLimite"
+                                        id="quantidade_limite"
                                         name="quantidade_limite"
                                         label='Qtd limite'
                                         fullWidth
                                         variant="outlined"
-                                        onChange={(e)=> onSetItem(e,index)}
-                                        // {...register('nome')}
+                                        // onChange={(e)=> onSetItem(e,index)}
+                                        {...register(`itens.${index}.quantidade_limite`)}
                                     />
                                 </Grid>
                             </Grid>
@@ -658,14 +673,13 @@ export default function NovaSolicitacao(){
 
                     <Box display='flex' justifyContent={"end"} gap='10px' p={2}>
                         <Button variant="text" onClick={()=> router.push('/solicitacao')}>Cancelar alterações</Button>
-                        <Button type="submit" variant="contained" onClick={()=>onSave()} > Salvar</Button>
+                        <Button type="submit" variant="contained"> Salvar</Button>
                     </Box>
                 </Box>
                 <NovoPrescritor
                     openModal={openModal} 
                     onClose={() => setOpenModal(false)} 
                     Save = {(data)=> salvarPrescritor(data)}
-                    // keyDown = {(event, data) => handleKeyDown(event, data)}
                 />
             </Box>
 

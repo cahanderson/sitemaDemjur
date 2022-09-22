@@ -3,21 +3,25 @@ import { useRouter } from "next/router";
 import { Box, Button, CssBaseline, Grid, Paper, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
-import { Solicitacao } from "@/lib/Solicitacao";
+import { Solicitacao } from "@/lib/solicitacao";
+import { GridActionsCellItem } from "@mui/x-data-grid";
+import DeleteIcon from '@mui/icons-material/Delete';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import useSolicitacaoStore from "@/hooks/solicitacao";
 
 export default function Solicitacoes(){   
     const router = useRouter();
     const [state, setState] = useState({
         buscaSolicitacao: '',
         data:[],
+        data_id:[],
         buscaCPF: '',
         buscaNome: '',
         buscaMae: '',
         tableCheckbox: false,
         form:false,
     });
-    // const data = useSolicitacaoStore(state => state.addData)
-    // data(state.data)
+    const addData = useSolicitacaoStore(state=>state.addData);
 
     useEffect(()=>{
         onLoadSolicitacao()
@@ -39,8 +43,13 @@ export default function Solicitacoes(){
         { field: 'solicitacao', headerName: 'Nº de solicitações', width: 240 },
         { field: 'nome', headerName: 'Nome', width: 240 },
         { field: 'cpf', headerName: 'CPF', width: 240 },
-        { field: 'nome_da_mae', headerName: 'Nome da mãe', width: 240 },
-        { field: 'dt_nascimento', headerName: 'Data de nascimento', width: 240 },  
+        { field: 'nome_da_mae', headerName: 'Nome da mãe', width: 220 },
+        { field: 'dt_nascimento', headerName: 'Data de nascimento', width: 200 }, 
+        { field: 'actions',type:'actions',getActions: (params) => [
+            <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
+            <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params.id)} label="edit" />,
+          ]
+        }
     ]
     const rows = state.data.map((row)=>({
         id:row.id,
@@ -50,6 +59,32 @@ export default function Solicitacoes(){
         nome_da_mae:row.beneficiario.nome_mae,
         dt_nascimento:row.beneficiario.data_nascimento,
     }));
+
+    function onEdit(id){
+        Solicitacao.getById(id).
+        then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+            }
+            // setState({...state, data_id:result.data})
+            addData(result.data)
+            router.push('/solicitacao/form')
+        })
+    }
+    function onDelete(id){
+        if(confirm('Realmente deseja apagar?')){
+            Solicitacao.deleteById(id)
+            .then(result => {
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});  
+                }else{
+                    setState({...state, openSnakebar:true, message:'Apagado com Sucesso', statusSnake:'success'});  
+                }    
+                onLoadSolicitacao()
+            })    
+        }else return;   
+    }
+    console.log(state.data_id);
 
     // function pesquisar(buscaSolicitacao,buscaCPF,buscaNome,buscaMae){
     //     if(buscaSolicitacao !==''){
@@ -64,7 +99,6 @@ export default function Solicitacoes(){
     //         setState({...state, filter:data.filter((data)=>data.nome_da_mae.toUpperCase().startsWith(buscaMae.toUpperCase()))})
     //     };
     // }
-
 
     return(
         <AppLayout>

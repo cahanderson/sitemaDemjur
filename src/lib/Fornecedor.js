@@ -5,7 +5,6 @@ const getPessoa = async (dados) =>{
   try {
       const{data} = await axios.post('/api/pessoa/index',dados)
         if(data){
-          console.log(data);
         return{
           data
         } 
@@ -18,7 +17,6 @@ const getPessoa = async (dados) =>{
 };
 const create = async (dados) => {
   await csrf()
-  console.log(dados);
   try {
     const { data } = await axios.post('/api/pessoa/', dados);
 

@@ -15,7 +15,6 @@ export function NovoItem(props){
         considera_lote_validade:false
     }])
 
-
     useEffect(()=>{
         if(props.editItem.id != null|| props.editItem.id != undefined){
            setItem([{
@@ -31,7 +30,6 @@ export function NovoItem(props){
            limparItem()
        }
     },[props.editItem.id])
-
 
     function limparItem(){
         setItem([{ codigo:null,nome:'',principio_ativo_id:'',d_tipo:'', categoria_id:'',considera_lote_validade:false}])
@@ -78,7 +76,6 @@ export function NovoItem(props){
             onClose={()=>{props.onClose(), limparItem()}}
             header='Itens'
             onSave = {()=>props.Save(props.editItem.id,item)}
-            // onSave = {()=>console.log(props.editItem.id,item)}
         >
             
             <CssBaseline />      

@@ -1,6 +1,6 @@
 import {axios} from './axios'
 
-// const csrf = () => axios.get('/sanctum/csrf-cookie')
+const csrf = () => axios.get('/sanctum/csrf-cookie')
 const getAll = async () =>{
   try {
       const{data} = await axios.get('/api/solicitacao')
@@ -21,7 +21,6 @@ const getEstabelecimento = async () =>{
   try {
       const{data} = await axios.get('/api/estabelecimentos')
       if(data){
-        // console.log(data);
         
         return{
           data
@@ -37,7 +36,6 @@ const getTipoAcao = async () =>{
   try {
       const{data} = await axios.get('/api/dominio/tipoDominio/TipoAcao')
       if(data){
-        // console.log(data);
         
         return{
           data
@@ -53,7 +51,6 @@ const getTipoRepresentante = async () =>{
   try {
       const{data} = await axios.get('/api/dominio/tipoDominio/TipoRepresentante')
       if(data){
-        // console.log(data);
         
         return{
           data
@@ -69,7 +66,6 @@ const getTipoReu = async () =>{
   try {
       const{data} = await axios.get('/api/dominio/tipoDominio/TipoReu')
       if(data){
-        // console.log(data);
         
         return{
           data
@@ -97,11 +93,9 @@ const getCids = async () =>{
   }
 };
 const getPessoa = async (dados) =>{
-  console.log(dados);
   try {
       const{data} = await axios.post('/api/pessoa/index',dados)
       if(data){
-        console.log(data);
         
         return{
           data
@@ -145,9 +139,8 @@ const getFrequenciaEntrega = async () =>{
 };
 const createPrescritor = async (dados) => {
   await csrf()
-  console.log(dados);
   try {
-    const { data } = await axios.post('/api/itens', dados);
+    const { data } = await axios.post('/api/pessoa/', dados);
 
     if (data) {
       return data.id;
@@ -159,7 +152,43 @@ const createPrescritor = async (dados) => {
     return new Error('Erro ao consultar o registro.');
   }
 };
+const create = async (dados) => {
+  await csrf()
+  try {
+    const { data } = await axios.post('/api/solicitacao', dados);
 
+    if (data) {
+      return data.id;
+    }
+
+    // return new Error('Erro ao criar o registro.');
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao consultar o registro.');
+  }
+};
+const deleteById = async (id)=> {
+  try {
+    await axios.delete(`/api/solicitacao/${id}`);
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao apagar o registro.');
+  }
+};
+const getById = async (id) => {
+  try {
+    const { data } = await axios.get(`/api/solicitacao/${id}`);
+
+    if (data) {
+      return data;
+    }
+
+    return new Error('Erro ao consultar o registro.');
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao consultar o registro.');
+  }
+};
 export const Solicitacao = {
   getAll,
   getEstabelecimento,
@@ -171,4 +200,7 @@ export const Solicitacao = {
   getSexo,
   getFrequenciaEntrega,
   createPrescritor,
+  create,
+  deleteById,
+  getById,
 };

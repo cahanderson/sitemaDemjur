@@ -1,94 +1,13 @@
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
+import { Movimentacoes } from "@/lib/movimentacao";
 import { Box, Button, CssBaseline, FormControl, Grid, InputLabel, Menu, MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/router";
-import { useState } from "react";
-
-//dados mocados
-const data = [
-    {
-        "nSolicitacao":"1010",
-        "tipoMovimentacao":"Entrada por doação",
-        "dtMovimentacao":"01/01/1995",
-        "item":"1",
-        "solicitante":"paracetamol",
-        "CPF":"060606060628",
-
-    },
-    {
-        "nSolicitacao":"1011",
-        "tipoMovimentacao":"Saída paciente SUS",
-        "dtMovimentacao":"01/01/1995",
-        "item":"1",
-        "solicitante":"paracetamol",
-        "CPF":"060606060628",
-
-    },
-    {
-        "nSolicitacao":"1012",
-        "tipoMovimentacao":"Saída paciente SUS",
-        "dtMovimentacao":"01/01/1995",
-        "item":"1",
-        "solicitante":"paracetamol",
-        "CPF":"060606060628",
-
-    },
-    {
-        "nSolicitacao":"1013",
-        "tipoMovimentacao":"Entrada",
-        "dtMovimentacao":"01/01/1995",
-        "item":"1",
-        "solicitante":"paracetamol",
-        "CPF":"060606060628",
-
-
-    },
-    {
-        "nSolicitacao":"1014",
-        "tipoMovimentacao":"paracetamol",
-        "dtMovimentacao":"01/01/1995",
-        "item":"1",
-        "solicitante":"paracetamol",
-        "CPF":"060606060628",
-
-
-    },
-    {
-        "nSolicitacao":"1015",
-        "tipoMovimentacao":"paracetamol",
-        "dtMovimentacao":"01/01/1995",
-        "item":"1",
-        "solicitante":"paracetamol",
-        "CPF":"060606060628",
-
-
-    },
-    {
-        "nSolicitacao":"1016",
-        "tipoMovimentacao":"paracetamol",
-        "dtMovimentacao":"01/01/1995",
-        "item":"1",
-        "solicitante":"paracetamol",
-        "CPF":"060606060628",
-
-
-    },
-    {
-        "nSolicitacao":"1017",
-        "tipoMovimentacao":"paracetamol",
-        "dtMovimentacao":"01/01/1995",
-        "item":"1",
-        "solicitante":"Saída",
-        "CPF":"060606060628",
-
-
-
-    }
-];
+import { useState, useEffect } from "react";
 
 export default function Movimentacao(){   
     const router = useRouter()
-
+    const [tipo, setTipo] = useState([''])
     const [state, setState] = useState({
         buscaTipoMovimentacao: '',
         buscaDtMovimentacao: '',
@@ -97,38 +16,67 @@ export default function Movimentacao(){
         buscaSolicitante: '',
         buscaCPF: '',
         tableCheckbox: false,
-        filter: data,
         anchorEl: null,
+        data:[],
+        dataTipo:[],
     });
     const columns = [
         { field: 'id', headerName: 'Nº movimentação', width:420 },
-        { field: 'tipoMovimentacao', headerName: 'Tipo movimentação', width: 420 },
-        { field: 'dtMovimentacao', headerName: 'Data da movimentação', width: 420 }, 
+        { field: 'd_tipo_movimentacao', headerName: 'Tipo movimentação', width: 420 },
+        { field: 'data', headerName: 'Data da movimentação', width: 420 }, 
     ]
-    const rows = state.filter.map((row)=>({
-        id:row.nSolicitacao,
-        tipoMovimentacao:row.tipoMovimentacao,
-        dtMovimentacao:row.dtMovimentacao,
+    const rows = state.data.map((row)=>({
+        id:row.id,
+        // d_tipo_movimentacao:tipo[row.d_tipo_movimentacao + 1].descricao,
+        d_tipo_movimentacao:row.d_tipo_movimentacao,
+        data:row.data.split('-').reverse().join('/'),
     }));
-    
-    function pesquisar(buscaCodigo,buscaDescricao,buscaPrincAtivo,buscaLote,buscaValidade,buscaCategoria){
-        if(buscaTipoMovimentacao !==''){
-            setState({...state, filter: data.filter((data)=>data.codigo.startsWith(buscaTipoMovimentacao))})
-        }else if(buscaDtMovimentacao !==''){
-            setState({...state, filter: data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDtMovimentacao.toUpperCase()))})
-        }else if(buscaItem !==''){
-            setState({...state, filter: data.filter((data)=>data.princAtivo.toUpperCase().startsWith(buscaItem.toUpperCase()))})
-        }else if(buscaNSolicitacao!==''){
-            setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaNSolicitacao.toUpperCase()))})
-        }else if(buscaSolicitante!==''){
-            setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaSolicitante.toUpperCase()))})
-        }else if(buscaCPF!==''){
-            setState({...state, filter:data.filter((data)=>data.lote.startsWith(buscaCPF))})
-        }else{
-            setState({...state, filter:data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-        };
-    }
 
+    function onLoad(){
+        Movimentacoes.getAll()
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setState({...state,data:result.data.data})
+        })
+    } 
+    function onLoadTipo(){
+        Movimentacoes.getMovimentacao()
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setTipo(result.data.dados)
+        })
+    } 
+
+    useEffect(()=>{
+        onLoad()
+    },[])
+    useEffect(()=>{
+        onLoadTipo()
+    },[state.data])
+    
+    // function pesquisar(buscaCodigo,buscaDescricao,buscaPrincAtivo,buscaLote,buscaValidade,buscaCategoria){
+    //     if(buscaTipoMovimentacao !==''){
+    //         setState({...state, filter: data.filter((data)=>data.codigo.startsWith(buscaTipoMovimentacao))})
+    //     }else if(buscaDtMovimentacao !==''){
+    //         setState({...state, filter: data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDtMovimentacao.toUpperCase()))})
+    //     }else if(buscaItem !==''){
+    //         setState({...state, filter: data.filter((data)=>data.princAtivo.toUpperCase().startsWith(buscaItem.toUpperCase()))})
+    //     }else if(buscaNSolicitacao!==''){
+    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaNSolicitacao.toUpperCase()))})
+    //     }else if(buscaSolicitante!==''){
+    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaSolicitante.toUpperCase()))})
+    //     }else if(buscaCPF!==''){
+    //         setState({...state, filter:data.filter((data)=>data.lote.startsWith(buscaCPF))})
+    //     }else{
+    //         setState({...state, filter:data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
+    //     };
+    // }
     const open = Boolean(state.anchorEl);
 
     function openMenu(event){
@@ -216,9 +164,9 @@ export default function Movimentacao(){
                             variant="outlined"
                             onChange={(e) => setState({...state, buscaItem:e.target.value})}
                         >
-                            {data.map((item, index)=>(
+                            {/* {state.data.map((item, index)=>(
                                 <MenuItem key={index} value={item.princAtivo}>{item.princAtivo}</MenuItem>
-                            ))}
+                            ))} */}
                         </TextField>
                     </Grid>
                 </Grid>    

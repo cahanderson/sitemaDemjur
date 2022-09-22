@@ -1,6 +1,7 @@
 import Backdrop from '@mui/material/Backdrop'
 import {Box, Button, Divider, Modal as MuiModal, Typography} from "@mui/material";
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
+import { useForm } from "react-hook-form";
 
 export function Modal(props){
     const style = {
@@ -26,7 +27,8 @@ export function Modal(props){
                 timeout: 800,
             }}
         >
-             <Box style={style} bgcolor= 'background.paper'>
+            {/* component="form" onSubmit={handleSubmit(onSubmit)} */}
+             <Box style={style} bgcolor= 'background.paper' component="form">
                 <Box display='flex' justifyContent='space-between' p={2} backgroundColor='#F5F5F9'>
                         <Typography variant="h6" color='blue' alignItems='center' display='flex'>
                             {props.header}

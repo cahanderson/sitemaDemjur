@@ -2,7 +2,7 @@ import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
 import { PrincAtivo } from "@/lib/princAtivo";
 import { Categoria } from "@/lib/categoria";
-import { Itens } from "@/lib/usuarios/Itens";
+import { Itens } from "@/lib/item";
 import { Box, Button, CssBaseline, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { NovoItem } from '../../components/Modal/itens';

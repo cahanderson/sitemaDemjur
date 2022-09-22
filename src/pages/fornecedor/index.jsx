@@ -5,7 +5,7 @@ import { Box, Button, CssBaseline, Grid, Paper, TextField, Typography } from "@m
 import AppLayout from "@/components/Layouts/AppLayout";
 import { NovoFornecedor } from "@/components/Modal/fonecedor";
 import { Table } from "@/components/Table";
-import { Fornecedor } from "@/lib/Fornecedor";
+import { Fornecedor } from "@/lib/fornecedor";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 
 export default function Item(){
@@ -33,7 +33,6 @@ export default function Item(){
                 return;
             }
             setState({...state, data:result.data.data})
-            // console.log(result.data.data);
             
 
     })}
@@ -59,6 +58,7 @@ export default function Item(){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
             }
             setState({...state, fornecedor:result.data, openModal:true})
+            
         })
     }
 
@@ -82,7 +82,6 @@ export default function Item(){
         })
         }
     }
-
     const columns = [
         { field: 'nome', headerName: 'Nome/Fornecedor', width: 300 },
         { field: 'cpf', headerName: 'CPF', width: 280 },
@@ -161,9 +160,11 @@ export default function Item(){
                     <Grid item xs={12} sm={5}>
                         <TextField
                         label="Fornecedor"
+                        name='fornecedor'
                         fullWidth
                         variant="outlined"
                         onChange={(e) => setState({...state, buscaFornecedor: e.target.value})}
+
                         />
                     </Grid>
                     <Grid item xs={12} sm={3}>

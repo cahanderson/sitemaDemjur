@@ -1,38 +1,9 @@
 import AppLayout from "@/components/Layouts/AppLayout";
 import { NovoInventario } from "@/components/Modal/inventario";
 import { Table } from "@/components/Table";
+import { Inventarios } from "@/lib/inventario";
 import { Box, Button, CssBaseline, Grid, Paper, TextField, Typography } from "@mui/material";
-import { useState } from "react";
-
-
-//dados mocados
-const data = [
-    {
-        "id":"1",
-        "Data":"18/10/2021",
-        "Nome":"Carlos",
-    },
-    {
-        "id":"2",
-        "Data":"18/10/2021",
-        "Nome":"Anderson",
-    },
-    {
-        "id":"3",
-        "Data":"18/10/2021",
-        "Nome":"Helcias",
-    },
-    {
-        "id":"4",
-        "Data":"18/10/2021",
-        "Nome":"Alysson",
-    },
-    {
-        "id":"5",
-        "Data":"18/10/2021",
-        "Nome":"Junior",
-    },
-];
+import { useState,useEffect } from "react";
 
 export default function Inventario(){   
 
@@ -44,38 +15,53 @@ export default function Inventario(){
         buscaValidade: '',
         buscaCategoria: '',
         tableCheckbox: false,
-        filter: data,
         openModal:false,
+        data:[],
     });
     const columns = [
         { field: 'id', headerName: '#', width: 210 },
-        { field: 'Nome', headerName: 'Nome', width: 210 },
-        { field: 'Data', headerName: 'Data', width: 210 },
+        { field: 'nome', headerName: 'Nome', width: 210 },
+        { field: 'data', headerName: 'Data', width: 210 },
     ]
-    const rows = state.filter.map((row)=>({
+    const rows = state.data.map((row)=>({
         id:row.id,
-        Nome:row.Nome,
-        Data:row.Data,
+        nome:row.nome,
+        data:row.data.split('-').reverse().join('/'), //Formatando data para modelo br
     }));
 
-    function pesquisar(buscaCodigo,buscaDescricao,buscaPrincAtivo,buscaLote,buscaValidade,buscaCategoria){
-        if(buscaCodigo !==''){
-            console.log(buscaCodigo);
-            setState({...state, filter: data.filter((data)=>data.codigo.startsWith(buscaCodigo))})
-        }else if(buscaDescricao !==''){
-            setState({...state, filter: data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-        }else if(buscaPrincAtivo !==''){
-            setState({...state, filter: data.filter((data)=>data.princAtivo.toUpperCase().startsWith(buscaPrincAtivo.toUpperCase()))})
-        }else if(buscaLote!==''){
-            setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaLote.toUpperCase()))})
-        }else if(buscaValidade!==''){
-            setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaValidade.toUpperCase()))})
-        }else if(buscaCategoria!==''){
-            setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaCategoria.toUpperCase()))})
-        }else{
-            setState({...state, filter:data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-        };
+    function onLoad(){
+        Inventarios.getAll()
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setState({...state, data:result.data.data})
+            console.log(result.data.data);
+        })
     }
+    useEffect(()=>{
+        onLoad()
+    },[])
+
+    // function pesquisar(buscaCodigo,buscaDescricao,buscaPrincAtivo,buscaLote,buscaValidade,buscaCategoria){
+    //     if(buscaCodigo !==''){
+    //         console.log(buscaCodigo);
+    //         setState({...state, filter: data.filter((data)=>data.codigo.startsWith(buscaCodigo))})
+    //     }else if(buscaDescricao !==''){
+    //         setState({...state, filter: data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
+    //     }else if(buscaPrincAtivo !==''){
+    //         setState({...state, filter: data.filter((data)=>data.princAtivo.toUpperCase().startsWith(buscaPrincAtivo.toUpperCase()))})
+    //     }else if(buscaLote!==''){
+    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaLote.toUpperCase()))})
+    //     }else if(buscaValidade!==''){
+    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaValidade.toUpperCase()))})
+    //     }else if(buscaCategoria!==''){
+    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaCategoria.toUpperCase()))})
+    //     }else{
+    //         setState({...state, filter:data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
+    //     };
+    // }
 
 
     return(
