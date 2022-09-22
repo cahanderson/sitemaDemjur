@@ -141,11 +141,11 @@ export default function Entradas(){
                         <Grid item xs={12} sm={5}>
                             <TextField
                                 select
-                                id="tipo_Entrada"
                                 name="tipo_Entrada"
                                 label="Tipo de entrada"
                                 fullWidth
                                 variant="outlined"
+                                {...register('tipo_Entrada')}
                             >
                                 {tipo.map((tipo, index)=>(
                                     <MenuItem key={index} value={tipo.id}>{tipo.descricao}</MenuItem>
@@ -155,11 +155,11 @@ export default function Entradas(){
                         <Grid item xs={12} sm={7}>
                             <TextField
                             select
-                            id="fornecedor"
                             name="fornecedor"
                             label="Fornecedor"
                             fullWidth
                             variant="outlined"
+                            {...register('fornecedor')}
                             >
                                 {fornecedor.map((f, index)=>(
                                     <MenuItem key={index} value={f.id}>{f.nome}</MenuItem>
@@ -171,11 +171,11 @@ export default function Entradas(){
                         <Grid item xs={12} sm={3}>
                             <TextField
                                 type='date'
-                                id="data"
                                 name="data"
                                 label='Data'
                                 fullWidth
                                 variant="outlined"
+                                {...register('data')}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -184,11 +184,11 @@ export default function Entradas(){
                         <Grid item xs={12} sm={3}>
                             <TextField
                                 // type=''
-                                id="valor"
                                 name="valor"
                                 label='Valor'
                                 fullWidth
                                 variant="outlined"
+                                {...register('valor')}
                             />
                         </Grid>
                         <Grid item xs={12} sm={2}>
@@ -211,14 +211,15 @@ export default function Entradas(){
                             <Grid item xs={11} container spacing={3}>
                                 <Grid item xs={12} sm={5}>
                                     <TextField
-                                        value={item.tipo}
+                                        // value={item.tipo}
                                         select
-                                        id="tipo"
+    
                                         name="tipo"
                                         label='Item'
                                         fullWidth
                                         variant="outlined"
                                         onChange={(e)=> onSetItem(e,index)}
+                                        {...register('itens.tipo')}
                                     >
                                         {itens.map((i, index)=>(
                                             <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
@@ -228,11 +229,12 @@ export default function Entradas(){
                                 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
-                                        id="quantidade"
+    
                                         name="quantidade"
                                         label='Quantidade'
                                         fullWidth
                                         variant="outlined"
+                                        {...register('itens.quantidade')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -242,11 +244,12 @@ export default function Entradas(){
 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
-                                        id="fatorEmbalagem"
+    
                                         name="fatorEmbalagem"
                                         label='Fator emb'
                                         fullWidth
                                         variant="outlined"
+                                        {...register('itens.fatorEmbalagem')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -257,11 +260,11 @@ export default function Entradas(){
                                 <Grid item xs={12} sm={3}>
                                     <TextField
                                         type='date'
-                                        id="dtValidade"
                                         name="dtValidade"
                                         label='Data de validade'
                                         fullWidth
                                         variant="outlined"
+                                        {...register('itens.dtValidade')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -271,11 +274,11 @@ export default function Entradas(){
 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
-                                        id="dtValidade"
-                                        name="dtValidade"
+                                        name="lote"
                                         label='Lote'
                                         fullWidth
                                         variant="outlined"
+                                        {...register('itens.lote')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -285,11 +288,11 @@ export default function Entradas(){
 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
-                                        id="V_Unitario"
                                         name="V_Unitario"
                                         label='valor Unitario'
                                         fullWidth
                                         variant="outlined"
+                                        {...register('itens.V_Unitario')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
