@@ -1,7 +1,7 @@
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
 import { Movimentacoes } from "@/lib/movimentacao";
-import { Box, Button, CssBaseline, FormControl, Grid, InputLabel, Menu, MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
+import { Box, Button, CssBaseline, Grid, Menu, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
@@ -17,6 +17,7 @@ export default function Movimentacao(){
         buscaCPF: '',
         tableCheckbox: false,
         anchorEl: null,
+        filter:[],
         data:[],
         dataTipo:[],
     });
@@ -25,10 +26,10 @@ export default function Movimentacao(){
         { field: 'd_tipo_movimentacao', headerName: 'Tipo movimentação', width: 420 },
         { field: 'data', headerName: 'Data da movimentação', width: 420 }, 
     ]
-    const rows = state.data.map((row)=>({
+    const rows = state.filter?.map((row)=>({
+
         id:row.id,
-        // d_tipo_movimentacao:tipo[row.d_tipo_movimentacao + 1].descricao,
-        d_tipo_movimentacao:row.d_tipo_movimentacao,
+        d_tipo_movimentacao:row.tipo_movimentacao.descricao,
         data:row.data.split('-').reverse().join('/'),
     }));
 
@@ -39,7 +40,7 @@ export default function Movimentacao(){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setState({...state,data:result.data.data})
+            setState({...state,data:result.data.data,filter:result.data.data})
         })
     } 
     function onLoadTipo(){
@@ -60,23 +61,23 @@ export default function Movimentacao(){
         onLoadTipo()
     },[state.data])
     
-    // function pesquisar(buscaCodigo,buscaDescricao,buscaPrincAtivo,buscaLote,buscaValidade,buscaCategoria){
-    //     if(buscaTipoMovimentacao !==''){
-    //         setState({...state, filter: data.filter((data)=>data.codigo.startsWith(buscaTipoMovimentacao))})
-    //     }else if(buscaDtMovimentacao !==''){
-    //         setState({...state, filter: data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDtMovimentacao.toUpperCase()))})
-    //     }else if(buscaItem !==''){
-    //         setState({...state, filter: data.filter((data)=>data.princAtivo.toUpperCase().startsWith(buscaItem.toUpperCase()))})
-    //     }else if(buscaNSolicitacao!==''){
-    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaNSolicitacao.toUpperCase()))})
-    //     }else if(buscaSolicitante!==''){
-    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaSolicitante.toUpperCase()))})
-    //     }else if(buscaCPF!==''){
-    //         setState({...state, filter:data.filter((data)=>data.lote.startsWith(buscaCPF))})
-    //     }else{
-    //         setState({...state, filter:data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-    //     };
-    // }
+    function pesquisar(buscaTipoMovimentacao,buscaDtMovimentacao,buscaNSolicitacao,buscaSolicitante,buscaCPF){
+        if(buscaTipoMovimentacao !==''){    
+            setState({...state, filter: data.filter((data)=>{ return data.d_tipo_movimentacao.startsWith(buscaTipoMovimentacao)})})
+        }else if(buscaDtMovimentacao !==''){
+            setState({...state, filter: data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDtMovimentacao.toUpperCase()))})
+        }else if(buscaItem !==''){
+            setState({...state, filter: data.filter((data)=>data.princAtivo.toUpperCase().startsWith(buscaItem.toUpperCase()))})
+        }else if(buscaNSolicitacao!==''){
+            setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaNSolicitacao.toUpperCase()))})
+        }else if(buscaSolicitante!==''){
+            setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaSolicitante.toUpperCase()))})
+        }else if(buscaCPF!==''){
+            setState({...state, filter:data.filter((data)=>data.lote.startsWith(buscaCPF))})
+        }else{
+            setState({...state, filter:data.filter((data)=>{ return data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase())})})
+        };
+    }
     const open = Boolean(state.anchorEl);
 
     function openMenu(event){
@@ -84,10 +85,16 @@ export default function Movimentacao(){
         // console.log(event.currentTarget);
     }
     function closeMenu(event){
-        console.log(event.target.name);
         setState({...state, anchorEl:null})
+        if(event.target.value === 1){
+            router.push('/movimentacao/form_SaidaPaciente')
+        }else if(event.target.value === 2){
+            router.push('/movimentacao/form_Saida')
+        }else if(event.target.value === 3){
+            router.push('/movimentacao/form_Entrada')
+        }
     }
-
+    console.log(state.data.filter((data)=>{ return data.data.includes("31/08/2022")}))
 
     return(
         <AppLayout>
@@ -96,7 +103,7 @@ export default function Movimentacao(){
                 display= 'flex'
                 justifyContent='space-between'
                 mb={4}
-             >
+            >
                 <Box
                     display='flex'
                     flexDirection='column'
@@ -115,9 +122,7 @@ export default function Movimentacao(){
                         onClick={(e)=>openMenu(e)}
                         aria-haspopup="true"
                         aria-controls={open ? 'basic-menu' : undefined}
-                        aria-expanded={open ? 'true' : undefined}
-
-                        // onClick={()=> router.push('/movimentacao/form_Entrada')}    
+                        aria-expanded={open ? 'true' : undefined}  
                     >
                          Nova movimentação
                     </Button>
@@ -130,12 +135,11 @@ export default function Movimentacao(){
                         'aria-labelledby': 'basic-button',
                         }}
                     >
-                        <MenuItem name={'saída'} onClick={(e)=>closeMenu(e)} >Saída para pacientes</MenuItem>
-                        <MenuItem value='Saídas' onClick={closeMenu}>Saídas</MenuItem>
-                        <MenuItem value='Entradas' onClick={closeMenu}>Entradas</MenuItem>
+                        <MenuItem  value={1} onClick={(e)=>closeMenu(e)} >Saída para pacientes</MenuItem>
+                        <MenuItem  value={2} onClick={(e)=>closeMenu(e)}>Saídas</MenuItem>
+                        <MenuItem  value={3} onClick={(e)=>closeMenu(e)}>Entradas</MenuItem>
                     </Menu>
                 </Box>
-
             </Box>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Grid container spacing={3}>
@@ -148,10 +152,9 @@ export default function Movimentacao(){
                             onChange={(e) => setState({...state, buscaTipoMovimentacao: e.target.value})}
 
                         >
-                            <MenuItem value=''></MenuItem>
-                            <MenuItem value='Entrada'>Entrada</MenuItem>
-                            <MenuItem value='Saída'>Saída</MenuItem>
-                            <MenuItem value='Saída para paciente'>Saída para paciente</MenuItem>
+                            {tipo.map((t, index)=>(
+                                <MenuItem key={index} value={t.id}>{t.descricao}</MenuItem>
+                            ))}
                         </TextField>
                     </Grid>
                     <Grid item xs={12} sm={9}>
@@ -164,9 +167,9 @@ export default function Movimentacao(){
                             variant="outlined"
                             onChange={(e) => setState({...state, buscaItem:e.target.value})}
                         >
-                            {/* {state.data.map((item, index)=>(
-                                <MenuItem key={index} value={item.princAtivo}>{item.princAtivo}</MenuItem>
-                            ))} */}
+                            {tipo.map((t, index)=>(
+                                <MenuItem key={index} value={t.id}>{t.descricao}</MenuItem>
+                            ))}
                         </TextField>
                     </Grid>
                 </Grid>    
@@ -208,27 +211,18 @@ export default function Movimentacao(){
                         />
                     </Grid>
                 </Grid>
-                <Box my={3} display='flex' justifyContent='right' alignItems='right'>
-                    <Button
-                        
-                        variant="outlined"
-                        onClick={()=> pesquisar(state.buscaCodigo,state.buscaDescricao,state.buscaLote,state.buscaValidade,state.buscaPrincAtivo,state.buscaCategoria)}
-                    >
-                        Pesquisar
-                    </Button>
-                </Box>
-                {/* <Box 
+                <Box 
                     my={3}
                     display='flex'
                     justifyContent='right'    
                 >
                     <Button 
                         variant="outlined"
-                        onClick={()=> pesquisar(state.buscaSolicitacao,state.buscaCPF,state.buscaNome,state.buscaMae)}
+                        onClick={()=> pesquisar(state.buscaTipoMovimentacao,state.buscaDtMovimentacao,state.buscaItem,state.buscaNSolicitacao,state.buscaSolicitante, state.buscaCPF)}
                     >
                         Pesquisar
                     </Button>
-                </Box> */}
+                </Box>
                 <Table
                     columns = {columns}
                     rows = {rows}

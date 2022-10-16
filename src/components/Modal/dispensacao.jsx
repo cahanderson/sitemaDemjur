@@ -1,81 +1,97 @@
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box'
 import {TextField } from '@mui/material';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from '../Layouts/modal';
 import { Table } from '../Table';
-import { GridActionsCellItem } from '@mui/x-data-grid';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
-const data = [
-    {
-        "Lote":"123",
-        "Validade":"20/07/2025",
-        "FatorEmbalagem":"20",
-        "QtdEmbalagens":"100",
-        "QtdEmbalagemDispensar":"5",
-
-    },
-    {
-        "Lote":"111",
-        "Validade":"24/01/2025",
-        "FatorEmbalagem":"30",
-        "QtdEmbalagens":"102",
-        "QtdEmbalagemDispensar":"9",
-
-    },
-    {
-        "Lote":"25",
-        "Validade":"29/11/2027",
-        "FatorEmbalagem":"16",
-        "QtdEmbalagens":"130",
-        "QtdEmbalagemDispensar":"1",
-
-    },
-    {
-        "Lote":"2526",
-        "Validade":"20/12/2022",
-        "FatorEmbalagem":"22",
-        "QtdEmbalagens":"140",
-        "QtdEmbalagemDispensar":"8",
-
-    }
-]; 
 
 export function Dispensacao(props){
+    const [somaEmbalagemDispensacao, setEmbalagemDispensacao] = useState(0)
+    const [somaItensDispensacao, setSomaItensDispensacao] = useState(0)
+    const [somaEmbalagem, setSomaEmbalagem] = useState(0)
     const [state, setState] = useState({
-        filter: data,
-        QtdEmbalagemDispensar: '',
+        quantidade:'',
+        tableCheckbox: false,
     })
+    const[itens, setItens] = useState([])
+
     const columns = [
-        { field: 'id', headerName: 'Lote', width: 150 },
-        { field: 'Validade', headerName: 'Validade', width: 150 },
-        { field: 'FatorEmbalagem', headerName: 'Fator embalagem', width: 200 },
-        { field: 'QtdEmbalagens', headerName: 'Qtd de embalagens', width: 280 },
-        { field: <TextField />, headerName: 'Qtd de embalagens a dispensar', width: 260 },
-        // { field: 'actions',type:'actions',getActions: (params) => [
-        //       <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
-        //       <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => {onEdit(params.id)}} label="edit" />,
-        //     ]
-        // }  
+        { field: 'lote', headerName: 'Lote', width: 150 },
+        { field: 'data_validade', headerName: 'Validade', width: 180 },
+        { field: 'fator_embalagem', headerName: 'Fator embalagem', width: 200 },
+        { field: 'quantidade', headerName: 'Qtd de embalagens', width: 200 },
+        { field: 'qtd', headerName: 'Quantidade a dispensar', width: 300,
+            renderCell: (params) => (
+                <TextField
+                    type='number'
+                    variant="standard"
+                    fullWidth
+                    label='Digite a quantidade a dispensar'
+                    name='item_id'
+                    maxLength={10}
+                    onChange={(e)=>setValue(e.target.value,params.row)}
+                />
+            )
+        }
     ]
 
-    const rows = state.filter.map((row)=>({
-        id:row.Lote,
-        validade:row.Validade,
-        FatorEmbalagem:row.FatorEmbalagem,
-        QtdEmbalagens:row.QtdEmbalagens,
-        QtdEmbalagemDispensar:row.QtdEmbalagemDispensar,
+    const rows = props.estoque?.map((row)=>({
+        id:row.id,
+        item_id: row.item_id,
+        item_nome: row.item.nome,
+        lote:row.lote,
+        data_validade:row.data_validade.split('-').reverse().join('/'),
+        fator_embalagem:row.fator_embalagem,
+        quantidade:row.quantidade,
+        valor_unit: row.valor_atual,
     }));
 
+    function setValue(value, row){
+        let clone = Object.assign({}, row);
+        if(clone.quantidade >= value){
+            clone.quantidade = value;
+            let itemIndex = itens.findIndex((i)=>i.id == clone.id)
+            if(itemIndex>=0){
+                itens[itemIndex].quantidade = value;
+                setItens(itens)
+            }else{
+                let addItem = itens;
+                addItem.push(clone)
+                setItens(addItem)
+            }
+            soma()
+        }else{
+            alert('Valor inserido é maior do que o estoque')
+            value = 0;
+
+        }
+    }
+
+    function soma(){
+        let soma = 0;
+        let somaEmbalagemDispensacao = 0;
+        let somaItensDispensacao = 0;
+        props.estoque?.map(item=>{
+            soma += item.quantidade;
+        })
+        itens.map(item=>{
+            somaItensDispensacao += parseInt(item.quantidade) * parseInt(item.fator_embalagem);
+            somaEmbalagemDispensacao += parseInt(item.quantidade);
+        })
+        setSomaEmbalagem(soma)
+        setEmbalagemDispensacao(somaEmbalagemDispensacao)
+        setSomaItensDispensacao(somaItensDispensacao)
+    }
+    function limparItem(){
+        setItens([]);        
+    }
     return(
         <Modal
             open={props.openModal}
-            onClose={()=>props.onClose()}
-            // onSave = {()=>props.onSave(props.usuario.id,state)}
+            onClose={()=>{props.onClose(), limparItem()}}
+            onSave = {()=>props.onSave(itens)}
             header='Dispensação'
             //enviando informações para o botão save
-
         >
             <Box my={2} p={2}>
                 <Grid container spacing={3} >
@@ -87,7 +103,10 @@ export function Dispensacao(props){
                             type="text"
                             name='TipoSaida'
                             // onChange={(e)=> setState({...state, name:e.target.value})}
-                            value={state.name}
+                            value={props.data?.d_tipo_movimentacao}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                             />
                     </Grid>
                     <Grid item xs={8}>
@@ -95,10 +114,12 @@ export function Dispensacao(props){
                             variant="standard"
                             fullWidth
                             label='Item'
-                            name='item'
+                            name='item_id'
                             type="text"
-                            // onChange={(e)=> setState({...state, email:e.target.value})}
-                            // value={state.email}
+                            value={props.estoque[0]?.item.nome}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                         />
                     </Grid>
                     <Grid item xs={2}>
@@ -106,10 +127,11 @@ export function Dispensacao(props){
                             variant="standard"
                             fullWidth
                             label='Saldo de embalagens'
-                            type="number"
                             name='saldoEmbalagens'
-                            // onChange={(e)=> setState({...state, password:e.target.value})}
-                            
+                            value={somaEmbalagem}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                         />
                     </Grid>
                 </Grid>
@@ -129,8 +151,10 @@ export function Dispensacao(props){
                             fullWidth
                             type="text"
                             name='TipoSaida'
-                            // onChange={(e)=> setState({...state, name:e.target.value})}
-                            value={state.name}
+                            value={somaEmbalagemDispensacao}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                             />
                     </Grid>
                     <Grid item xs={8}>
@@ -140,8 +164,10 @@ export function Dispensacao(props){
                             label='Itens por embalagem na dispensação atual'
                             name='item'
                             type="text"
-                            // onChange={(e)=> setState({...state, email:e.target.value})}
-                            // value={state.email}
+                            value={somaItensDispensacao}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                         />
                     </Grid>
                 </Grid>

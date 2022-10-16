@@ -66,10 +66,27 @@ const deleteById = async (id)=> {
   }
 };
 
+const getTipoItem = async () =>{
+  try {
+      const{data} = await axios.get('/api/dominio/tipoDominio/TipoItem')
+      if(data){
+        
+        return{
+          data
+        } 
+      }else{
+        return new Error('Erro ao listar os registros')  
+      }
+  } catch (error) {
+      return error;
+  }
+};
+
 export const Itens = {
   getAll,
   create,
   getById,
   updateById,
   deleteById,
+  getTipoItem,
 };

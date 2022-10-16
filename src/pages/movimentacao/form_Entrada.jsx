@@ -7,70 +7,49 @@ import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Movimentacoes } from "@/lib/movimentacao";
-import { Fornecedor } from "@/lib/fornecedor";
 import { Itens } from "@/lib/item";
-import { useForm } from "react-hook-form";
-
-const data = [
-    {
-        "solicitacoes":"123",
-        "nome":"Carlos",
-        "cpf":"12345678910",
-        "nome_da_mae":"Maria",
-        "dt_nascimento":"01/01/1995",
-
-    },
-    {
-        "solicitacoes":"123456",
-        "nome":"Carlos",
-        "cpf":"12345678910",
-        "nome_da_mae":"Maria",
-        "dt_nascimento":"01/01/1995",
-
-    },
-    {
-        "solicitacoes":"123456",
-        "nome":"Carlos",
-        "cpf":"06060206328",
-        "nome_da_mae":"Maria",
-        "dt_nascimento":"01/01/1995",
-
-    },
-    {
-        "solicitacoes":"123456",
-        "nome":"Carlos",
-        "cpf":"17316200302",
-        "nome_da_mae":"Maria",
-        "dt_nascimento":"01/01/1995",
-
-    }
-];  
+// import { useForm } from "react-hook-form";
+import { useRouter } from "next/router";
 
 export default function Entradas(){
-    const {register, handleSubmit, setValue} = useForm()
+    const router = useRouter()
+    // const {register, handleSubmit, setValue} = useForm()
     const [tipo, setTipo] = useState([''])
     const [fornecedor, setFornecedor] = useState([''])
     const [itens, setItens] = useState([''])
+    const [estabelecimento, setEstabelecimento] = useState()
+    const [file, setFile] = useState()
+    const [movimentacaoId, setMovimentacaoId] = useState()
+    const [pessoa, setPessoa] = useState({
+        "is_beneficiario": true,
+        "is_prescritor": false,
+        "is_fornecedor": false,
+        "is_doacao": false,
+    })
     const [state, setState] = useState({
-        codigo:'',
-        descricao:'',
-        princAtivo:'',
-        pessoa:{
-            "is_beneficiario": false,
-            "is_prescritor": false,
-            "is_fornecedor": true,
-        },
+        d_tipo_movimentacao:'',
+        movimentable_id:'',
+        documento: "URI::localhost",
+        data:'',
+        valor:'',
+        is_efetivado:false,
+        itens:[{
+            item_id:'',
+            quantidade:'',
+            fator_embalagem:'',
+            data_validade:'',
+            lote:'',
+            valor_unit:'',
+        }]
     })
     const [item, setItem] = useState([{
-        tipo:'',
-        categoria:'',
-        loteEValidade:false
+        item_id:'',
+        quantidade:'',
+        fator_embalagem:'',
+        data_validade:'',
+        lote:'',
+        valor_unit:'',
     }])
-
-    const onSubmit = (data)=>{
-        console.log(data);
-    }
-
     function onLoad(pessoa){
         Movimentacoes.getMovimentacao()
         .then((result)=>{
@@ -81,13 +60,16 @@ export default function Entradas(){
             setTipo(result.data.dados.filter((tipos)=>{return tipos.metadata?.includes("entrada")}))
         });
 
-        Fornecedor.getPessoa(pessoa)
+        Movimentacoes.getPessoa(pessoa)
         .then((result)=>{
             if(result instanceof Error){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
+            }if(pessoa.is_beneficiario === ''){
+                setFornecedor(estabelecimento)
+            }else{
+                setFornecedor(result.data.data)
             }
-            setFornecedor(result.data.data)
         });
 
         Itens.getAll()
@@ -97,58 +79,121 @@ export default function Entradas(){
                 return;
             }
             setItens(result.data.data)
+        });
+
+        Movimentacoes.getEstabelecimento()
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setEstabelecimento(result.data.data)
         })
-    }            
+    }          
     function onAddItem(){
         // setItem([...item, ''])
-        setItem([...item,{ item:'',qtdMensal:'',PrevDt:'',FreqEntrega:''}])
+        setItem([...item,{ item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}])
+        setState({...state, itens:[...state.itens, {item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}]})
     }
     function onSetItem(e,index){
-        if(e.target.name === 'tipo'){
-            item[index].tipo = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'categoria'){
-            item[index].categoria = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'check'){
-            item[index].categoria = e;
-            // setItem([...item])
-        }
-        
+        if(e.target.name === 'item_id'){
+            item[index].item_id = e.target.value;
+            setState({...state,itens:[...item]})
+        }else if(e.target.name === 'quantidade'){
+            item[index].quantidade = e.target.value;
+            setState({...state,itens:[...item]})
+        }else if(e.target.name === 'fator_embalagem'){
+            item[index].fator_embalagem = e.target.value;
+            setState({...state,itens:[...item]})
+        }else if(e.target.name === 'data_validade'){
+            item[index].data_validade = e.target.value;
+            setState({...state,itens:[...item]})
+        }else if(e.target.name === 'lote'){
+            item[index].lote = e.target.value;
+            setState({...state,itens:[...item]})
+        }else if(e.target.name === 'valor_unit'){
+            item[index].valor_unit = e.target.value;
+            setState({...state,itens:[...item]})
+        }     
     }
     function onDeleteItem(position){
-        if(item.length > 1){
-            setItem([...item.filter((item,index) => index !== position)])
+        if(state.itens.length > 1){
+            setState({...state, itens:[...state.itens.filter((item,index)=>index !== position)]})
         }else{
-            // setItem([...item.filter((item,index) => index !== position)])
-            setItem([{ item:'',qtdMensal:'',PrevDt:'',FreqEntrega:''}])
+            setState({...state, itens:[{item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}]})
         }
     }
+    function reload(valor){
+        if(valor === "1"){
+            setPessoa({"is_beneficiario": false,"is_prescritor": false,"is_fornecedor": true,"is_doacao": false,})
+        }else if(valor === "3"){
+            setPessoa({ "is_beneficiario": false,"is_prescritor": false,"is_fornecedor": false,"is_doacao": true})
+        }else if(valor === "2"){
+            setPessoa({"is_beneficiario": '',"is_prescritor": '',"is_fornecedor": '',"is_doacao": '',})
+            setFornecedor(estabelecimento)
+        }
+    }
+    function onFile(e){
+        e.preventDefault();
+
+    }
+    function onSave(data){
+        Movimentacoes.create(data).then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                    return;
+                }
+                setMovimentacaoId(result.dados.id)
+        })
+    }
+    function onSaveFile(file,movimentacaoId){
+        const formData = new FormData();
+
+        formData.append('movimentacao_id', movimentacaoId);
+        formData.append('file', file);
+        
+        Movimentacoes.updateFile(formData).then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                return;
+            }
+            router.push('/movimentacao')
+        })
+    }
+    useEffect(()=>{
+        onLoad(pessoa)
+    },[pessoa])
+    console.log(movimentacaoId);
 
     useEffect(()=>{
-        onLoad(state.pessoa)
-    },[])
-    // console.log(itens);
+        if(movimentacaoId){
+            onSaveFile(file, movimentacaoId)
+        }
+    },[movimentacaoId])
+
+    console.log(movimentacaoId);
 
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>
                 Entradas
             </Typography>
-            <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-                <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mt={2}>
+            {/* onSubmit={handleSubmit(onSubmit)} */}
+            <Box component="form" >
+                <Box  padding='10px' component={Paper} justifyContent='center' alignItems='center' mt={2}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={5}>
                             <TextField
                                 select
-                                name="tipo_Entrada"
+                                name="d_tipo_movimentacao"
                                 label="Tipo de entrada"
                                 fullWidth
                                 variant="outlined"
-                                {...register('tipo_Entrada')}
+                                onChange={(e) => {setState({...state, d_tipo_movimentacao: e.target.value}),reload(e.target.value)}}
+                                // {...register('tipo_Entrada')}
                             >
                                 {tipo.map((tipo, index)=>(
-                                    <MenuItem key={index} value={tipo.id}>{tipo.descricao}</MenuItem>
+                                    <MenuItem key={index} value={tipo.valor}>{tipo.descricao}</MenuItem>
                                 ))}
                             </TextField>
                         </Grid>
@@ -159,9 +204,10 @@ export default function Entradas(){
                             label="Fornecedor"
                             fullWidth
                             variant="outlined"
-                            {...register('fornecedor')}
+                            onChange={(e) => {setState({...state, movimentable_id: e.target.value})}}
+                            // {...register('fornecedor')}
                             >
-                                {fornecedor.map((f, index)=>(
+                                {fornecedor?.map((f, index)=>(
                                     <MenuItem key={index} value={f.id}>{f.nome}</MenuItem>
                                 ))}
                             </TextField>
@@ -175,7 +221,8 @@ export default function Entradas(){
                                 label='Data'
                                 fullWidth
                                 variant="outlined"
-                                {...register('data')}
+                                onChange={(e) => {setState({...state,data: e.target.value})}}
+                                // {...register('data')}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -183,24 +230,42 @@ export default function Entradas(){
                         </Grid>
                         <Grid item xs={12} sm={3}>
                             <TextField
-                                // type=''
                                 name="valor"
                                 label='Valor'
                                 fullWidth
                                 variant="outlined"
-                                {...register('valor')}
+                                onChange={(e) => {setState({...state,valor: e.target.value})}}
+                                // {...register('valor')}
                             />
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <Button
-                                sx={{marginTop:'7px'}}
+                                sx={{marginTop:'6px'}}
                                 variant="outlined" 
-                                component="label">
+                                component="label"
+                                onChange={(e)=>setFile(e.target.files[0])}    
+                            >
                                 Anexar
                                 <AttachFileIcon sx={{marginBottom:'5px'}} />
                                 <input hidden multiple type="file" />
                             </Button>
-                        </Grid>     
+                        </Grid>
+
+                        <Grid item xs={12} sm={4} padding='15px'>
+                            <Box
+                                display='flex'
+                                justifyContent='end'
+                            >
+                                <Button
+                                    sx={{marginTop:'6px'}}
+                                    variant = {state.is_efetivado ? "outlined" : "contained"}
+                                    component="label"
+                                    onClick={()=>setState({...state, is_efetivado: !state.is_efetivado })}    
+                                >
+                                    {state.is_efetivado ? "Efetivado" : "Efetivar"}
+                                </Button>
+                            </Box>
+                        </Grid>   
                         
                     </Grid>   
                     <Box component='div'my={4}>
@@ -211,15 +276,13 @@ export default function Entradas(){
                             <Grid item xs={11} container spacing={3}>
                                 <Grid item xs={12} sm={5}>
                                     <TextField
-                                        // value={item.tipo}
                                         select
-    
-                                        name="tipo"
+                                        name="item_id"
                                         label='Item'
                                         fullWidth
                                         variant="outlined"
                                         onChange={(e)=> onSetItem(e,index)}
-                                        {...register('itens.tipo')}
+                                        // {...register('itens.tipo')}
                                     >
                                         {itens.map((i, index)=>(
                                             <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
@@ -229,12 +292,11 @@ export default function Entradas(){
                                 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
-    
                                         name="quantidade"
                                         label='Quantidade'
                                         fullWidth
                                         variant="outlined"
-                                        {...register('itens.quantidade')}
+                                        // {...register('itens.quantidade')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -245,11 +307,11 @@ export default function Entradas(){
                                 <Grid item xs={12} sm={2}>
                                     <TextField
     
-                                        name="fatorEmbalagem"
+                                        name="fator_embalagem"
                                         label='Fator emb'
                                         fullWidth
                                         variant="outlined"
-                                        {...register('itens.fatorEmbalagem')}
+                                        // {...register('itens.fatorEmbalagem')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -260,11 +322,11 @@ export default function Entradas(){
                                 <Grid item xs={12} sm={3}>
                                     <TextField
                                         type='date'
-                                        name="dtValidade"
+                                        name="data_validade"
                                         label='Data de validade'
                                         fullWidth
                                         variant="outlined"
-                                        {...register('itens.dtValidade')}
+                                        // {...register('itens.dtValidade')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -278,7 +340,7 @@ export default function Entradas(){
                                         label='Lote'
                                         fullWidth
                                         variant="outlined"
-                                        {...register('itens.lote')}
+                                        // {...register('itens.lote')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -288,11 +350,11 @@ export default function Entradas(){
 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
-                                        name="V_Unitario"
+                                        name="valor_unit"
                                         label='valor Unitario'
                                         fullWidth
                                         variant="outlined"
-                                        {...register('itens.V_Unitario')}
+                                        // {...register('itens.V_Unitario')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -324,12 +386,12 @@ export default function Entradas(){
                             Novo item
                         </Button>
                     </Box>
-                    <Box display='flex' justifyContent={"end"} gap={3} p={2} borderRadius={3}>
-                        <Button variant="text" onClick={()=>props.onClose()}> Cancelar Edição</Button>
-                        <Button type='submit' variant="contained" onClick={() => props.onSave()}> Salvar</Button>
-                    </Box>
-                    
+                    <Box display='flex' justifyContent={"end"} gap='10px' p={2}>
+                        <Button variant="text" onClick={() => router.push('/movimentacao')}> Cancelar Edição</Button>
+                        <Button variant="contained" onClick={() => onSave(state)}> Salvar</Button>
+                    </Box>  
                 </Box>
+
             </Box>
         </AppLayout>
     )

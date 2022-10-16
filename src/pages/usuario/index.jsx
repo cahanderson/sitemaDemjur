@@ -14,7 +14,7 @@ export default function Usuarios() {
     const [state, setState] = useState({
         openModal:false,
         usuario:[],
-        data:'',
+        data:[''],
         filter:[],
         busca:'',
         openSnakebar:false,
@@ -37,14 +37,13 @@ export default function Usuarios() {
             ]
         }  
     ]
-    const rows = state.filter.map((row)=>({
+    const rows = state.filter?.map((row)=>({
         id:row.id,
         name:row.name,
         email:row.email,
         action:null,
     }));
     function onLoad(){
-        console.log(state.openModal, 'teste2');
         UsuariosService.getAll()
         .then((result)=>{
             if(result instanceof Error){
@@ -105,7 +104,7 @@ export default function Usuarios() {
     }
 
     function pesquisar(busca){
-        setState({...state, filter: data.filter((data)=>data.name.toUpperCase().startsWith(busca.toUpperCase()))})
+        setState({...state, filter: state.data?.filter((data)=>{return data.name?.toUpperCase().startsWith(busca?.toUpperCase())})})
     }
 
     function handleKeyDown(event, data){
@@ -117,6 +116,7 @@ export default function Usuarios() {
     function closeSnakebar(){
         setState({...state, openSnakebar:false})
     }
+    // console.log(state.data);
 
   return (
     <AppLayout>
@@ -145,7 +145,7 @@ export default function Usuarios() {
                     <Button
                         onClick={() => {setState({...state, usuario:{}, openModal:true})}} 
                     >
-                        Adicionar
+                        Novo usuário
                     </Button>
                 </Box>
                 <Snackbar 

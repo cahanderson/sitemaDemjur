@@ -8,7 +8,7 @@ import { Link } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-const menu = ['Solicitações', 'Itens', 'Movimentação', 'Fornecedores', 'Usuários', 'Inventário'];
+const menu = ['Solicitações', 'Itens', 'Movimentações', 'Fornecedores', 'Usuários', 'Inventários', 'Relatórios'];
 
 export function NavBar(){
   const router = useRouter();
@@ -27,12 +27,14 @@ export function NavBar(){
       router.push('/usuario')
     }else if(e === 'Itens'){
       router.push('/item')  
-    }else if(e === 'Movimentação'){
+    }else if(e === 'Movimentações'){
       router.push('/movimentacao')  
     }else if(e === 'Fornecedores'){
       router.push('/fornecedor')  
-    }else if(e === 'Inventário'){
+    }else if(e === 'Inventários'){
       router.push('/inventario')  
+    }else if(e === 'Relatórios'){
+      router.push('/relatorio')  
     }
   };
 

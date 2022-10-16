@@ -1,83 +1,212 @@
-import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Table as TableMui, Box, Button, Grid, MenuItem, Paper, TableBody, TableContainer, TableHead, TableRow, TextField, Typography, IconButton, Divider } from "@mui/material";
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import { styled } from '@mui/material/styles';
+import DeleteOutlineTwoToneIcon from '@mui/icons-material/DeleteOutlineTwoTone';
 import AppLayout from "@/components/Layouts/AppLayout";
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { useState } from "react";
+import { DispensacaoCliente } from "@/components/Modal/dispensacaoCliente";
+import { Movimentacoes } from "@/lib/movimentacao";
+import { Itens } from "@/lib/item";
+import { Solicitacao } from "@/lib/solicitacao";
+import { Estoque } from "@/lib/estoque";
 import { Table } from "@/components/Table";
 import { GridActionsCellItem } from "@mui/x-data-grid";
-import OutboxIcon from '@mui/icons-material/Outbox';
-import { DispensacaoCliente } from "@/components/Modal/dispensacaoCliente";
-
-const data = [
-    {
-        "itens":"dipirona monoidratada",
-        "qtdProg":"10/mes",
-        "qtdLimite":"50",
-        "qtdAtendida":"30",
-        "mesAtual":"0",
-    },
-    {
-        "itens":"amoxicilina + clavulanato de potássio",
-        "qtdProg":"20/mes",
-        "qtdLimite":"20",
-        "qtdAtendida":"4",
-        "mesAtual":"8",
-    },
-    {
-        "itens":"dorflex",
-        "qtdProg":"20/mes",
-        "qtdLimite":"0",
-        "qtdAtendida":"10",
-        "mesAtual":"4",
-    },
-    {
-        "itens":"Amoxilina",
-        "qtdProg":"5/mes",
-        "qtdLimite":"20",
-        "qtdAtendida":"3",
-        "mesAtual":"2",
-    },
-];  
 
 export default function Paciente(){
 
+    let tableCheckbox = false;
+    let itemEditado = []
+    let soma=0.0;
+    const [isEfetivado, setIsEfetivado] = useState(false)
+    const [tabelaItensDefinidos, setTabelaItensDefinidos] = useState(false)
+    const [quantidade, setQuantidade] = useState()
+    const [nSolicitacoes, setNSolicitacoes] = useState([''])
+    const [openModal, setOpenModal] = useState(false)
+    const [solicitacao, setSolicitacao] = useState()
+    const [idSolicitacoes, setIdSolicitacoes] = useState('')
+    const [dataItens, setDataItens] = useState([])
+    const [estoque, setEstoque] = useState([])
+    const [itens, setItens] = useState([])
+    const [itensInseridos, setItensInseridos] = useState([])
     const [state, setState] = useState({
-        codigo:'',
-        descricao:'',
-        princAtivo:'',
-        openModal: false,
-        tableCheckbox:false,
-        filter: data
-    })
-    const [item, setItem] = useState([{
-        tipo:'',
-        categoria:'',
-        loteEValidade:false
-    }])
+        solicitacao_id:'',
+        d_tipo_movimentacao:'',
+        movimentable_id:'',
+        data: '',
+        documento: "URI::localhost",
+        is_efetivado: false,
+        valor:'',
+        itens:''
+        })
 
-    function handleOpenModal(id){
-        setState({...state, openModal:true})
-    }
-
-    
     const columns = [
-        { field: 'id', headerName: 'Itens', width:300 },
-        { field: 'qtdProg', headerName: 'qtdProg', width: 150},
-        { field: 'qtdLimite', headerName: 'qtdLimite', width: 150 }, 
-        { field: 'qtdAtendida', headerName: 'qtdAtendida', width: 200 }, 
-        { field: 'mesAtual', headerName: 'mesAtual', width: 180 }, 
-        { field: 'Dispensação',headerName: 'Dispensação' ,type:'actions',getActions: (params) => [
-            <GridActionsCellItem icon={<OutboxIcon />} onClick={() => handleOpenModal(params.id)} label="Dispensação" />
-        ]}
+        { field: 'item_nome', headerName: 'Itens', width: 200,  },
+        { field: 'quantidade', headerName: 'Quantidade', width: 200 },
+        { field: 'fator_embalagem', headerName: 'Fator Embalagem', width: 200 },
+        { field: 'data_validade', headerName: 'Validade', width: 200 },
+        { field: 'lote', headerName: 'Lote', width: 300 }, 
+        { field: 'actions',type:'actions',getActions: (params) => [
+            <GridActionsCellItem icon={<DeleteOutlineTwoToneIcon/>} onClick={() => onDeleteItemInserido(params.id)} label="Delete" />,
+            ]
+        }
     ]
-
-    const rows = state.filter.map((row)=>({
-        id:row.itens,
-        qtdProg:row.qtdProg,
-        qtdLimite:row.qtdLimite,
-        qtdAtendida:row.qtdAtendida,
-        mesAtual:row.mesAtual,
+    const rows = itensInseridos?.map((row)=>({
+        id:row.id,
+        item_nome:row.item_nome,
+        quantidade: row.quantidade,
+        fator_embalagem: row.fator_embalagem,
+        lote:row.lote,
+        data_validade:row.data_validade.split('-').reverse().join('/'),
     }));
 
+
+    function onLoad(){
+        Itens.getAll()
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setDataItens(result.data.data)
+        });
+
+        Itens.getAll()
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setDataItens(result.data.data)
+        });
+
+        Movimentacoes.getNumeroSolicitacoes()
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setNSolicitacoes(result.data)
+        });
+    }
+    function onLoadSolicitacao(id){
+        Solicitacao.getById(id)
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setSolicitacao(result.data)
+            const itemFormated = result.data.itens?.map((item)=>({
+                id:item.id,
+                item_id: item.item_id,
+                item_nome: item.item.nome,
+                lote:item?.lote,
+                data_validade:item?.data_validade,
+                fator_embalagem:item.fator_embalagem,
+                quantidade:item?.quantidade_mensal,
+                quantidade_limite:item?.item.quantidade_limite,
+                quantidade_atendida:'',
+                mesAtual:'',
+            }));
+            setItens(itemFormated)
+        });
+    }
+    function onLoadEstoque(id){
+        Estoque.getByItens(id)
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setEstoque(result)
+        });
+    }
+    function populaItem(dados){
+        let newItens = itensInseridos;
+        Object.keys(dados).forEach((i)=>{
+            newItens.push(dados[i])
+        })
+        setItensInseridos(newItens)
+    }
+    function onDeleteItemInserido(id){
+        setItensInseridos([...itensInseridos.filter((item)=>item.id !== id)])
+    }
+    function adicionarItens(qtd){
+        setTabelaItensDefinidos(true);
+        const estoqueEditado = estoque.map((row)=>({
+            id:row.id,
+            item_id: row.item_id,
+            item_nome:row.item.nome,
+            lote:row.lote,
+            data_validade:row.data_validade.split('-').reverse().join('/'),
+            fator_embalagem:row.fator_embalagem,
+            valor: row.valor_atual,
+            quantidade:row.quantidade,
+        }));
+        let newItens = Object.assign([], itensInseridos);
+        let cloneEstoque=[];
+        if(qtd>0){
+            estoqueEditado.sort(function compare(a, b) {
+                if (a.data_validade < b.data_validade) return -1;
+                if (a.data_validade > b.data_validade) return 1;
+                return 0
+            })
+            estoqueEditado.forEach(e=>{
+                if(e.quantidade > qtd && qtd>0){
+                    cloneEstoque = e;
+                    cloneEstoque.quantidade = qtd
+                    qtd = 0;
+                    newItens.push(cloneEstoque)
+                }else if(qtd!=0){
+                    cloneEstoque = e;
+                    qtd -= cloneEstoque.quantidade;
+                    newItens.push(cloneEstoque)
+                }
+                soma += parseFloat(e.valor);
+            })
+            setItensInseridos(newItens)
+        }else{
+            alert('quantidade tem que ser maior que 0')
+        }
+        if(qtd>0){
+            alert(`quantidade solicitada insuficiente em estoque. ${qtd} não adicionado`)
+        }
+        
+    }
+    function editSave(data){
+        data.forEach(item=>{
+            let editItem = Object.assign({}, item);
+            delete editItem.id
+            delete editItem.item_nome
+            itemEditado.push(editItem)
+        })
+        setState({...state, d_tipo_movimentacao: solicitacao.d_tipo, movimentable_id:solicitacao.beneficiario.id, is_efetivado:isEfetivado,valor: soma, itens: itemEditado})
+    }
+    function onSave(data){
+        setTabelaItensDefinidos(false)
+        Movimentacoes.create(data).then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                    return;
+                }
+                // setMovimentacaoId(result.dados.id)
+        })
+    }
+    useEffect(()=>{
+        if(state.itens){
+            onSave(state)
+        }
+    },[state.itens])
+
+    useEffect(()=>{
+        onLoad()
+    },[])
+    useEffect(()=>{
+        if(idSolicitacoes){
+            onLoadSolicitacao(idSolicitacoes)
+        }
+    },[idSolicitacoes])
 
     return(
         <AppLayout>
@@ -89,45 +218,54 @@ export default function Paciente(){
                     <Grid item xs={12} sm={2}>
                         <TextField
                             select
-                            id="tipo_Saida"
+                            value={idSolicitacoes}
                             name="tipo_Saida"
                             label="Nº da solicitação"
                             fullWidth
                             variant="outlined"
+                            onChange={(e)=>{setIdSolicitacoes(e.target.value), setState({...state, solicitacao_id:e.target.value})}}
                         >
-                            {/* <MenuItem value='doacão'>Perca por validade</MenuItem>
-                            <MenuItem value='aquisição'>Doação</MenuItem>
-                            <MenuItem value='empréstimo'>Empréstimo</MenuItem>
-                            <MenuItem value='empréstimo'>Outras percas</MenuItem> */}
+                            {nSolicitacoes.map((sol,index)=>(
+                                <MenuItem key={index} value={sol.id}>{sol.numero_solicitacao}</MenuItem>
+                            ))}
                         </TextField>
                     </Grid>
                     <Grid item xs={12} sm={7}>
                         <TextField
-                            id="solicitante"
+                            value={solicitacao?.beneficiario.nome}
                             name="solicitante"
                             label='Solicitante'
                             fullWidth
                             variant="outlined"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                         />
                     </Grid>
                     <Grid item xs={12} sm={3}>
                         <TextField
-                            id="cpf"
+                            value={solicitacao?.beneficiario.cpf}
                             name="cpf"
                             label='CPF'
                             fullWidth
                             variant="outlined"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                         />
                     </Grid>
                 </Grid>    
                 <Grid container spacing={3} my={1} mb={4} justifyContent='start'>
                     <Grid item xs={12} sm={3}>
                         <TextField
-                            id="cns"
+                            value={solicitacao?.beneficiario.cns}
                             name="cns"
                             label='CNS'
                             fullWidth
                             variant="outlined"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                         />
                     </Grid>
                     <Grid item xs={12} sm={3}>
@@ -138,6 +276,7 @@ export default function Paciente(){
                             label='Data da movimentação'
                             fullWidth
                             variant="outlined"
+                            onChange={(e)=>setState({...state, data:e.target.value})}
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -154,18 +293,157 @@ export default function Paciente(){
                             <input hidden multiple type="file" />
                         </Button>
                     </Grid>     
+                    <Grid item xs={12} sm={2} mt={1}>
+                        {/* <Typography>Documento da dispensação</Typography> */}
+                        <Button
+                            sx={{marginTop:'6px'}}
+                            variant = {isEfetivado ? "outlined" : "contained"}
+                            component="label"
+                            onClick={()=>setIsEfetivado(!isEfetivado)}    
+                        >
+                            {isEfetivado ? "Efetivado" : "Efetivar"}
+                        </Button>
+                    </Grid>     
                 </Grid>               
+                { solicitacao?     
+                    <TableContainer>
+                        <TableMui sx={{ minWidth: 650 }}>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell component='th'>Itens </TableCell>
+                                    <TableCell component='th'>Qtd Programada</TableCell>
+                                    <TableCell component='th'>Qtd.Limite</TableCell>
+                                    <TableCell component='th'>Qtd.Atendida</TableCell>
+                                    <TableCell component='th'>Mês Atual</TableCell>
+                                    <TableCell component='th'>Quantidade</TableCell>
+                                    <TableCell component='th'align="center">Ação</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {itens.map((item, index) => (
+                                    <TableRow
+                                        key={item.id}
+                                        // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                    >
+                                        <TableCell >{item.item_nome}</TableCell>
+                                        <TableCell >{item.quantidade}</TableCell>
+                                        <TableCell >{item.quantidade_limite}</TableCell>
+                                        <TableCell >0</TableCell>
+                                        <TableCell >0</TableCell>
+                                        <TableCell >
+                                            <TextField
+                                                name="quantidade"
+                                                type='number'
+                                                label='Qtd Saida'
+                                                variant="standard"
+                                                onChange={(e)=> {setQuantidade(e.target.value),onLoadEstoque(item.item_id)}}
+                                            />
+                                        </TableCell>
+                                        <TableCell align={"center"}>
+                                            <Button
+                                                sx={{marginRight:'10px'}}
+                                                variant="text"
+                                                size="small"
+                                                onClick={() =>{setOpenModal(true),onLoadEstoque(item.item_id)}}
+                                            >
+                                                editar lote
+                                            </Button>
+                                            <Button
+                                                sx={{marginLeft:'10px'}}
+                                                variant="contained"
+                                                size="small"
+                                                onClick={() =>{adicionarItens(quantidade)}}
+                                            >
+                                                Adcionar
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </TableMui>
+                    </TableContainer>
+                    // <TableContainer>
+                    //     <TableMui sx={{ minWidth: 650 }}>
+                    //         <TableHead>
+                    //             <StyledTableRow>
+                    //                 <StyledTableCell component='th'>Itens </StyledTableCell>
+                    //                 <StyledTableCell component='th'>Qtd Programada</StyledTableCell>
+                    //                 <StyledTableCell component='th'>Qtd.Limite</StyledTableCell>
+                    //                 <StyledTableCell component='th'>Qtd.Atendida</StyledTableCell>
+                    //                 <StyledTableCell component='th'>Mês Atual</StyledTableCell>
+                    //                 <StyledTableCell component='th'>Quantidade</StyledTableCell>
+                    //                 <StyledTableCell component='th'align="center">Ação</StyledTableCell>
+                    //             </StyledTableRow>
+                    //         </TableHead>
+                    //         <TableBody>
+                    //             {itens.map((item, index) => (
+                    //                 <StyledTableRow
+                    //                     key={item.id}
+                    //                     // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    //                 >
+                    //                     <StyledTableCell >{item.item_nome}</StyledTableCell>
+                    //                     <StyledTableCell >{item.quantidade}</StyledTableCell>
+                    //                     <StyledTableCell >{item.quantidade_limite}</StyledTableCell>
+                    //                     <StyledTableCell >0</StyledTableCell>
+                    //                     <StyledTableCell >0</StyledTableCell>
+                    //                     <StyledTableCell >
+                    //                         <TextField
+                    //                             name="quantidade"
+                    //                             type='number'
+                    //                             label='Qtd Saida'
+                    //                             variant="standard"
+                    //                             onChange={(e)=> {setQuantidade(e.target.value),onLoadEstoque(item.item_id)}}
+                    //                         />
+                    //                     </StyledTableCell>
+                    //                     <StyledTableCell align={"center"}>
+                    //                         <Button
+                    //                             sx={{marginRight:'10px'}}
+                    //                             variant="text"
+                    //                             size="small"
+                    //                             onClick={() =>{setOpenModal(true),onLoadEstoque(item.item_id)}}
+                    //                         >
+                    //                             editar lote
+                    //                         </Button>
+                    //                         <Button
+                    //                             sx={{marginLeft:'10px'}}
+                    //                             variant="contained"
+                    //                             size="small"
+                    //                             onClick={() =>{adicionarItens(quantidade)}}
+                    //                         >
+                    //                             Adcionar
+                    //                         </Button>
+                    //                     </StyledTableCell>
+                    //                 </StyledTableRow>
+                    //             ))}
+                    //         </TableBody>
+                    //     </TableMui>
+                    // </TableContainer>
+                : null}
                 
-                <Table
-                    columns = {columns}
-                    rows = {rows}
-                    check={state.tableCheckbox}
-                    height={300}
-                />
+                { tabelaItensDefinidos?
+                    <Box component={Paper} margin={2}>
+                        <Typography mt={5} mb={1} color='primary'>Itens Inseridos</Typography>
+                        <Table
+                            columns = {columns}
+                            rows = {rows}
+                            check={tableCheckbox}
+                            height={270}
+                        />
+                    </Box>     
+                : null}
+                <Divider sx={{marginTop:"100px"}} />
+                <Box display='flex' justifyContent={"end"} gap='10px' p={2}>
+                    <Button variant="text" onClick={() => router.push('/movimentacao')}> Cancelar Edição</Button>
+                    <Button variant="contained" onClick={() => editSave(itensInseridos)}> Salvar</Button>
+                </Box> 
+
                 <DispensacaoCliente
-                    openModal={state.openModal} 
-                    onClose={() => setState({...state, openModal: false})} 
-                    onSave = {(id,data)=> onSave(id,data)}
+                    openModal={openModal} 
+                    onClose={() => setOpenModal(false)} 
+                    onSave = {(dados)=> populaItem(dados)}
+                    estoque={estoque}
+                    solicitacao = {solicitacao}
+                    itens = {dataItens}
                 /> 
             </Box>
         </AppLayout>

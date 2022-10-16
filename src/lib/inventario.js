@@ -17,14 +17,13 @@ const getAll = async () =>{
   }
 };
 const create = async (dados) => {
+  console.log(dados);
   await csrf()
   try {
-    const { data } = await axios.post('/api/solicitacao', dados);
-
+    const { data } = await axios.post('/api/inventario/', dados);
     if (data) {
       return data.id;
     }
-
     // return new Error('Erro ao criar o registro.');
   } catch (error) {
     console.error(error);
@@ -33,7 +32,7 @@ const create = async (dados) => {
 };
 const deleteById = async (id)=> {
   try {
-    await axios.delete(`/api/solicitacao/${id}`);
+    await axios.delete(`/api/inventario/${id}`);
   } catch (error) {
     console.error(error);
     return new Error('Erro ao apagar o registro.');
@@ -41,16 +40,22 @@ const deleteById = async (id)=> {
 };
 const getById = async (id) => {
   try {
-    const { data } = await axios.get(`/api/solicitacao/${id}`);
-
+    const { data } = await axios.get(`/api/inventario/${id}`);
     if (data) {
       return data;
     }
-
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
     console.error(error);
     return new Error('Erro ao consultar o registro.');
+  }
+};
+const updateById = async (id, dados) => {
+  try {
+    await axios.put(`/api/inventario/${id}`, dados);
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao atualizar o registro.');
   }
 };
 export const Inventarios = {
@@ -58,4 +63,5 @@ export const Inventarios = {
   create,
   deleteById,
   getById,
+  updateById,
 };

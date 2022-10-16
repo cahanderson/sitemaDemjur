@@ -4,16 +4,36 @@ import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import { useForm } from "react-hook-form";
 
 export function Modal(props){
+    // const styles = theme => ({
+    //     modal:{
+    //       position:'absolute',
+    //       top:'10%',
+    //       left:'50%',
+    //       transform: 'translate(-50%, -50%)',
+    //       overflow:'hidden',
+    //       height:'100%',
+    //       maxHeight: 500,
+    //       display:'block'
+    //     },
+    //     header: {
+    //       padding: '12px 0',
+    //       borderBottom: '1px solid darkgrey'
+    //     },
+    //     content: {
+    //       padding: 12,
+    //       overflow: 'scroll'
+    //     }
+    //   });
     const style = {
         position: 'absolute',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
+        overflow:'hidden',
         width: 1100,
         boxShadow: 24,
         flexDirection:'column',
         borderRadius:3,
-        // backgroundColor:{paper},
       }
     return(
         <MuiModal
@@ -22,13 +42,14 @@ export function Modal(props){
             aria-labelledby="transition-modal-title"
             aria-describedby="transition-modal-description"
             closeAfterTransition
+            disableScrollLock
             BackdropComponent={Backdrop}
             BackdropProps={{
                 timeout: 800,
             }}
         >
             {/* component="form" onSubmit={handleSubmit(onSubmit)} */}
-             <Box style={style} bgcolor= 'background.paper' component="form">
+             <Box style={style} bgcolor= 'background.paper'>
                 <Box display='flex' justifyContent='space-between' p={2} backgroundColor='#F5F5F9'>
                         <Typography variant="h6" color='blue' alignItems='center' display='flex'>
                             {props.header}
@@ -37,12 +58,12 @@ export function Modal(props){
                             <ClearRoundedIcon color='primary' />
                         </Button>
                     </Box>
-                    <Divider width='100%' m={0} />
+                    {/* <Divider width='100%' m={0} /> */}
                     {props.children}
                     <Divider />
                     <Box display='flex' justifyContent={"end"} gap='10px' p={2} backgroundColor='#F5F5F9' borderRadius={3}>
                         <Button variant="text" onClick={()=>props.onClose()}> Cancelar Edição</Button>
-                        <Button type='submit' variant="contained" onClick={() => props.onSave()}> Salvar</Button>
+                        <Button type='submit' variant="contained" onClick={() => {props.onSave(),props.onClose()}}> Salvar</Button>
                     </Box>
                 <Box>
                 </Box>

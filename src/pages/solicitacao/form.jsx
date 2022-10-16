@@ -8,14 +8,11 @@ import ClearIcon from '@mui/icons-material/Clear';
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Solicitacao } from "@/lib/solicitacao";
 import { NovoPrescritor } from "@/components/Modal/novoPrescritor";
+import { Itens } from "@/lib/item";
 
 
 export default function NovaSolicitacao(){
-    const datas = useSolicitacaoStore(state=>state.datas);
     const router = useRouter();
-    console.log(datas);
-
-    const {register, handleSubmit, setValue} = useForm()
     const [estabelecimento, setEstabelecimento] = useState([''])
     const [acao, setAcao] = useState(['']);
     const [representante, setRepresentante] = useState(['']);
@@ -24,36 +21,68 @@ export default function NovaSolicitacao(){
     const [prescritor, setPrescritor] = useState(['']);
     const [sexo, setSexo] = useState([''])
     const [freq, setFreq] = useState([''])
-    const [solicitacao, setSolicitacao]=useState([])
-    const [beneficiario, setBeneficiario] = useState({})
+    const [dataItens, setDataItens] = useState([''])
     const [openModal, setOpenModal] = useState(false)
-
+    const [state, setState] = useState({
+        numero_solicitacao: '',
+        d_tipo: '',
+        d_representante_legal: '',
+        vara: '',
+        juiz:'',
+        reu_acao:'',
+        data_entrada:'',
+        cid_id:'',
+        estabelecimento_id:'',
+        prescritor_id:'',
+        local_tratamento:'',
+        data_atendimento:'',
+        beneficiario: {
+            id:null,
+            cpf:'',
+            nome:'',
+            nome_mae:'',
+            data_nascimento:'',
+            rg:'',
+            cns:'',
+            telefone:'',
+            email:'',
+            d_sexo:'',
+            cep:'',
+            rua:'',
+            numero:'',
+            bairro:'',
+            complemento:''
+        },
+        itens: [
+            {
+                item_id: '',
+                quantidade_mensal: '',
+                d_frequencia_entrega: '',
+                quantidade_limite: ''
+            }
+        ]
+    })
     const [pessoa, setPessoa] = useState({
         "is_beneficiario": false,
         "is_prescritor": true,
         "is_fornecedor": false,
     })
-    const [itens, setItens] = useState([{
-        item_id:'',
-        quantidade_mensal:'',
-        d_frequencia_entrega:'',
-        quantidade_limite:''
-    }])
-    const onSubmit = (data)=>{
-        setSolicitacao(data)
-    }
     const [message, setMessage] = useState({
         openSnakebar:false,
         message:'',
         statusSnake:'success'
     })
-    function checkCpf(){
-        data.map( data => {
-            if(beneficiario.cpf === data.cpf){
-                setSolicitante({...solicitante, nome: data.nome, nomeMae: data.nome_da_mae, dtNascimento: data.dt_nascimento})
+    function checkCpf(cpf){
+        Solicitacao.getPessoaByCpf(cpf)
+        .then((result)=>{
+            if(result instanceof Error){
+                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
             }
-        })
+            setState({...state, beneficiario: result})
+        });
     }
+    console.log(state);
     function checkCep(){
         if(solicitante.cep){
             setSolicitante(solicitante.cep?.replace(/\D/g, ''))
@@ -70,7 +99,12 @@ export default function NovaSolicitacao(){
             setSolicitante({...solicitante, logradouro:'',bairro:''})
         }
     }
-    // Requisição Ajax para banco
+    const [item, setItem] = useState([{
+        item_id: '',
+        quantidade_mensal: '',
+        d_frequencia_entrega: '',
+        quantidade_limite: ''
+    }])
     function onLoad(pessoa){
         Solicitacao.getEstabelecimento()
         .then((result)=>{
@@ -139,11 +173,34 @@ export default function NovaSolicitacao(){
                 return;
             }
             setFreq(result.data.dados)
-        })
+        });
+        Itens.getAll()
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setDataItens(result.data.data)
+        });
     }
-    //funções para adicionar novas linhas aos Itens
     function onAddItem(){
-        setItens([...itens,{ item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
+        setItem([...item,{ item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
+        setState({...state, itens:[...state.itens, {item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}]})
+    }
+    function onSetItem(e,index){
+        if(e.target.name === 'item_id'){
+            item[index].item_id = e.target.value;
+            setState({...state,itens:[...item]})
+        }else if(e.target.name === 'quantidade_mensal'){
+            item[index].quantidade_mensal = e.target.value;
+            setState({...state,itens:[...item]})
+        }else if(e.target.name === 'd_frequencia_entrega'){
+            item[index].d_frequencia_entrega = e.target.value;
+            setState({...state,itens:[...item]})
+        }else if(e.target.name === 'quantidade_limite'){
+            item[index].quantidade_limite = e.target.value;
+            setState({...state,itens:[...item]})     
+        }
     }
     function onDeleteItem(position){
         if(itens.length > 1){
@@ -170,7 +227,6 @@ export default function NovaSolicitacao(){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});                   
                     return;
                 }
-            // setState({...state, openModal:false})
             })
         // }
     }
@@ -184,27 +240,26 @@ export default function NovaSolicitacao(){
             setOpenModal(false)
         })  
     }
-    function onLoadEdit(){
-        if(datas){
-            setValue('beneficiario',datas)
-        }
-    }
+    // function onLoadEdit(){
+    //     console.log(dataEdit);
+    //         setValue('data',dataEdit)
+    // }
 
-    useEffect(()=>{
+    useEffect(()=>{ 
         onLoad(pessoa)
     },[openModal])
 
     // useEffect(()=>{
-    //     onSave(solicitacao)
+    //     if(solicitacao){
+    //         onSave(solicitacao.data)
+    //     }
     // },[solicitacao])
 
-    useEffect(()=>{
-        onLoadEdit()
-    },[datas])
-
-
-
-
+    // useEffect(()=>{
+    //     if(dataEdit){
+    //         onLoadEdit()
+    //     }
+    // },[dataEdit])
     return(
         <AppLayout>
             <CssBaseline />
@@ -225,7 +280,7 @@ export default function NovaSolicitacao(){
                     
                 </Box>
             </Box>
-            <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+            <Box component="main">
                 <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mb={2} >
                     <Typography variant='h5' component='h1' mb={2}>
                         Processo
@@ -235,21 +290,21 @@ export default function NovaSolicitacao(){
                             <TextField
                                 type='text'
                                 name='numero_solicitacao'
-                                {...register("numero_solicitacao")}
                                 label="Nº da solicitação"
                                 fullWidth
                                 variant="outlined"
+                                onChange={(e) => {setState({...state,numero_solicitacao: e.target.value})}}
                             />
                         </Grid>
                         <Grid item sm={3}>
                             <TextField
                                 select
                                 defaultValue={1}
-                                name="TipoAcao"
+                                name="d_tipo"
                                 label="d_tipo"
                                 fullWidth
                                 variant="outlined"
-                                {...register('d_tipo')}
+                                onChange={(e) => {setState({...state,d_tipo: e.target.value})}}
                             >
                                 {acao.map((a, index)=>(
                                     <MenuItem key={index} value={a.id}>{a.descricao}</MenuItem>
@@ -263,7 +318,7 @@ export default function NovaSolicitacao(){
                             name="d_representante_legal"
                             label='Representante legal'
                             fullWidth
-                            {...register('d_representante_legal')}
+                            onChange={(e) => {setState({...state,d_representante_legal: e.target.value})}}
                             variant="outlined"
                             >
                                 {representante.map((r, index)=>(
@@ -275,7 +330,7 @@ export default function NovaSolicitacao(){
                             <TextField
                             name="vara"
                             label="Vara"
-                            {...register('vara')}
+                            onChange={(e) => {setState({...state,vara: e.target.value})}}
                             fullWidth
                             variant="outlined"
                             />
@@ -286,7 +341,7 @@ export default function NovaSolicitacao(){
                             label="Juiz"
                             fullWidth
                             variant="outlined"
-                            {...register('juiz')}
+                            onChange={(e) => {setState({...state,juiz: e.target.value})}}
                             />
                         </Grid>
                         <Grid item xs={12} sm={5}>
@@ -297,7 +352,7 @@ export default function NovaSolicitacao(){
                                 name="reu_acao"
                                 label="Réu da ação"
                                 fullWidth
-                                {...register('reu_acao')}
+                                onChange={(e) => {setState({...state,reu_acao: e.target.value})}}
                                 variant="outlined"
                             >
                                 {reu.map((r, index)=>(
@@ -312,7 +367,7 @@ export default function NovaSolicitacao(){
                             name="data_entrada"
                             label='data de entrada'
                             fullWidth
-                            {...register('data_entrada')}
+                            onChange={(e) => {setState({...state,data_entrada: e.target.value})}}
                             variant="outlined"
                             InputLabelProps={{
                                 shrink: true,
@@ -327,7 +382,7 @@ export default function NovaSolicitacao(){
                                 label="CID"
                                 fullWidth
                                 variant="outlined"
-                                {...register('cid_id')}
+                                onChange={(e) => {setState({...state,cid_id: e.target.value})}}
                             >
                                 {cid.map((r, index)=>(
                                     <MenuItem key={index} value={r.id}>{r.nome}</MenuItem>
@@ -339,7 +394,7 @@ export default function NovaSolicitacao(){
                                 select
                                 defaultValue={1}
                                 name="estabelecimento"
-                                {...register("estabelecimento_id")}
+                               onChange={(e) => {setState({...state,estabelecimento: e.target.value})}}
                                 label='Estabelecimento'
                                 fullWidth
                                 variant="outlined"
@@ -357,7 +412,7 @@ export default function NovaSolicitacao(){
                                 label="Prescritor"
                                 fullWidth
                                 variant="outlined"
-                                {...register("prescritor_id")}
+                               onChange={(e) => {setState({...state,prescritor_id: e.target.value})}}
                             >
                                 {prescritor.map((p, index)=>(
                                     <MenuItem key={index} value={p.id}>{p.nome}</MenuItem>
@@ -397,7 +452,7 @@ export default function NovaSolicitacao(){
                             label="Local do Tratamento"
                             fullWidth
                             variant="outlined"
-                            {...register("local_tratamento")}
+                           onChange={(e) => {setState({...state,local_tratamento: e.target.value})}}
                             />
                         </Grid>
                         <Grid item xs={12} sm={2}>
@@ -408,7 +463,7 @@ export default function NovaSolicitacao(){
                             label='Data do atendimento'
                             fullWidth
                             variant="outlined"
-                            {...register("data_atendimento")}
+                           onChange={(e) => {setState({...state, data_atendimento: e.target.value})}}
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -423,161 +478,168 @@ export default function NovaSolicitacao(){
                         <Grid item xs={12} sm={2}>
                             <TextField
                             // value={beneficiario.cpf}
-                            onBlur={()=>checkCpf()}
+                            onBlur={()=>checkCpf(state.beneficiario.cpf)}
                             name="cpf"
                             label="CPF"
-                            {...register('beneficiario.cpf')}
+                           onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, cpf: e.target.value}})}
                             fullWidth
                             variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <TextField
-                            // value={beneficiario.nome}
-                            name="nome_mae"
+                            value={state.beneficiario.nome}
+                            name="nome"
                             label="Nome"
                             fullWidth
                             variant="outlined"
 
-                            {...register('beneficiario.nome')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, nome: e.target.value}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <TextField
-                            // value={beneficiario.nomeMae}
+                            value={state.beneficiario.nome_mae}
                             name="nome_mae"
                             label='Nome da mãe'
                             fullWidth
                             autoComplete="shipping address-line2"
                             variant="outlined"
 
-                            {...register('beneficiario.nome_mae')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, nome_mae: e.target.value}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            // value={beneficiario.dtNascimento}
-                            type='date'
-                            name="data_nascimento"
-                            label="Data de nascimento"
-                            fullWidth
-                            autoComplete="shipping address-line2"
-                            variant="outlined"
-
-                            InputLabelProps={{
-                                shrink: true,
+                                value={state.beneficiario.data_nascimento}
+                                type='date'
+                                name="data_nascimento"
+                                label="Data de nascimento"
+                                fullWidth
+                                autoComplete="shipping address-line2"
+                                variant="outlined"
+                                onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, data_nascimento: e.target.value}})}
+                                InputLabelProps={{
+                                    shrink: true,
                             }}
-                            {...register('beneficiario.data_nascimento')}
                             />
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            select
-                            name="d_sexo"
-                            label="Sexo"
-                            fullWidth
-                            autoComplete="shipping address-line2"
-                            variant="outlined"
+                                value={state.beneficiario.d_sexo}
+                                select
+                                name="d_sexo"
+                                label="Sexo"
+                                fullWidth
+                                autoComplete="shipping address-line2"
+                                variant="outlined"
 
-                            {...register('beneficiario.sexo')}
+                                onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, d_sexo: e.target.value}})}
                             >
                                 {sexo.map((s, index)=>(
-                                <MenuItem key={index} value={s.descricao}>{s.descricao}</MenuItem>
+                                <MenuItem key={index} value={s.valor}>{s.descricao}</MenuItem>
                                 ))}
                             </TextField>
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <TextField
+                            value={state.beneficiario.cns}
                             name="cns"
                             label="CNS"
                             fullWidth
                             variant="outlined"
-                            {...register('beneficiario.cns')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, cns: e.target.value}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <TextField
+                            value={state.beneficiario.rg}
                             name="rg"
                             label='RG'
                             fullWidth
                             variant="outlined"
 
-                            {...register('beneficiario.rg')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, rg: e.target.value}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <TextField
+                            value={state.beneficiario.telefone}
                             name="telefone"
                             label="Telefone"
                             fullWidth
                             variant="outlined"
 
-                            {...register('beneficiario.telefone')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, telefone: e.target.value}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <TextField
+                            value={state.beneficiario.email}
                             name="email"
                             label='E-mail'
                             fullWidth
                             variant="outlined"
 
-                            {...register('beneficiario.email')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, email: e.target.value}})}
                             />
                         </Grid>
 
                         <Grid item xs={12} sm={2}>
                             <TextField
                             onBlur={()=>checkCep()}
+                            value={state.beneficiario.cep}
                             id="cep"
                             name="cep"
                             label="CEP"
                             fullWidth
                             variant="outlined"
-                            {...register('beneficiario.cep')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, cep: e.target.value}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
                             <TextField
-                            value={beneficiario?.rua}
+                            value={state.beneficiario.rua}
                             name="rua"
                             label="Rua"
                             fullWidth
                             variant="outlined"
 
-                            {...register('beneficiario.rua')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, rua: e.target.value}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={1}>
                             <TextField
+                            value={state.beneficiario.numero}
                             name="numero"
                             label="Número"
                             fullWidth
                             variant="outlined"
-                            {...register('beneficiario.numero')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, numero: e.target.value}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
                             <TextField
-                            value={beneficiario?.bairro}
+                            value={state.beneficiario.bairro}
                             id="bairro"
                             name="bairro"
                             label="Bairro"
                             fullWidth
                             variant="outlined"
-                            {...register('beneficiario.bairro')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, bairro: e.target.value}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
                             {/* <Typography>Data de entrada</Typography> */}
                             <TextField
+                            value={state.beneficiario.complemento}
                             id="complemento"
                             name="complemento"
                             label='Complemento'
                             fullWidth
                             variant="outlined"
 
-                            {...register('beneficiario.complemento')}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, complemento: e.target.value}})}
                             />
                         </Grid>
                     </Grid>    
@@ -587,20 +649,23 @@ export default function NovaSolicitacao(){
                         </Typography>
                     </Box>      
                     
-                    {itens.map((itens, index)=>(
+                    {item.map((itens, index)=>(
                         <Grid key={index} container mb={2}>
                             <Grid item xs={11} container spacing={3}>
                                 <Grid item xs={5}>
                                     <TextField
-                                        // value={itens.item_id}
+                                        select
                                         id="item_id"
                                         name="item_id"
                                         label='Item'
                                         fullWidth
                                         variant="outlined"
-                                        // onChange={(e)=> onSetItem(e,index)}
-                                        {...register(`itens.${index}.item_id`)}
-                                    />
+                                        onChange={(e)=> onSetItem(e,index)}
+                                    >
+                                        {dataItens.map((i, index)=>(
+                                            <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
+                                        ))}   
+                                    </TextField>
                                 </Grid>
                                 <Grid item xs={1}>
                                     <TextField
@@ -610,11 +675,10 @@ export default function NovaSolicitacao(){
                                     label='Qtd Mensal'
                                     fullWidth
                                     variant="outlined"
-                                    // onChange={(e)=> onSetItem(e,index)}
+                                    onChange={(e)=> onSetItem(e,index)}
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
-                                    {...register(`itens.${index}.quantidade_mensal`)}
                                 />
                                 </Grid>
                                 <Grid item xs={2}>
@@ -626,11 +690,10 @@ export default function NovaSolicitacao(){
                                         label='Freq da entrega'
                                         fullWidth
                                         variant="outlined"
-                                        // onChange={(e)=> onSetItem(e,index)}
-                                        {...register(`itens.${index}.d_frequencia_entrega`)}
+                                        onChange={(e)=> onSetItem(e,index)}
                                     >
                                         {freq.map((f, index)=>(
-                                        <MenuItem key={index} value={f.descricao}>{f.descricao}</MenuItem>
+                                        <MenuItem key={index} value={f.valor}>{f.descricao}</MenuItem>
                                         ))}
                                     </TextField>
                                 </Grid>
@@ -641,8 +704,7 @@ export default function NovaSolicitacao(){
                                         label='Qtd limite'
                                         fullWidth
                                         variant="outlined"
-                                        // onChange={(e)=> onSetItem(e,index)}
-                                        {...register(`itens.${index}.quantidade_limite`)}
+                                        onChange={(e)=> onSetItem(e,index)}
                                     />
                                 </Grid>
                             </Grid>

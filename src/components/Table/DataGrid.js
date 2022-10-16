@@ -17,7 +17,6 @@ const fakeRows = (columns, pageSize) => {
 }
 
 const CellSkeleton = (params) => {
-    console.log(params)
     return (
         <div className="MuiDataGrid-cell" style={{ "width": params.width, "height": params.height}}>
             <Skeleton variant="rect" width={"100%"} height={20} />

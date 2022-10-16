@@ -16,7 +16,7 @@ export function NovoItem(props){
     }])
 
     useEffect(()=>{
-        if(props.editItem.id != null|| props.editItem.id != undefined){
+        if(props.editItem?.id != null|| props.editItem?.id != undefined){
            setItem([{
                 codigo:props.editItem.codigo, 
                 nome:props.editItem.nome, 
@@ -29,7 +29,7 @@ export function NovoItem(props){
        else{
            limparItem()
        }
-    },[props.editItem.id])
+    },[props.editItem?.id])
 
     function limparItem(){
         setItem([{ codigo:null,nome:'',principio_ativo_id:'',d_tipo:'', categoria_id:'',considera_lote_validade:false}])
@@ -137,8 +137,8 @@ export function NovoItem(props){
                                         variant="outlined"
                                         onChange={(e)=> onSetItem(e,index)}
                                     >
-                                        {props.tipo.map((tipo, index)=>(
-                                            <MenuItem key={index} value={props.tipo[index].id}>{props.tipo[index].nome}</MenuItem>
+                                        {props.tipo?.map((tipo, index)=>(
+                                            <MenuItem key={index} value={tipo.id}>{tipo.descricao}</MenuItem>
                                         ))}
                                     </TextField>
                                 </Grid>

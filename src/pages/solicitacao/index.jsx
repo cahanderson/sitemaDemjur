@@ -34,11 +34,8 @@ export default function Solicitacoes(){
                 return;
             }
             setState({...state, data:result.data.data})
-            // console.log(state.data);
         })
     }
-
-
     const columns = [
         { field: 'solicitacao', headerName: 'Nº de solicitações', width: 240 },
         { field: 'nome', headerName: 'Nome', width: 240 },
@@ -51,13 +48,13 @@ export default function Solicitacoes(){
           ]
         }
     ]
-    const rows = state.data.map((row)=>({
+    const rows = state.data?.map((row)=>({
         id:row.id,
         solicitacao:row.numero_solicitacao,
-        nome:row.beneficiario.nome,
-        cpf:row.beneficiario.cpf,
-        nome_da_mae:row.beneficiario.nome_mae,
-        dt_nascimento:row.beneficiario.data_nascimento,
+        nome:row.beneficiario?.nome,
+        cpf:row.beneficiario?.cpf,
+        nome_da_mae:row.beneficiario?.nome_mae,
+        dt_nascimento:row.beneficiario?.data_nascimento,
     }));
 
     function onEdit(id){
@@ -70,6 +67,7 @@ export default function Solicitacoes(){
             addData(result.data)
             router.push('/solicitacao/form')
         })
+
     }
     function onDelete(id){
         if(confirm('Realmente deseja apagar?')){

@@ -153,15 +153,15 @@ const createPrescritor = async (dados) => {
   }
 };
 const create = async (dados) => {
+  console.log(dados,'lib')
   await csrf()
   try {
-    const { data } = await axios.post('/api/solicitacao', dados);
+    const {data} = await axios.post('/api/solicitacao', dados);
 
     if (data) {
-      return data.id;
+      console.log(data);
+      // return data.id;
     }
-
-    // return new Error('Erro ao criar o registro.');
   } catch (error) {
     console.error(error);
     return new Error('Erro ao consultar o registro.');
@@ -189,6 +189,20 @@ const getById = async (id) => {
     return new Error('Erro ao consultar o registro.');
   }
 };
+const getPessoaByCpf = async (cpf) => {
+  try {
+    const { data } = await axios.get(`/api/pessoa/get-beneficiario/${cpf}`);
+
+    if (data) {
+      return data.data;
+    }
+
+    return new Error('Erro ao consultar o registro.');
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao consultar o registro.');
+  }
+};
 export const Solicitacao = {
   getAll,
   getEstabelecimento,
@@ -203,4 +217,5 @@ export const Solicitacao = {
   create,
   deleteById,
   getById,
+  getPessoaByCpf
 };
