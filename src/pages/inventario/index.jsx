@@ -6,7 +6,7 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { Estoque } from "@/lib/estoque";
 import { Itens } from "@/lib/item";
 import { Inventarios } from "@/lib/inventario";
-import { UsuariosService } from "@/lib/usuario";
+import { UsuariosService } from "@/lib/Usuario";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { NovoInventario } from "@/components/Modal/inventario";
 import { Table } from "@/components/Table";
