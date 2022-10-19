@@ -4,16 +4,17 @@ import { Box, Button, Divider, Grid, IconButton, MenuItem, Paper, TextField, Typ
 import ClearIcon from '@mui/icons-material/Clear';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
-
+import { mask, unMask } from 'remask'
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Movimentacoes } from "@/lib/movimentacao";
 import { Itens } from "@/lib/item";
-// import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
+import useMovimentacaoEntradaStore from "@/hooks/movimentacaoEntrada";
 
 export default function Entradas(){
     const router = useRouter()
-    // const {register, handleSubmit, setValue} = useForm()
+    const dados = useMovimentacaoEntradaStore(state=>state.datas)
+    const [dataId, setDataId] = useState('')
     const [tipo, setTipo] = useState([''])
     const [fornecedor, setFornecedor] = useState([''])
     const [itens, setItens] = useState([''])
@@ -21,7 +22,7 @@ export default function Entradas(){
     const [file, setFile] = useState()
     const [movimentacaoId, setMovimentacaoId] = useState()
     const [pessoa, setPessoa] = useState({
-        "is_beneficiario": true,
+        "is_beneficiario": false,
         "is_prescritor": false,
         "is_fornecedor": false,
         "is_doacao": false,
@@ -43,6 +44,7 @@ export default function Entradas(){
         }]
     })
     const [item, setItem] = useState([{
+        id:null,
         item_id:'',
         quantidade:'',
         fator_embalagem:'',
@@ -91,9 +93,8 @@ export default function Entradas(){
         })
     }          
     function onAddItem(){
-        // setItem([...item, ''])
-        setItem([...item,{ item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}])
-        setState({...state, itens:[...state.itens, {item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}]})
+        setItem([...item,{id:null, item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}])
+        setState({...state, itens:[...state.itens, {id:null ,item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}]})
     }
     function onSetItem(e,index){
         if(e.target.name === 'item_id'){
@@ -112,39 +113,70 @@ export default function Entradas(){
             item[index].lote = e.target.value;
             setState({...state,itens:[...item]})
         }else if(e.target.name === 'valor_unit'){
-            item[index].valor_unit = e.target.value;
+            item[index].valor_unit = unMask(e.target.value);
             setState({...state,itens:[...item]})
         }     
     }
     function onDeleteItem(position){
         if(state.itens.length > 1){
+            setItem([...item.filter((item,index) => index !== position)])
             setState({...state, itens:[...state.itens.filter((item,index)=>index !== position)]})
         }else{
-            setState({...state, itens:[{item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}]})
+            setItem([{ id:null, item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
+            setState({...state, itens:[{id:null, item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}]})
         }
     }
     function reload(valor){
-        if(valor === "1"){
+        if(valor === "1"||valor === 1){
             setPessoa({"is_beneficiario": false,"is_prescritor": false,"is_fornecedor": true,"is_doacao": false,})
-        }else if(valor === "3"){
+        }else if(valor === "3"||valor === 3){
             setPessoa({ "is_beneficiario": false,"is_prescritor": false,"is_fornecedor": false,"is_doacao": true})
-        }else if(valor === "2"){
+        }else if(valor === "2"||valor === 2){
             setPessoa({"is_beneficiario": '',"is_prescritor": '',"is_fornecedor": '',"is_doacao": '',})
             setFornecedor(estabelecimento)
         }
     }
-    function onFile(e){
-        e.preventDefault();
-
+    function onLoadEdit(data){
+        reload(data.d_tipo_movimentacao)
+        const itensEdit = data.itens?.map((item)=>({
+            id:item.id,
+            item_id:item.item_id,
+            quantidade:item.quantidade,
+            fator_embalagem:item.fator_embalagem,
+            data_validade:item.data_validade,
+            lote:item.lote,
+            valor_unit:item.valor_unit,
+        }));
+        setState({
+            d_tipo_movimentacao:data.d_tipo_movimentacao,
+            movimentable_id:8,
+            documento: "URI::localhost",
+            data:data.data,
+            valor:data.valor,
+            is_efetivado:data.is_efetivado,
+            itens: itensEdit,
+        })
+        setItem(itensEdit)
+        setDataId(data.id)
     }
     function onSave(data){
-        Movimentacoes.create(data).then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
-                    return;
-                }
-                setMovimentacaoId(result.dados.id)
-        })
+        if(dataId!=''){
+            Movimentacoes.updateById(dataId,data).then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                        return;
+                    }
+                })
+        }else{
+            Movimentacoes.create(data).then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                        return;
+                    }
+                    // setMovimentacaoId(result.dados.id)
+                })
+        }
+        router.push('/movimentacao')
     }
     function onSaveFile(file,movimentacaoId){
         const formData = new FormData();
@@ -163,34 +195,36 @@ export default function Entradas(){
     useEffect(()=>{
         onLoad(pessoa)
     },[pessoa])
-    console.log(movimentacaoId);
+
+    // useEffect(()=>{
+    //     if(movimentacaoId){
+    //         onSaveFile(file, movimentacaoId)
+    //     }
+    // },[movimentacaoId])
 
     useEffect(()=>{
-        if(movimentacaoId){
-            onSaveFile(file, movimentacaoId)
+        if(dados){
+            onLoadEdit(dados)
         }
-    },[movimentacaoId])
-
-    console.log(movimentacaoId);
+    },[dados])
 
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>
                 Entradas
             </Typography>
-            {/* onSubmit={handleSubmit(onSubmit)} */}
             <Box component="form" >
                 <Box  padding='10px' component={Paper} justifyContent='center' alignItems='center' mt={2}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={5}>
                             <TextField
+                                value={state.d_tipo_movimentacao}
                                 select
                                 name="d_tipo_movimentacao"
                                 label="Tipo de entrada"
                                 fullWidth
                                 variant="outlined"
                                 onChange={(e) => {setState({...state, d_tipo_movimentacao: e.target.value}),reload(e.target.value)}}
-                                // {...register('tipo_Entrada')}
                             >
                                 {tipo.map((tipo, index)=>(
                                     <MenuItem key={index} value={tipo.valor}>{tipo.descricao}</MenuItem>
@@ -199,13 +233,13 @@ export default function Entradas(){
                         </Grid>
                         <Grid item xs={12} sm={7}>
                             <TextField
+                            value={state.movimentable_id}
                             select
                             name="fornecedor"
                             label="Fornecedor"
                             fullWidth
                             variant="outlined"
                             onChange={(e) => {setState({...state, movimentable_id: e.target.value})}}
-                            // {...register('fornecedor')}
                             >
                                 {fornecedor?.map((f, index)=>(
                                     <MenuItem key={index} value={f.id}>{f.nome}</MenuItem>
@@ -216,13 +250,13 @@ export default function Entradas(){
                     <Grid container spacing={3} mt={3}>    
                         <Grid item xs={12} sm={3}>
                             <TextField
+                                value={state.data}
                                 type='date'
                                 name="data"
                                 label='Data'
                                 fullWidth
                                 variant="outlined"
                                 onChange={(e) => {setState({...state,data: e.target.value})}}
-                                // {...register('data')}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -230,12 +264,12 @@ export default function Entradas(){
                         </Grid>
                         <Grid item xs={12} sm={3}>
                             <TextField
+                                value={mask(state.valor,['9,99','99,99','999,99'])}
                                 name="valor"
                                 label='Valor'
                                 fullWidth
                                 variant="outlined"
-                                onChange={(e) => {setState({...state,valor: e.target.value})}}
-                                // {...register('valor')}
+                                onChange={(e) => {setState({...state,valor: unMask(e.target.value)})}}
                             />
                         </Grid>
                         <Grid item xs={12} sm={2}>
@@ -257,6 +291,7 @@ export default function Entradas(){
                                 justifyContent='end'
                             >
                                 <Button
+                                    value={state.is_efetivado}
                                     sx={{marginTop:'6px'}}
                                     variant = {state.is_efetivado ? "outlined" : "contained"}
                                     component="label"
@@ -276,13 +311,13 @@ export default function Entradas(){
                             <Grid item xs={11} container spacing={3}>
                                 <Grid item xs={12} sm={5}>
                                     <TextField
+                                        value={item.item_id}
                                         select
                                         name="item_id"
                                         label='Item'
                                         fullWidth
                                         variant="outlined"
                                         onChange={(e)=> onSetItem(e,index)}
-                                        // {...register('itens.tipo')}
                                     >
                                         {itens.map((i, index)=>(
                                             <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
@@ -292,11 +327,11 @@ export default function Entradas(){
                                 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
+                                        value={item.quantidade}
                                         name="quantidade"
                                         label='Quantidade'
                                         fullWidth
                                         variant="outlined"
-                                        // {...register('itens.quantidade')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -306,12 +341,11 @@ export default function Entradas(){
 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
-    
+                                        value={item.fator_embalagem}
                                         name="fator_embalagem"
                                         label='Fator emb'
                                         fullWidth
                                         variant="outlined"
-                                        // {...register('itens.fatorEmbalagem')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -321,6 +355,7 @@ export default function Entradas(){
 
                                 <Grid item xs={12} sm={3}>
                                     <TextField
+                                        value={item.data_validade}
                                         type='date'
                                         name="data_validade"
                                         label='Data de validade'
@@ -336,11 +371,11 @@ export default function Entradas(){
 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
+                                        value={item.lote}
                                         name="lote"
                                         label='Lote'
                                         fullWidth
                                         variant="outlined"
-                                        // {...register('itens.lote')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,
@@ -350,11 +385,11 @@ export default function Entradas(){
 
                                 <Grid item xs={12} sm={2}>
                                     <TextField
+                                        value={mask(item.valor_unit,['9,99','99,99','999,99'])}
                                         name="valor_unit"
                                         label='valor Unitario'
                                         fullWidth
                                         variant="outlined"
-                                        // {...register('itens.V_Unitario')}
                                         onChange={(e)=> onSetItem(e,index)}
                                         InputLabelProps={{
                                             shrink: true,

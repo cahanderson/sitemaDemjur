@@ -1,5 +1,5 @@
 import { useState,useEffect } from "react";
-import { Box, Button, CssBaseline, Grid, Paper, TextField, Typography } from "@mui/material";
+import { Box, Button, CssBaseline, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
@@ -16,19 +16,17 @@ export default function Inventario(){
     const [usuario, setUsuario] = useState([]);
     const [estoque, setEstoque] = useState([]);
     const [item, setItem] = useState([]);
-    const [state, setState] = useState({
-        buscaCodigo: '',
-        buscaDescricao: '',
-        buscaPrincAtivo: '',
-        buscaLote: '',
-        buscaValidade: '',
-        buscaCategoria: '',
-        tableCheckbox: false,
-        openModal:false,
-        usuarios:[{}],
-        data:[],
-    });
     const [inventario, setInventario] = useState()
+    const [openModal, setOpenModal] = useState(false)
+    const [state, setState] = useState({
+        data:'',
+        responsavel_id:'',
+        tableCheckbox: false,
+        usuarios:[{}],
+        dataItens:[],
+        filter:[],
+    });
+    
     const columns = [
         { field: 'id', headerName: '#', width: 50 },
         { field: 'nome', headerName: 'Nome', width: 210 },
@@ -39,10 +37,10 @@ export default function Inventario(){
           ]
       }
     ]
-    const rows = state.data?.map((row)=>({
+    const rows = state.filter?.map((row)=>({
         id:row.id,
         nome:row.responsavel_id,
-        data:row.data?.split('-').reverse().join('/'), //Formatando data para modelo br
+        data:row.data?.split('-').reverse().join('/')
     }));
     function onLoad(){
         Inventarios.getAll()
@@ -51,7 +49,7 @@ export default function Inventario(){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setState({...state, data:result.data.data})
+            setState({...state, data:result.data.data, filter:result.data.data})
         });
 
         UsuariosService.getAll()
@@ -81,14 +79,12 @@ export default function Inventario(){
         });
     }
     function onSave(id,data){
-        console.log(id,data);
         if(id!==undefined){
             Inventarios.updateById(id,data).then((result)=>{
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
                 }
-                setState({...state,openModal:false})
             })
         }else{
             Inventarios.create(data).then((result)=>{
@@ -96,10 +92,9 @@ export default function Inventario(){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
                         return;
                     }
-                setState({...state, openModal:false})
-            })
-              
-        }
+                })
+            }
+        setOpenModal(false)
     }
     function onDelete(id){
         if(confirm('Realmente deseja apagar?')){
@@ -122,32 +117,23 @@ export default function Inventario(){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
             }
             setInventario(result)
-            setState({...state,openModal:true})
+            setOpenModal(true)
         })
     }
     useEffect(()=>{
         onLoad()
-    },[state.openModal])
-    // console.log(inventario);
+    },[openModal])
 
-    // function pesquisar(buscaCodigo,buscaDescricao,buscaPrincAtivo,buscaLote,buscaValidade,buscaCategoria){
-    //     if(buscaCodigo !==''){
-    //         setState({...state, filter: data.filter((data)=>data.codigo.startsWith(buscaCodigo))})
-    //     }else if(buscaDescricao !==''){
-    //         setState({...state, filter: data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-    //     }else if(buscaPrincAtivo !==''){
-    //         setState({...state, filter: data.filter((data)=>data.princAtivo.toUpperCase().startsWith(buscaPrincAtivo.toUpperCase()))})
-    //     }else if(buscaLote!==''){
-    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaLote.toUpperCase()))})
-    //     }else if(buscaValidade!==''){
-    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaValidade.toUpperCase()))})
-    //     }else if(buscaCategoria!==''){
-    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaCategoria.toUpperCase()))})
-    //     }else{
-    //         setState({...state, filter:data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-    //     };
-    // }
-
+    function pesquisar(data,responsavel){
+        if(data){
+            setState({...state, filter: state.dataItens?.filter((data)=>{return data.data?.includes(data)})})
+        }else if(responsavel){
+            setState({...state, filter: state.dataItens?.filter((data)=>{return data.responsavel_id.includes(responsavel)})})
+        }else{
+            setState({...state, filter:state.dataItens})
+        }
+    }
+    console.log(state.data);
 
     return(
         <AppLayout>
@@ -171,7 +157,7 @@ export default function Inventario(){
                 <Box alignItems='center' display='flex'>
                     <Button 
                         variant="outlined"
-                        onClick={() => {setState({...state, openModal:true})}}   
+                        onClick={() => setOpenModal(true)}   
                     >
                          Novo inventário
                     </Button>
@@ -193,19 +179,26 @@ export default function Inventario(){
                         />
                     </Grid>
                     <Grid item xs={12} sm={3}>
-                        <TextField
-                        label="Responsável"
+                    <TextField
+                        value={state.responsavel_id}
+                        select
+                        name="responsavel_id"
+                        label='Responsável'
                         fullWidth
-                        placeholder="Usuário responsável pelo inventário"
+                        placeholder='Usuário responsável pelo inventário'
                         variant="outlined"
-                        onChange={(e) => setState({...state, buscaDescricao:e.target.value})}
-                        />
+                        onChange={(e)=> setState({...state, responsavel_id:e.target.value})}
+                    >
+                        {usuario?.map((user, index)=>(
+                            <MenuItem key={index} value={user.id}>{user.name}</MenuItem>
+                        ))}
+                    </TextField>
                     </Grid>
                     <Grid item xs={12} sm={4} display='flex' alignItems='center' justifyContent='end' mb={1}>
                         <Button
                         
                         variant="outlined"
-                        onClick={()=> pesquisar(state.buscaCodigo,state.buscaDescricao,state.buscaLote,state.buscaValidade,state.buscaPrincAtivo,state.buscaCategoria)}
+                        onClick={()=> pesquisar(state.data, state.responsavel_id)}
                     >
                             Pesquisar
                         </Button>  
@@ -219,8 +212,8 @@ export default function Inventario(){
                 />
 
                 <NovoInventario
-                    openModal={state.openModal} 
-                    onClose={() => setState({...state, openModal: false})} 
+                    openModal={openModal} 
+                    onClose={() => setOpenModal(false)} 
                     usuario={usuario}
                     estoque = {estoque}
                     itens = {item}

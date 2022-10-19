@@ -2,9 +2,9 @@ import { Box, Button, CssBaseline, Grid, Paper, TextField } from "@mui/material"
 import { useEffect,useState } from "react";
 import { useForm } from "react-hook-form";
 import { Modal } from '../Layouts/modal';   
+import { mask, unMask } from 'remask'
 
 export function NovoFornecedor(props){
-    const {register, handleSubmit, setValue, reset} = useForm();
     const [state, setState] = useState({
         nome:'',
         email:'',
@@ -19,9 +19,23 @@ export function NovoFornecedor(props){
         "is_prescritor": false,
         "is_fornecedor": true
     })
-    const onSubmit = (e)=>{
-       console.log(e);
-    }   
+    useEffect(()=>{
+        if(props.fornecedor?.id != null|| props.fornecedor?.id != undefined){
+           setState({
+                nome:props.fornecedor.nome,
+                email:props.fornecedor.email, 
+                telefone:props.fornecedor.telefone, 
+                cnpj:props.fornecedor.cnpj,
+                cep:props.fornecedor.cep,
+                rua:props.fornecedor.rua,
+                numero:props.fornecedor.numero, 
+                bairro:props.fornecedor.bairro,
+            })
+       }
+       else{
+        limparFornecedor()
+       }
+    },[props.fornecedor?.id])
     function checkCep(){
         if(state.cep){
             
@@ -38,17 +52,20 @@ export function NovoFornecedor(props){
         }
     }
     function limparFornecedor(){
-        reset()
+        setState({
+        nome:'',
+        email:'',
+        telefone:'',
+        cpf:'',
+        cnpj:'',
+        cep:'',
+        rua:'',
+        numero:'',
+        bairro:'',
+        "is_beneficiario": false,
+        "is_prescritor": false,
+        "is_fornecedor": true})
     }
-    useEffect(()=>{
-        if(props.fornecedor.id != null|| props.fornecedor.id != undefined){
-            setValue('form',props.fornecedor)
-        }
-       else{
-        limparFornecedor()
-       }
-    },[props.fornecedor.id])
-
     return(
         <Modal
             open={props.openModal}
@@ -58,54 +75,52 @@ export function NovoFornecedor(props){
 
         >
             <CssBaseline />
-            <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+            <Box >
                 <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' >
-                    <Grid container spacing={3} mb={3}>
-                        <Grid item xs={12} sm={4}>
+                    <Grid container spacing={3} mb={4}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                                 id="nome"
                                 name="nome"
                                 label="Nome"
-                                // value={state.nome}
-                                // onChange={(e) => setState({...state, nome: e.target.value})}
-                                {...register("form.nome")}
+                                value={state.nome}
+                                onChange={(e) => setState({...state, nome: e.target.value})}
                                 fullWidth
                                 variant="outlined"
                             />
                         </Grid>
-                        <Grid item xs={12} sm={4}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                             id="email"
                             name="email"
                             label="E-mail"
-                            // value={state.email}
-                            // onChange={(e) => setState({...state, email: e.target.value})}
-                            {...register("form.email")}
+                            value={state.email}
+                            onChange={(e) => setState({...state, email: e.target.value})}
                             fullWidth
                             variant="outlined"
                             />
                         </Grid>
-                        <Grid item xs={12} sm={2}>
+                    </Grid>
+                    <Grid container spacing={3} mb={4}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                             id="cnpj"
                             name="cnpj"
                             label='CNPJ'
-                            // value={state.cnpj}
-                            // onChange={(e) => setState({...state, cnpj: e.target.value})}
-                            {...register("form.cnpj")}
+                            value={mask(state.cnpj,['99.999.999/9999-99'])}
+                            onChange={(e) => setState({...state, cnpj: unMask(e.target.value)})}
                             fullWidth
                             autoComplete="shipping address-line2"
                             variant="outlined"
                             />
                         </Grid>
-                        <Grid item xs={12} sm={2}>
+                        <Grid item xs={12} sm={6}>
                             <TextField
                             id="telefone"
                             name="telefone"
                             label='Telefone'
-                            // value={state.telefone}
-                            // onChange={(e) => setState({...state, telefone: e.target.value})}
-                            {...register("form.telefone")}
+                            value={mask(state.telefone,['(99)99999999','(99)9 99999999'])}
+                            onChange={(e) => setState({...state, telefone: e.target.value})}
                             fullWidth
                             autoComplete="shipping address-line2"
                             variant="outlined"
@@ -113,57 +128,54 @@ export function NovoFornecedor(props){
                         </Grid>  
                         
                     </Grid>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} sm={2}>
+                    <Grid container spacing={3}mb={4}>
+                        <Grid item xs={12} sm={12}>
                             <TextField
-                            // value={state.cep}
+                            value={mask(state.cep,['99.999-999'])}
                             onBlur={()=>checkCep()}
                             id="cep"
                             name="cep"
                             label="CEP"
                             fullWidth
                             variant="outlined"
-                            // onChange={(e) => setState({...state, cep:e.target.value})}
-                            {...register("form.cep")}
+                            onChange={(e) => setState({...state, cep:unMask(e.target.value)})}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={4}>
+                    </Grid>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} sm={5}>
                             <TextField
                             id="rua"
                             name="rua"
-                            // value={state.rua}
+                            value={state.rua}
                             label="Rua"
-                            // onChange={(e) => setState({...state, rua:e.target.value})}
-                            {...register("form.rua")}
+                            onChange={(e) => setState({...state, rua:e.target.value})}
                             fullWidth
                             variant="outlined"
                             />
                         </Grid>
-                        <Grid item xs={12} sm={1}>
+                        <Grid item xs={12} sm={2}>
                             <TextField
                             id="numero"
                             name="numero"
                             label='Nº'
-                            // value={state.numero}
-                            // onChange={(e) => setState({...state, numero:e.target.value})}
-                            {...register("form.numero")}
+                            value={state.numero}
+                            onChange={(e) => setState({...state, numero:e.target.value})}
                             fullWidth
                             variant="outlined"
                             />
                         </Grid>
-                        <Grid item xs={12} sm={4}>
+                        <Grid item xs={12} sm={5}>
                             <TextField
                             id="bairro"
                             name="bairro"
                             label='Bairro'
-                            // value={state.bairro}
-                            // onChange={(e) => setState({...state, bairro:e.target.value})}
-                            {...register("form.bairro")}
+                            value={state.bairro}
+                            onChange={(e) => setState({...state, bairro:e.target.value})}
                             fullWidth
                             variant="outlined"
                             />
                         </Grid>
-                        <Button name='enviarFormulario' type='submit'></Button>
                     </Grid>
                     
                 </Box>

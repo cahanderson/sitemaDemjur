@@ -6,11 +6,5 @@ const useSolicitacaoStore = create((set)=>({
         set(state=>({datas:data}))
     }
 }))
-// const useSolicitacaoStore = create((set)=>({
-//     datas:'',
-//     addData:(data)=>{
-//         set(state=>({datas:[...state.datas,data]}))
-//     }
-// }))
 
 export default useSolicitacaoStore;

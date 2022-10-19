@@ -17,7 +17,6 @@ const getAll = async () =>{
   }
 };
 const create = async (dados) => {
-  console.log(dados);
   await csrf()
   try {
     const { data } = await axios.post('/api/inventario/', dados);

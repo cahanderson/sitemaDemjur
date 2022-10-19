@@ -10,10 +10,15 @@ import { Movimentacoes } from "@/lib/movimentacao";
 import { Fornecedor } from "@/lib/fornecedor";
 import { Estoque } from "@/lib/estoque";
 import { useRef } from "react";
+import useMovimentacaoSaidaStore from "@/hooks/movimentacaoSaida";
+import { useRouter } from "next/router";
 
 export default function Saidas(){
     const inputRef = useRef();
+    const router = useRouter()
+    const dados = useMovimentacaoSaidaStore(state=>state.datas)
     const [dataItens, setDataItens] = useState([''])
+    const [dataId, setDataId] = useState('')
     const [estoque, setEstoque] = useState([])
     const [desability , setDesability] = useState(false)
     const [destino, setDestino] = useState([''])
@@ -27,10 +32,12 @@ export default function Saidas(){
         "is_fornecedor": '',
     })
     const [state, setState] = useState({
+        solicitacao_id:5,
         d_tipo_movimentacao:'',
         movimentable_id:'',
         documento: "URI::localhost",
         data:'',
+        valor:'',
         is_efetivado:false,
         itens:[],
     })    
@@ -62,7 +69,7 @@ export default function Saidas(){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setTipo(result.data.dados.filter((tipos)=>{return tipos.metadata?.includes("saida")}))
+            setTipo(result.data.dados.filter((tipos)=> {return tipos.metadata?.includes("saida")}))
         });
 
         Fornecedor.getPessoa(pessoa)
@@ -159,19 +166,78 @@ export default function Saidas(){
         if(qtd>0){
             alert(`quantidade solicitada insuficiente em estoque. ${qtd} não adicionado`)
         }
-        
     }
-    function editSave(itens){
-        itens.forEach(i=>{
-            delete i.id;
-            setState({...state, itens:itens })
+    function onLoadEdit(data){
+        reload(data.d_tipo_movimentacao)
+        const itensEdit = data.itens?.map((item)=>({
+            id:item.id,
+            item_id:item.item_id,
+            quantidade:item.quantidade,
+            fator_embalagem:item.fator_embalagem,
+            data_validade:item.data_validade,
+            lote:item.lote,
+            valor_unit:item.valor_unit,
+        }));
+        setState({
+            solicitacao_id:5,
+            d_tipo_movimentacao:data.d_tipo_movimentacao,
+            movimentable_id:1,
+            documento: "URI::localhost",
+            data:data.data,
+            valor:data.valor,
+            is_efetivado:data.is_efetivado,
+            itens: itensEdit,
         })
-        // router.push('/movimentacao')
+        setItens(itensEdit)
+        setDataId(data.id)
     }
+    function editItens(itens){
+        itens.forEach(i=>{
+            if(i.id){
+                delete i.id;
+            }
+        })
+        setState({...state, itens:itens })
+    }
+    function onSave(data){
+        console.log(data);
+        if(dataId!=''){
+            Movimentacoes.updateById(dataId,data).then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                        return;
+                }
+                    // alert(result.message)
+            })
+        }else{
+            Movimentacoes.create(data).then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                        return;
+                    }
+                    // setMovimentacaoId(result.dados.id)
+                    alert(result.message)
+            })
+        }   
+        router.push('/movimentacao')
+    }
+
     useEffect(()=>{
         onLoad(pessoa)
     },[pessoa])
+
+    useEffect(()=>{
+        editItens(itens)
+    },[itens])
+
+    useEffect(()=>{
+        if(dados){
+            onLoadEdit(dados)
+        }
+    },[dados])
+
     console.log(estoque);
+    console.log(dataItens);
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>
@@ -308,7 +374,7 @@ export default function Saidas(){
                                 // onClick={() => { setOpenModal(true), onLoadEstoque(item.item_id)}}
                                 onClick={() => dispensacao(itemPesquisa.quantidade)}
                             >
-                                Adcionar
+                                Adicionar
                             </Button>
                         </Grid>
                     </Grid>
@@ -319,7 +385,7 @@ export default function Saidas(){
                             <Grid item xs={12} sm={6} disabled>
                                 <TextField
                                     disabled
-                                    value={item.item_nome}
+                                    value={item.item_id}
                                     name="item_id"
                                     label='Itens'
                                     fullWidth
@@ -328,6 +394,9 @@ export default function Saidas(){
                                         shrink: true,
                                     }}
                                 >
+                                    {dataItens.map((i, index)=>(
+                                        <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
+                                    ))}
                                 </TextField>    
                             </Grid>
                             
@@ -386,7 +455,7 @@ export default function Saidas(){
                     <Divider />
                     <Box display='flex' justifyContent={"end"} gap='10px' p={2}>
                         <Button variant="text" onClick={() => router.push('/movimentacao')}> Cancelar Edição</Button>
-                        <Button variant="contained" onClick={() => editSave(itens)}> Salvar</Button>
+                        <Button variant="contained" onClick={() => onSave(state)}> Salvar</Button>
                     </Box> 
                <Dispensacao
                     openModal={openModal}

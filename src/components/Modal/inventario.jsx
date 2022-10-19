@@ -1,6 +1,6 @@
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import ClearIcon from '@mui/icons-material/Clear';
-import { Box, Button, CssBaseline, Divider, Grid, IconButton, InputAdornment, MenuItem, Paper, TextField } from "@mui/material";
+import { Box, Button, CssBaseline, Divider, Grid, IconButton, InputAdornment, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import { useEffect } from 'react';
 import { useState } from "react";
 import { Modal } from '../Layouts/modal';    
@@ -9,14 +9,7 @@ export function NovoInventario(props){
     const [state, setState] = useState({
         data:'',
         responsavel_id:'',
-        itens:[{
-            item_id:'',
-            qtd_atual:'',
-            valor_atual:'',
-            valor_anterior:'',
-            qtd_anterior: '',
-            lote:''
-            }]
+        itens:[]
     })
     const [item, setItem] = useState([{
         item_id:'',
@@ -30,7 +23,6 @@ export function NovoInventario(props){
         diferenca_qtd:'',
         diferenca_valor:'',
     }])
-
     function onAddItem(){
         setCalc([...calc,{ diferenca_qtd:'',diferenca_valor:''}])
         setItem([...item,{ item_id:'',qtd_atual:'',valor_atual:'',valor_anterior:'',qtd_anterior:'',lote:''}])
@@ -42,17 +34,19 @@ export function NovoInventario(props){
             item[index].qtd_anterior = props.estoque[item[index].item_id-1]?.quantidade,
             item[index].lote = props.estoque[item[index].item_id-1]?.lote,
             item[index].valor_anterior = props.estoque[item[index].item_id-1]?.valor_atual,
-            setState({...state,itens:[...item]})
-            console.log(index);
+            // setState({...state,itens:[...item]})
+            setItem([...item])
         }else if(e.target.name === 'qtd_atual'){
             item[index].qtd_atual = e.target.value;
             calc[index].diferenca_qtd = item[index].qtd_anterior - e.target.value;
+            // setState({...state,itens:[...item]})
+            setItem([...item])
             setCalc([...calc])
-            setState({...state,itens:[...item]})
         }else if(e.target.name === 'valor_atual'){
             item[index].valor_atual = e.target.value;
             calc[index].diferenca_valor = props.estoque[item[index].item_id-1]?.valor_atual - e.target.value,
-            setState({...state,itens:[...item]})
+            // setState({...state,itens:[...item]})
+            setItem([...item])
             setCalc([...calc])
         }    
     }
@@ -64,15 +58,29 @@ export function NovoInventario(props){
         }
     }
     function limparItem(){
-        setState({data:'',responsavel_id:'',itens:[{item_id:'',qtd_atual:'',valor_atual:'',valor_anterior:'',qtd_anterior:'',diferenca_qtd:'',diferenca_valor:'',lote:''}]})
+        setState({data:'',responsavel_id:'',itens:[]})
+        setItem([{item_id:'',qtd_atual:'',valor_atual:'',valor_anterior:'',qtd_anterior:'',diferenca_qtd:'',diferenca_valor:'',lote:''}])
         setCalc([{diferenca_qtd:'',diferenca_valor:''}])
     }
     useEffect(()=>{
         if(props.inventario?.id != null|| props.inventario?.id != undefined){
-            setState({...state,data:props.inventario.data.split('-').reverse().join('/'), responsavel_id:props.inventario.responsavel_id})
-            props.inventario?.itens.map((item)=>{
-            setState({...state,itens:[{item_id:item.item_id, qtd_atual:item.qtd_atual, valor_atual:item.valor_atual, valor_anterior:item.valor_anterior, qtd_anterior:item.qtd_anterior, lote:item.lote}]})
-        })
+            setState({...state,data:props.inventario.data, responsavel_id:props.inventario.responsavel_id})
+            const editItem = props.inventario.itens.map((item)=>({
+                id:item.id,
+                item_id:item.item_id,
+                qtd_atual:item.qtd_atual,
+                valor_atual:item.valor_atual,
+                qtd_anterior: item.qtd_anterior,
+                lote:item.lote,
+                valor_anterior:item.valor_atual,
+
+            }))
+            const editcalc = props.inventario.itens.map(item=>({
+                diferenca_qtd:item.diferenca_qtd,
+                diferenca_valor:item.diferenca_valor,
+            }))
+            setItem(editItem)
+            setCalc(editcalc)
        }else{
            limparItem()
        }
@@ -80,14 +88,14 @@ export function NovoInventario(props){
 
     useEffect(()=>{
         setState({...state,itens:item})
-    },[])
-    console.log(state);
+    },[item])
     return(
         <Modal
             open={props.openModal}
             onClose={()=>{props.onClose(), limparItem()}}
             header='Inventário'
             onSave = {()=>props.onSave(props.inventario?.id ,state)}
+            // onSave = {()=>console.log(state)}
             //enviando informações para o botão save
         >
             <CssBaseline />
@@ -126,106 +134,75 @@ export function NovoInventario(props){
                     </Grid>  
                 </Grid>            
                 
-                {state.itens?.map((itens, index)=>(
-                    <Grid key={index} container my={3}>
-                        <Grid item xs={11} container spacing={3}>
-                            <Divider />
-                            <Grid item xs={8}>
-                                <TextField
-                                    select
-                                    value={itens.item_id}
-                                    name="item_id"
-                                    label='Itens'
-                                    fullWidth
-                                    variant="outlined"
-                                    onChange={(e)=> onSetItem(e,index)}
-                                    // {...register(`itens.${index}.item_id`)}
-                                >
-                                    {props.estoque?.map((item, index)=>(
-                                        <MenuItem key={index} value={item.item_id}>{`${props.itens[item.item_id]?.codigo} - ${props.itens[item.item_id]?.nome} - Lote: ${item.lote} - Validade: ${item.data_validade.split('-').reverse().join('/')} - Fator embalagem: ${item.fator_embalagem}`}</MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-
-                            <Grid item xs={2}>
-                                <TextField
-                                    value={itens.qtd_atual}
-                                    name="qtd_atual"
-                                    label='Qtd Atual'
-                                    fullWidth
-                                    variant="outlined"
-                                    onChange={(e)=> onSetItem(e,index)}
-                                    // {...register(`itens.${index}.d_frequencia_entrega`)}
-                                />
-                            </Grid>
-                            
-                            <Grid item xs={2}>
-                                <TextField
-                                    value={itens.valor_atual}
-                                    name="valor_atual"
-                                    label='Valor atual'
-                                    fullWidth
-                                    variant="outlined"
-                                    // startAdornment='R$'
-                                    onChange={(e)=> onSetItem(e,index)}
-                                    // {...register(`itens.${index}.quantidade_limite`)}
-                                />
-                            </Grid>
-
-
-                            <Grid item xs={2}>
-                                <TextField
-                                    value={itens.qtd_anterior}
-                                    name="qtd_anterior"
-                                    label='Quantidade anterior'
-                                    fullWidth
-                                    variant="filled"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                            />
-                            </Grid>
-
-                            <Grid item xs={4}>
-                                <TextField
-                                    value={calc[index]?.diferenca_qtd}
-                                    name="diferenca_qtd"
-                                    label='Diferença de quantidade'
-                                    fullWidth
-                                    variant="filled"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    // {...register(`itens.${index}.quantidade_limite`)}
-                                />
-                            </Grid>
-                            <Grid item xs={4}>
-                                <TextField
-                                    value={calc[index]?.diferenca_valor}
-                                    name="diferenca_valor"
-                                    label='Diferença de valor'
-                                    fullWidth
-                                    variant="filled"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    // {...register(`itens.${index}.quantidade_limite`)}
-                                />
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={1} display='flex' alignItems='center' justifyContent='center'>
-                            <Grid display='flex' item xs={12} sm={1}>
-                            <IconButton
+                {item?.map((itens, index)=>(
+                    <Box marginTop={7}>
+                        <Grid key={index} container my={3}>
+                            <Grid item xs={11} container spacing={3}>
+                                <Grid item xs={8}>
+                                    <TextField
+                                        select
+                                        value={itens.item_id}
+                                        name="item_id"
+                                        label='Itens'
+                                        fullWidth
+                                        variant="outlined"
+                                        onChange={(e)=> onSetItem(e,index)}
+                                    >
+                                        {props.estoque?.map((item, index)=>(
+                                            <MenuItem key={index} value={item.item_id}>{`${props.itens[item.item_id]?.codigo} - ${props.itens[item.item_id]?.nome} - Lote: ${item.lote} - Validade: ${item.data_validade.split('-').reverse().join('/')} - Fator embalagem: ${item.fator_embalagem}`}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Grid>
+    
+                                <Grid item xs={2}>
+                                    <TextField
+                                        value={itens.qtd_atual}
+                                        name="qtd_atual"
+                                        label='Qtd Atual'
+                                        fullWidth
+                                        variant="outlined"
+                                        onChange={(e)=> onSetItem(e,index)}
+                                    />
+                                </Grid>
                                 
-                                onClick={()=>{onDeleteItem(index)}}
-                            >
-                                <ClearIcon sx={{color:'red'}} />
-                            </IconButton>
+                                <Grid item xs={2}>
+                                    <TextField
+                                        value={itens.valor_atual}
+                                        name="valor_atual"
+                                        label='Valor atual'
+                                        fullWidth
+                                        variant="outlined"
+                                        onChange={(e)=> onSetItem(e,index)}
+                                    />
+                                </Grid>
+                                <Grid item xs={3}>
+                                    <Typography variant='body2'>Quantidade anterior</Typography>
+                                    <Typography variant='body2'>{itens.qtd_anterior}</Typography>
+                                </Grid>
+    
+                                <Grid item xs={3}>
+                                    <Typography variant='body2'>Diferença de quantidade</Typography>
+                                    <Typography variant='body2'>{calc[index]?.diferenca_qtd}</Typography>
+                                </Grid>
+                                <Grid item xs={3}>
+                                    <Typography variant='body2'>Diferença de valor</Typography>
+                                    <Typography variant='body2'> {calc[index]?.diferenca_valor}</Typography>
+                                </Grid>
                             </Grid>
-                        </Grid>    
-                    </Grid>
-                ))}
-                <Divider />
+                            <Grid item xs={1} display='flex' alignItems='center' justifyContent='center'>
+                                <Grid display='flex' item xs={12} sm={1}>
+                                <IconButton
+                                    
+                                    onClick={()=>{onDeleteItem(index)}}
+                                >
+                                    <ClearIcon sx={{color:'red'}} />
+                                </IconButton>
+                                </Grid>
+                            </Grid>    
+                        </Grid>
+                        <Divider />
+                    </Box>
+                    ))}
                 <Box display='flex' justifyContent={'center'} my={2}>
                     <Button
                         variant='outlined'

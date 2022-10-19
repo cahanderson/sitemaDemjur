@@ -12,28 +12,22 @@ import useSolicitacaoStore from "@/hooks/solicitacao";
 export default function Solicitacoes(){   
     const router = useRouter();
     const [state, setState] = useState({
-        buscaSolicitacao: '',
         data:[],
-        data_id:[],
+        filter:[],
+        buscaSolicitacao: '',
         buscaCPF: '',
         buscaNome: '',
-        buscaMae: '',
         tableCheckbox: false,
-        form:false,
     });
     const addData = useSolicitacaoStore(state=>state.addData);
-
-    useEffect(()=>{
-        onLoadSolicitacao()
-    },[])
-    function onLoadSolicitacao(){
+    function onLoad(){
         Solicitacao.getAll()
         .then((result)=>{
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setState({...state, data:result.data.data})
+        setState({...state, data:result.data.data, filter:result.data.data})
         })
     }
     const columns = [
@@ -48,7 +42,7 @@ export default function Solicitacoes(){
           ]
         }
     ]
-    const rows = state.data?.map((row)=>({
+    const rows = state.filter?.map((row)=>({
         id:row.id,
         solicitacao:row.numero_solicitacao,
         nome:row.beneficiario?.nome,
@@ -60,14 +54,9 @@ export default function Solicitacoes(){
     function onEdit(id){
         Solicitacao.getById(id).
         then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-            }
-            // setState({...state, data_id:result.data})
             addData(result.data)
             router.push('/solicitacao/form')
         })
-
     }
     function onDelete(id){
         if(confirm('Realmente deseja apagar?')){
@@ -78,26 +67,24 @@ export default function Solicitacoes(){
                 }else{
                     setState({...state, openSnakebar:true, message:'Apagado com Sucesso', statusSnake:'success'});  
                 }    
-                onLoadSolicitacao()
+                onLoad()
             })    
         }else return;   
     }
-    console.log(state.data_id);
-
-    // function pesquisar(buscaSolicitacao,buscaCPF,buscaNome,buscaMae){
-    //     if(buscaSolicitacao !==''){
-    //         setState({...state, filter: data.filter((data)=>data.solicitacoes.toUpperCase().startsWith(buscaSolicitacao.toUpperCase()))})
-    //     }else if(buscaCPF !==''){
-    //         setState({...state, filter: data.filter((data)=>data.cpf.startsWith(buscaCPF))})
-    //     }else if(buscaNome !==''){
-    //         setState({...state, filter: data.filter((data)=>data.nome.toUpperCase().startsWith(buscaNome.toUpperCase()))})
-    //     }else if(buscaMae !==''){
-    //         setState({...state, filter:data.filter((data)=>data.nome_da_mae.toUpperCase().startsWith(buscaMae.toUpperCase()))})
-    //     }else{
-    //         setState({...state, filter:data.filter((data)=>data.nome_da_mae.toUpperCase().startsWith(buscaMae.toUpperCase()))})
-    //     };
-    // }
-
+    function pesquisar(solicitacao,cpf, nome){
+        if(solicitacao){
+            setState({...state, filter: state.data?.filter((data)=>{return data.name?.toUpperCase().startsWith(nome?.toUpperCase())})})
+        }else if(cpf){
+            setState({...state, filter: state.data?.filter((data)=>{return data.email?.toUpperCase().startsWith(email?.toUpperCase())})})
+        }else if(nome){
+            setState({...state, filter: state.data?.filter((data)=>{return data.beneficiario?.nome.toUpperCase().startsWith(nome?.toUpperCase())})})
+        }else{
+            setState({...state, filter:state.data})
+        }
+    }
+    useEffect(()=>{
+        onLoad()
+    },[])
     return(
         <AppLayout>
             <CssBaseline />
@@ -129,7 +116,7 @@ export default function Solicitacoes(){
             </Box>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} sm={2}>
+                    <Grid item xs={12} sm={4}>
                         <TextField
                         label="Nº da solicitação"
                         fullWidth
@@ -137,7 +124,7 @@ export default function Solicitacoes(){
                         onChange={(e) => setState({...state, buscaSolicitacao: e.target.value})}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={2}>
+                    <Grid item xs={12} sm={4}>
                         <TextField
                         label="CPF"
                         fullWidth
@@ -153,14 +140,6 @@ export default function Solicitacoes(){
                         onChange={(e) => setState({...state, buscaNome:e.target.value})}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <TextField
-                        label="Nome da mãe"
-                        fullWidth
-                        variant="outlined"
-                        onChange={(e) => setState({...state, buscaMae:e.target.value})}
-                        />
-                    </Grid>
                 </Grid>
                 <Box 
                     my={3}
@@ -169,7 +148,7 @@ export default function Solicitacoes(){
                 >
                     <Button 
                         variant="outlined"
-                        onClick={()=> pesquisar(state.buscaSolicitacao,state.buscaCPF,state.buscaNome,state.buscaMae)}
+                        onClick={()=> pesquisar(state.buscaSolicitacao,state.buscaCPF,state.buscaNome)}
                     >
                         Pesquisar
                     </Button>

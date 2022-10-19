@@ -105,6 +105,28 @@ const getNumeroSolicitacoes = async () =>{
       return error;
   }
 };
+const deleteById = async (id)=> {
+  try {
+    await axios.delete(`/api/movimentacao/${id}`);
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao apagar o registro.');
+  }
+};
+const getById = async (id) => {
+  try {
+    const { data } = await axios.get(`/api/movimentacao/${id}`);
+
+    if (data) {
+      return data;
+    }
+
+    return new Error('Erro ao consultar o registro.');
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao consultar o registro.');
+  }
+};
 
 export const Movimentacoes = {
     getAll,
@@ -115,4 +137,6 @@ export const Movimentacoes = {
     getEstabelecimento,
     updateFile,
     getNumeroSolicitacoes,
+    deleteById,
+    getById,
   };

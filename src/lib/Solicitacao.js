@@ -16,7 +16,6 @@ const getAll = async () =>{
       return error;
   }
 };
-
 const getEstabelecimento = async () =>{
   try {
       const{data} = await axios.get('/api/estabelecimentos')
@@ -189,6 +188,20 @@ const getById = async (id) => {
     return new Error('Erro ao consultar o registro.');
   }
 };
+const getPessoaById = async (id) => {
+  try {
+    const { data } = await axios.get(`/api/pessoa/${id}`);
+
+    if (data) {
+      return data;
+    }
+
+    return new Error('Erro ao consultar o registro.');
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao consultar o registro.');
+  }
+};
 const getPessoaByCpf = async (cpf) => {
   try {
     const { data } = await axios.get(`/api/pessoa/get-beneficiario/${cpf}`);
@@ -201,6 +214,14 @@ const getPessoaByCpf = async (cpf) => {
   } catch (error) {
     console.error(error);
     return new Error('Erro ao consultar o registro.');
+  }
+};
+const updateById = async (id, dados) => {
+  try {
+    await axios.put(`/api/solicitacao/${id}`, dados);
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao atualizar o registro.');
   }
 };
 export const Solicitacao = {
@@ -217,5 +238,7 @@ export const Solicitacao = {
   create,
   deleteById,
   getById,
-  getPessoaByCpf
+  getPessoaByCpf,
+  getPessoaById,
+  updateById
 };

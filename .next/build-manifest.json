@@ -25,11 +25,6 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/relatorio": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/relatorio.js"
-    ],
     "/solicitacao": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",

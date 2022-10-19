@@ -21,7 +21,7 @@ export function DispensacaoCliente(props){
     const rowsForm = props.estoque?.map((row)=>({
         id:row.id,
         item_id: row.item_id,
-        item_nome: row.item.nome,
+        item_nome: row.item?.nome,
         lote:row.lote,
         data_validade:row.data_validade.split('-').reverse().join('/'),
         fator_embalagem:row.fator_embalagem,

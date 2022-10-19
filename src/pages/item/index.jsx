@@ -3,7 +3,7 @@ import { Table } from "@/components/Table";
 import { PrincAtivo } from "@/lib/princAtivo";
 import { Categoria } from "@/lib/categoria";
 import { Itens } from "@/lib/item";
-import { Box, Button, CssBaseline, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
+import { Box, Button, CssBaseline, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { NovoItem } from '../../components/Modal/itens';
 import { GridActionsCellItem } from "@mui/x-data-grid";
@@ -16,35 +16,34 @@ export default function Item(){
     const [princAtivo, setPrincAtivo] = useState([])
     const [categoria, setCategoria] = useState([])
     const [tipoItem, setTipoItem] = useState()
+    const [editItem, setEditItem] = useState([])
     const [state, setState] = useState({
         codigo: '',
-        nome: '',
+        descricao: '',
         principio_ativo: '',
         d_tipo: '',
         categoria_id: '',
         tableCheckbox: false,
         dataItens:[],
-        item:[],
+        filter:[],
     });
-    const [dataItens, setDataItens] = useState({
-        dataItens:[],
-    })
+    const [dataItens, setDataItens] = useState([])
     const [item, setItem] = useState({
         itens:[]
     })
-    const rows = state.dataItens?.map((row)=>({
+    const rows = state.filter?.map((row)=>({
         id : row.id,
         codigo:row.codigo,
         nome:row.nome,
-        principio_ativo:princAtivo[row.principio_ativo_id - 1]?.nome,
-        tipo:tipoItem[row.d_tipo-1].descricao,
-        categoria:categoria[row.categoria_id-1]?.nome,
+        principio_ativo:row.principio_ativo.nome,
+        // tipo:tipoItem[row.d_tipo-1]?.descricao,
+        categoria:row.categoria.nome,
     }));
     const columns = [
         { field: 'codigo', headerName: 'Código', width: 180 },
         { field: 'nome', headerName: 'Descrição', width: 150 },
         { field: 'principio_ativo', headerName: 'Princípio Ativo', width: 400 },
-        { field: 'tipo', headerName: 'Tipo', width: 210 },
+        // { field: 'tipo', headerName: 'Tipo', width: 210 },
         { field: 'categoria', headerName: 'Categoria', width: 210 },
         { field: 'actions',type:'actions',getActions: (params) => [
             <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
@@ -58,12 +57,22 @@ export default function Item(){
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
             }
-            setState({...state, item:result.data})
-            setOpenModal(false)
+            setEditItem(result.data)
+            setOpenModal(true)
         })
-    }  
+    }
+    function onLoadItens(){
+        Itens.getAll()
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setDataItens(result.data.data)
+            setState({...state, filter:result.data.data})
+        });
+    }
     function onLoad(){
-        
         Itens.getTipoItem()
         .then((result)=>{
             if(result instanceof Error){
@@ -81,17 +90,6 @@ export default function Item(){
             }
             setPrincAtivo(result.data.data)
         });
-
-        Itens.getAll()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setDataItens({...dataItens, dataItens:result.data.data})
-            setState({...dataItens, dataItens:result.data.data})
-        });
-
         Categoria.getAll()
         .then((result)=>{
             if(result instanceof Error){
@@ -99,7 +97,6 @@ export default function Item(){
                 return;
             }
             setCategoria(result.data.data)
-            console.log(result);
         });
 
     }
@@ -114,71 +111,65 @@ export default function Item(){
                 }    
                 onLoadItens()
             })    
-        }else return;   
+        } 
     }
     function onSave(){
-        if(item.itens){
-            if(id === undefined){
-                Itens.create(item).then((result)=>{
-                    if(result instanceof Error){
-                        setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
-                            return;
-                        }
-                })
-            }else{
-                Itens.updateById({id,item}).
-                then((result)=>{
-                    if(result instanceof Error){
-                        setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+        if(id){
+            Itens.updateById(id,item).
+            then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                    return;
+                }
+                setId(null)
+            }) 
+        }else{
+            Itens.create(item).then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
                         return;
                     }
-                    setId(null)
-                })  
-            }
-            setOpenModal(false)
-        }else{return;}
-        
+            })
+        }
+        setOpenModal(false)
+        onLoadItens()
     }
-    function guardaItem(id, item){
+    function guardaItem(id,item){
         setItem({itens:item})
         setId(id)
     }
 
     useEffect(()=>{
         onLoad()
+    },[])
+
+    useEffect(()=>{
+        onLoadItens()
     },[openModal])
     
     useEffect(()=>{
+        if(item.itens!=''){
             onSave()
+        }
     },[item])
 
-    function pesquisar(codigo,nome,principio_ativo,d_tipo,categoria_id){
-            setDataItens({dataItens: state.dataItens?.filter((item)=> { return item.codigo.includes(codigo)})})
-            console.log(dataItens);
-        // }else if(buscaDescricao !==''){
-        //     setState({...state, filter: data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-        // }else if(buscaPrincAtivo !==''){
-        //     setState({...state, filter: data.filter((data)=>data.princAtivo.toUpperCase().startsWith(buscaPrincAtivo.toUpperCase()))})
-        // }else if(buscaTipo!==''){
-        //     setState({...state, filter:data.filter((data)=>data.tipo.toUpperCase().startsWith(buscaTipo.toUpperCase()))})
-        // }else if(buscaValidade!==''){
-        //     setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaValidade.toUpperCase()))})
-        // }else if(buscaCategoria!==''){
-        //     setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaCategoria.toUpperCase()))})
-        // }else{
-        //     setState({...state, filter:data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-        // };
-    }    
-        // function pesquisar(codigo,nome,principio_ativo,d_tipo,categoria_id){
-        //     Objectkeys(dataItens).foreach((item)=>{
-        //         setState({...state, filter: state.data?.filter((data)=>{return data.name?.toUpperCase().startsWith(busca?.toUpperCase())})})
-        //     })
-            
-        // }
-        // dataItens.dataItens.map((item)=>{
-            // console.log(dataItens.dataItens?.filter((item)=> { return item.codigo.includes(123)}))
-            // console.log(item);
-        // })
+    function pesquisar(codigo, descricao,principio_ativo, d_tipo, categoria){
+        if(codigo){
+            setState({...state, filter: dataItens?.filter((data)=>{return data.codigo?.startsWith(codigo)})})
+        }else if(descricao){
+            setState({...state, filter: dataItens?.filter((data)=>{return data.nome?.toUpperCase().startsWith(descricao?.toUpperCase())})})
+        }else if(principio_ativo){
+            setState({...state, filter: dataItens?.filter((data)=>{return data.principio_ativo?.nome.toUpperCase().includes(principio_ativo.toUpperCase())})})
+        }else if(principio_ativo){
+            setState({...state, filter: dataItens?.filter((data)=>{return data.d_tipo?.includes(d_tipo)})})
+        }else if(categoria){
+            setState({...state, filter: dataItens?.filter((data)=>{return data.categoria?.nome.toUpperCase().includes(categoria.toUpperCase())})})
+        }else{
+            setState({...state, filter: dataItens})
+        }
+        
+    }
+    console.log(state.filter);
     return(
         <AppLayout>
             <CssBaseline />
@@ -223,7 +214,7 @@ export default function Item(){
                         label="Descrição"
                         fullWidth
                         variant="outlined"
-                        onChange={(e) => setState({...state, nome:e.target.value})}
+                        onChange={(e) => setState({...state, descricao:e.target.value})}
                         />
                     </Grid>
                     <Grid item xs={12} sm={3}>
@@ -236,7 +227,7 @@ export default function Item(){
                             onChange={(e) => setState({...state, principio_ativo:e.target.value})}
                         >
                             {princAtivo?.map((item, index)=>(
-                                <MenuItem key={index} value={item.id}>{item.nome}</MenuItem>
+                                <MenuItem key={index} value={item.nome}>{item.nome}</MenuItem>
                             ))}
                         </TextField>
                     </Grid>
@@ -249,7 +240,7 @@ export default function Item(){
                             onChange={(e) => setState({...state, d_tipo:e.target.value})}
                         >
                             {tipoItem?.map((item, index)=>(
-                                <MenuItem key={index} value={item.id}>{item.descricao}</MenuItem>
+                                <MenuItem key={index} value={item.descricao}>{item.descricao}</MenuItem>
                             ))}
                         </TextField>    
                     </Grid>
@@ -262,7 +253,7 @@ export default function Item(){
                             onChange={(e) => setState({...state, categoria_id:e.target.value})}
                         >
                             {categoria?.map((item, index)=>(
-                                <MenuItem key={index} value={item.id}>{item.nome}</MenuItem>
+                                <MenuItem key={index} value={item.nome}>{item.nome}</MenuItem>
                             ))}
                         </TextField>
                     </Grid>
@@ -281,7 +272,7 @@ export default function Item(){
                         <Button
                             
                             variant="outlined"
-                            onClick={()=> pesquisar(state.codigo,state.nome,state.principio_ativo,state.categoria_id)}
+                            onClick={()=> pesquisar(state.codigo, state.descricao, state.principio_ativo, state.d_tipo, state.categoria_id)}
                         >
                             Pesquisar
                         </Button>
@@ -297,7 +288,7 @@ export default function Item(){
                 <NovoItem
                     openModal={openModal} 
                     onClose={() => setOpenModal(false)}
-                    editItem={state?.item}
+                    editItem={editItem}
                     Save = {(id,item)=> guardaItem(id,item)}
                     princAtivo = {princAtivo}
                     tipo = {tipoItem}

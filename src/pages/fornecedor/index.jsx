@@ -7,16 +7,16 @@ import { NovoFornecedor } from "@/components/Modal/fonecedor";
 import { Table } from "@/components/Table";
 import { Fornecedor } from "@/lib/fornecedor";
 import { GridActionsCellItem } from "@mui/x-data-grid";
+import { mask, unMask } from 'remask'
 
 export default function Item(){
-
+    const[openModal, setOpenModal] = useState(false)
     const [state, setState] = useState({
         buscaFornecedor: '',
-        buscaCpf: null,
-        buscaTelefone: '',
+        buscaCnpj: '',
         tableCheckbox: false,
         data:[],
-        openModal:false,
+        filter:[],
         fornecedor:[],
     });
     const [pessoa, setPessoa] = useState({
@@ -24,7 +24,6 @@ export default function Item(){
         "is_prescritor": false,
         "is_fornecedor": true,
     });
-
     function onLoad(pessoa){
         Fornecedor.getPessoa(pessoa)
         .then((result)=>{
@@ -32,11 +31,8 @@ export default function Item(){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setState({...state, data:result.data.data})
-            
-
+            setState({...state, data:result.data.data, filter:result.data.data})
     })}
-
     function onDelete(id){
         if(confirm('Realmente deseja apagar?')){
             Fornecedor.deleteById(id)
@@ -50,18 +46,17 @@ export default function Item(){
             })    
         }else return;   
     }
-
     function onEdit(id){
         Fornecedor.getById(id).
         then((result)=>{
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
             }
-            setState({...state, fornecedor:result.data, openModal:true})
+            setState({...state, fornecedor:result.data})
+            setOpenModal(true)
             
         })
     }
-
     function onSave(fornecedor,id){
         if(id){
             Fornecedor.updateById(id, fornecedor).
@@ -70,21 +65,21 @@ export default function Item(){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
                 }
-                setState({...state,openModal:false})
+                setOpenModal(false)
             })   
         }else{
-        Fornecedor.create(fornecedor).then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
-                    return;
-                }
-            setState({...state, openModal:false})
-        })
+            Fornecedor.create(fornecedor).then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                        return;
+                    }
+                setOpenModal(false)
+            })
         }
     }
     const columns = [
         { field: 'nome', headerName: 'Nome/Fornecedor', width: 300 },
-        { field: 'cpf', headerName: 'CPF', width: 280 },
+        // { field: 'cpf', headerName: 'CPF', width: 280 },
         { field: 'cnpj', headerName: 'CNPJ', width: 280 },
         { field: 'telefone', headerName: 'Telefone', width: 280 },
         { field: 'actions',type:'actions',getActions: (params) => [
@@ -94,38 +89,27 @@ export default function Item(){
         }
 
     ]
-    const rows = state.data.map((row)=>({
+    const rows = state.filter.map((row)=>({
         id:row.id,
-        cpf:row.cpf,
         cnpj: row.cnpj,
         nome:row.nome,
         telefone:row.telefone,
     }));
-
     useEffect(()=>{
         onLoad(pessoa);
-    },[state.openModal])
+    },[openModal])
     // }
 
-    // function pesquisar(buscaCodigo,buscaDescricao,buscaPrincAtivo,buscaLote,buscaValidade,buscaCategoria){
-    //     if(buscaCodigo !==''){
-    //         setState({...state, filter: data.filter((data)=>data.codigo.startsWith(buscaCodigo))})
-    //     }else if(buscaDescricao !==''){
-    //         setState({...state, filter: data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-    //     }else if(buscaPrincAtivo !==''){
-    //         setState({...state, filter: data.filter((data)=>data.princAtivo.toUpperCase().startsWith(buscaPrincAtivo.toUpperCase()))})
-    //     }else if(buscaLote!==''){
-    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaLote.toUpperCase()))})
-    //     }else if(buscaValidade!==''){
-    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaValidade.toUpperCase()))})
-    //     }else if(buscaCategoria!==''){
-    //         setState({...state, filter:data.filter((data)=>data.lote.toUpperCase().startsWith(buscaCategoria.toUpperCase()))})
-    //     }else{
-    //         setState({...state, filter:data.filter((data)=>data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase()))})
-    //     };
-    // }
-
-
+    function pesquisar(fornecedor,cnpj){
+        if(fornecedor){
+            setState({...state, filter: state.data?.filter((data)=>{return data.nome?.toUpperCase().startsWith(fornecedor?.toUpperCase())})})
+        }else if(cnpj){
+            setState({...state, filter: state.data?.filter((data)=>{return data.cnpj?.startsWith(cnpj)})})
+        }else{
+            setState({...state, filter:state.data})
+        }
+        console.log(state.filter);
+    }
     return(
         <AppLayout>
             <CssBaseline />
@@ -148,7 +132,7 @@ export default function Item(){
                 <Box alignItems='center' display='flex'>
                     <Button 
                         variant="outlined"
-                        onClick={() => {setState({...state,fornecedor:[], openModal:true})}}   
+                        onClick={() => {setState({...state,fornecedor:[]}),setOpenModal(true)}}   
                     >
                          Novo Fornecedor
                     </Button>
@@ -159,6 +143,7 @@ export default function Item(){
                 <Grid container spacing={3} mb={4}>
                     <Grid item xs={12} sm={5}>
                         <TextField
+                        value={state.buscaFornecedor}
                         label="Fornecedor"
                         name='fornecedor'
                         fullWidth
@@ -169,17 +154,18 @@ export default function Item(){
                     </Grid>
                     <Grid item xs={12} sm={3}>
                         <TextField
+                        value={mask(state.buscaCnpj,['99.999.999/9999-99'])}
                         label="CPF/CNPJ"
                         fullWidth
                         variant="outlined"
-                        onChange={(e) => setState({...state, buscaCpf:e.target.value})}
+                        onChange={(e) => setState({...state, buscaCnpj:unMask(e.target.value)})}
                         />
                     </Grid>
                     <Grid item xs={12} sm={4} display='flex' alignItems='center' justifyContent='end' mb={1}>
                         <Button
                         
                         variant="outlined"
-                        onClick={()=> pesquisar(state.buscaFornecedor,state.buscaCpf)}
+                        onClick={()=> pesquisar(state.buscaFornecedor,state.buscaCnpj)}
                     >
                             Pesquisar
                         </Button>  
@@ -193,8 +179,8 @@ export default function Item(){
                 />
 
                 <NovoFornecedor
-                    openModal={state.openModal} 
-                    onClose={() => setState({...state, openModal: false})} 
+                    openModal={openModal} 
+                    onClose={() => setOpenModal(false)} 
                     fornecedor={state.fornecedor}
                     Save = {(fornecedor,id)=> onSave(fornecedor,id)}
                     // keyDown = {(event, data) => handleKeyDown(event, data)}

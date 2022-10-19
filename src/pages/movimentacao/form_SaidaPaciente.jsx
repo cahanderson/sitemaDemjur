@@ -12,13 +12,19 @@ import { Solicitacao } from "@/lib/solicitacao";
 import { Estoque } from "@/lib/estoque";
 import { Table } from "@/components/Table";
 import { GridActionsCellItem } from "@mui/x-data-grid";
+import { useRouter } from "next/router";
+import useMovimentacaoSaidaPacienteStore from "@/hooks/movimentacaoSaidaPaciente";
+import { mask, unMask } from 'remask'
 
 export default function Paciente(){
 
     let tableCheckbox = false;
     let itemEditado = []
     let soma=0.0;
+    const router = useRouter()
+    const dados = useMovimentacaoSaidaPacienteStore(state=>state.datas)
     const [isEfetivado, setIsEfetivado] = useState(false)
+    const [dataId, setDataId] = useState('')
     const [tabelaItensDefinidos, setTabelaItensDefinidos] = useState(false)
     const [quantidade, setQuantidade] = useState()
     const [nSolicitacoes, setNSolicitacoes] = useState([''])
@@ -31,7 +37,7 @@ export default function Paciente(){
     const [itensInseridos, setItensInseridos] = useState([])
     const [state, setState] = useState({
         solicitacao_id:'',
-        d_tipo_movimentacao:'',
+        d_tipo_movimentacao:null,
         movimentable_id:'',
         data: '',
         documento: "URI::localhost",
@@ -60,17 +66,7 @@ export default function Paciente(){
         data_validade:row.data_validade.split('-').reverse().join('/'),
     }));
 
-
     function onLoad(){
-        Itens.getAll()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setDataItens(result.data.data)
-        });
-
         Itens.getAll()
         .then((result)=>{
             if(result instanceof Error){
@@ -89,6 +85,31 @@ export default function Paciente(){
             setNSolicitacoes(result.data)
         });
     }
+    function onLoadEdit(data){
+        setTabelaItensDefinidos(true);
+        const itensEdit = data.itens?.map((item)=>({
+            id:item.id,
+            item_id:item.item_id,
+            quantidade:item.quantidade,
+            fator_embalagem:item.fator_embalagem,
+            data_validade:item.data_validade,
+            lote:item.lote,
+            valor_unit:item.valor_unit,
+        }));
+        setIdSolicitacoes(data.solicitacao_id)
+        setState({
+            solicitacao_id:data.solicitacao_id,
+            d_tipo_movimentacao:data.d_tipo_movimentacao,
+            movimentable_id:data.movimentable_id,
+            documento: "URI::localhost",
+            data:data.data,
+            valor:data.valor,
+            is_efetivado:data.is_efetivado,
+            itens: itensEdit,
+        })
+        setItensInseridos(itensEdit)
+        setDataId(data.id)
+    }
     function onLoadSolicitacao(id){
         Solicitacao.getById(id)
         .then((result)=>{
@@ -100,12 +121,12 @@ export default function Paciente(){
             const itemFormated = result.data.itens?.map((item)=>({
                 id:item.id,
                 item_id: item.item_id,
-                item_nome: item.item.nome,
+                item_nome: item.item?.nome,
                 lote:item?.lote,
                 data_validade:item?.data_validade,
                 fator_embalagem:item.fator_embalagem,
                 quantidade:item?.quantidade_mensal,
-                quantidade_limite:item?.item.quantidade_limite,
+                quantidade_limite:item.item?.quantidade_limite,
                 quantidade_atendida:'',
                 mesAtual:'',
             }));
@@ -125,6 +146,7 @@ export default function Paciente(){
     function populaItem(dados){
         let newItens = itensInseridos;
         Object.keys(dados).forEach((i)=>{
+            console.log(dados[i]);
             newItens.push(dados[i])
         })
         setItensInseridos(newItens)
@@ -137,7 +159,7 @@ export default function Paciente(){
         const estoqueEditado = estoque.map((row)=>({
             id:row.id,
             item_id: row.item_id,
-            item_nome:row.item.nome,
+            item_nome:row.item?.nome,
             lote:row.lote,
             data_validade:row.data_validade.split('-').reverse().join('/'),
             fator_embalagem:row.fator_embalagem,
@@ -174,40 +196,62 @@ export default function Paciente(){
         }
         
     }
-    function editSave(data){
+    function editItens(data){
         data.forEach(item=>{
             let editItem = Object.assign({}, item);
-            delete editItem.id
-            delete editItem.item_nome
+            if(editItem.id){
+                delete editItem.id
+            }
+            if(editItem.item_nome){
+                delete editItem.item_nome
+            }
             itemEditado.push(editItem)
         })
-        setState({...state, d_tipo_movimentacao: solicitacao.d_tipo, movimentable_id:solicitacao.beneficiario.id, is_efetivado:isEfetivado,valor: soma, itens: itemEditado})
+        setState({...state,data:solicitacao?.data_entrada, d_tipo_movimentacao:4 ,movimentable_id:solicitacao?.beneficiario.id, is_efetivado:isEfetivado,valor: soma, itens: itemEditado})
     }
     function onSave(data){
         setTabelaItensDefinidos(false)
-        Movimentacoes.create(data).then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
-                    return;
+        if(dataId!=''){
+            Movimentacoes.updateById(dataId,data).then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                        return;
                 }
-                // setMovimentacaoId(result.dados.id)
-        })
-    }
-    useEffect(()=>{
-        if(state.itens){
-            onSave(state)
+            })
+        }else{
+            Movimentacoes.create(data).then((result)=>{
+                if(result instanceof Error){
+                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                        return;
+                    }
+            })
         }
-    },[state.itens])
-
+        router.push('/movimentacao')
+    }
     useEffect(()=>{
         onLoad()
     },[])
+
     useEffect(()=>{
         if(idSolicitacoes){
             onLoadSolicitacao(idSolicitacoes)
         }
     },[idSolicitacoes])
+    
+    useEffect(()=>{
+        if(dados){
+            onLoadEdit(dados)
+        }
+    },[dados])
 
+    useEffect(()=>{
+        if(itensInseridos!=''){
+            editItens(itensInseridos)
+        }
+    },[itensInseridos])
+
+// console.log(dados);
+console.log(state);
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>
@@ -270,7 +314,7 @@ export default function Paciente(){
                     </Grid>
                     <Grid item xs={12} sm={3}>
                         <TextField
-                            id="dateMovimentacao"
+                            value={solicitacao?.data_entrada}
                             name="dateMovimentacao"
                             type="date"
                             label='Data da movimentação'
@@ -293,10 +337,10 @@ export default function Paciente(){
                             <input hidden multiple type="file" />
                         </Button>
                     </Grid>     
-                    <Grid item xs={12} sm={2} mt={1}>
+                    <Grid item xs={12} sm={2} display= 'inline-block' justify-content='space-evenly' align-items='baseline'>
                         {/* <Typography>Documento da dispensação</Typography> */}
                         <Button
-                            sx={{marginTop:'6px'}}
+                            sx={{marginTop:'7px', marginLeft:'20px'}}
                             variant = {isEfetivado ? "outlined" : "contained"}
                             component="label"
                             onClick={()=>setIsEfetivado(!isEfetivado)}    
@@ -362,62 +406,6 @@ export default function Paciente(){
                             </TableBody>
                         </TableMui>
                     </TableContainer>
-                    // <TableContainer>
-                    //     <TableMui sx={{ minWidth: 650 }}>
-                    //         <TableHead>
-                    //             <StyledTableRow>
-                    //                 <StyledTableCell component='th'>Itens </StyledTableCell>
-                    //                 <StyledTableCell component='th'>Qtd Programada</StyledTableCell>
-                    //                 <StyledTableCell component='th'>Qtd.Limite</StyledTableCell>
-                    //                 <StyledTableCell component='th'>Qtd.Atendida</StyledTableCell>
-                    //                 <StyledTableCell component='th'>Mês Atual</StyledTableCell>
-                    //                 <StyledTableCell component='th'>Quantidade</StyledTableCell>
-                    //                 <StyledTableCell component='th'align="center">Ação</StyledTableCell>
-                    //             </StyledTableRow>
-                    //         </TableHead>
-                    //         <TableBody>
-                    //             {itens.map((item, index) => (
-                    //                 <StyledTableRow
-                    //                     key={item.id}
-                    //                     // sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    //                 >
-                    //                     <StyledTableCell >{item.item_nome}</StyledTableCell>
-                    //                     <StyledTableCell >{item.quantidade}</StyledTableCell>
-                    //                     <StyledTableCell >{item.quantidade_limite}</StyledTableCell>
-                    //                     <StyledTableCell >0</StyledTableCell>
-                    //                     <StyledTableCell >0</StyledTableCell>
-                    //                     <StyledTableCell >
-                    //                         <TextField
-                    //                             name="quantidade"
-                    //                             type='number'
-                    //                             label='Qtd Saida'
-                    //                             variant="standard"
-                    //                             onChange={(e)=> {setQuantidade(e.target.value),onLoadEstoque(item.item_id)}}
-                    //                         />
-                    //                     </StyledTableCell>
-                    //                     <StyledTableCell align={"center"}>
-                    //                         <Button
-                    //                             sx={{marginRight:'10px'}}
-                    //                             variant="text"
-                    //                             size="small"
-                    //                             onClick={() =>{setOpenModal(true),onLoadEstoque(item.item_id)}}
-                    //                         >
-                    //                             editar lote
-                    //                         </Button>
-                    //                         <Button
-                    //                             sx={{marginLeft:'10px'}}
-                    //                             variant="contained"
-                    //                             size="small"
-                    //                             onClick={() =>{adicionarItens(quantidade)}}
-                    //                         >
-                    //                             Adcionar
-                    //                         </Button>
-                    //                     </StyledTableCell>
-                    //                 </StyledTableRow>
-                    //             ))}
-                    //         </TableBody>
-                    //     </TableMui>
-                    // </TableContainer>
                 : null}
                 
                 { tabelaItensDefinidos?
@@ -434,7 +422,7 @@ export default function Paciente(){
                 <Divider sx={{marginTop:"100px"}} />
                 <Box display='flex' justifyContent={"end"} gap='10px' p={2}>
                     <Button variant="text" onClick={() => router.push('/movimentacao')}> Cancelar Edição</Button>
-                    <Button variant="contained" onClick={() => editSave(itensInseridos)}> Salvar</Button>
+                    <Button variant="contained" onClick={() => onSave(state)}> Salvar</Button>
                 </Box> 
 
                 <DispensacaoCliente

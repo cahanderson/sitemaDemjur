@@ -12,7 +12,7 @@ export function NovoItem(props){
         principio_ativo_id:'',
         d_tipo:'',
         categoria_id:'',
-        considera_lote_validade:false
+        considera_lote_validade:false,
     }])
 
     useEffect(()=>{
@@ -54,18 +54,16 @@ export function NovoItem(props){
         }else if(e.target.name === 'principio_ativo_id'){
             item[index].principio_ativo_id = e.target.value;
             setItem([...item])
+        }else if(e.target.name === 'check'){
+            item[index].considera_lote_validade = e.target.checked;
+            setItem([...item])
         }
-        // else if(e.target.name === 'check'){
-        //     item[index].categoria = e;
-        //     // setItem([...item])
-        // }
         
     }
     function onDeleteItem(position){
         if(item.length > 1){
             setItem([...item.filter((item,index) => index !== position)])
         }else{
-            // setItem([...item.filter((item,index) => index !== position)])
             limparItem()
         }
     }
@@ -138,7 +136,7 @@ export function NovoItem(props){
                                         onChange={(e)=> onSetItem(e,index)}
                                     >
                                         {props.tipo?.map((tipo, index)=>(
-                                            <MenuItem key={index} value={tipo.id}>{tipo.descricao}</MenuItem>
+                                            <MenuItem key={index} value={tipo.valor}>{tipo.descricao}</MenuItem>
                                         ))}
                                     </TextField>
                                 </Grid>
@@ -163,7 +161,7 @@ export function NovoItem(props){
                                     <FormControl>
                                         <FormControlLabel
                                             name='check'
-                                            onChange={(e)=> onSetItem(e.target.checked,index)}
+                                            onChange={(e)=> onSetItem(e,index)}
                                             control={<Checkbox />} 
                                             label='Considera lote e validade' />    
                                         </FormControl>   

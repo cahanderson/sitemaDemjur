@@ -6,7 +6,7 @@ import { UsuariosService } from '../../lib/usuario'
 import Button from '@/components/Button'
 import AppLayout from '@/components/Layouts/AppLayout'
 import { Table } from '@/components/Table';
-import { Box, Typography, Paper, TextField, Snackbar, CssBaseline, Alert} from '@mui/material'
+import { Box, Typography, Paper, TextField, Snackbar, CssBaseline, Alert, Grid} from '@mui/material'
 import { GridActionsCellItem } from '@mui/x-data-grid'
 
 export default function Usuarios() {
@@ -16,7 +16,8 @@ export default function Usuarios() {
         usuario:[],
         data:[''],
         filter:[],
-        busca:'',
+        buscaNome:'',
+        buscaEmail:'',
         openSnakebar:false,
         statusSnake:'success',
         message:'',
@@ -53,7 +54,6 @@ export default function Usuarios() {
             setState({...state, data:result.data.data, filter:result.data.data, busca:''})
         }) 
     }
-
     function onEdit(id){
         UsuariosService.
         getById(id).
@@ -63,7 +63,6 @@ export default function Usuarios() {
             }
             setState({...state, usuario:result.data, openModal:true})
         })
-        console.log(state.usuario);
     }
 
     function onSave(id,data){
@@ -102,9 +101,14 @@ export default function Usuarios() {
             })    
         }else return;   
     }
-
-    function pesquisar(busca){
-        setState({...state, filter: state.data?.filter((data)=>{return data.name?.toUpperCase().startsWith(busca?.toUpperCase())})})
+    function pesquisar(nome,email){
+        if(nome){
+            setState({...state, filter: state.data?.filter((data)=>{return data.name?.toUpperCase().startsWith(nome?.toUpperCase())})})
+        }else if(email){
+            setState({...state, filter: state.data?.filter((data)=>{return data.email?.toUpperCase().startsWith(email?.toUpperCase())})})
+        }else{
+            setState({...state, filter:state.data})
+        }
     }
 
     function handleKeyDown(event, data){
@@ -166,19 +170,31 @@ export default function Usuarios() {
 
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Box display='flex' flexDirection='row' mt='20px' mb='50px' gap='20px' >
+            <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
                     <TextField
                         id="outlined-size-normal"
                         label="Nome"
-                        // fullWidth
-                        onChange={(e) => setState({...state, busca: e.target.value})}
+                        fullWidth
+                        onChange={(e) => setState({...state, buscaNome: e.target.value})}
                     />
-                    <Button
-                        onClick={()=> pesquisar(state.busca)}
-                        variant="outlined"  
-                    >
-                        Pesquisar
-                    </Button>
-                </Box>   
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        id="outlined-size-normal"
+                        label="Email"
+                        fullWidth
+                        onChange={(e) => setState({...state, buscaEmail: e.target.value})}
+                    />
+                </Grid>
+            </Grid>
+            <Button
+                    onClick={()=> pesquisar(state.buscaNome,state.buscaEmail)}
+                    variant="outlined"  
+                >
+                    Pesquisar
+            </Button>
+                </Box>
                 <Table 
                     columns = {columns}
                     rows = {rows}
