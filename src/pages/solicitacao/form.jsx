@@ -29,6 +29,7 @@ export default function NovaSolicitacao(){
     const [freq, setFreq] = useState([''])
     const [dataItens, setDataItens] = useState([''])
     const [openModal, setOpenModal] = useState(false)
+    const [editReu, setEditReu] = useState([])
     const [state, setState] = useState({
         numero_solicitacao: '',
         d_tipo: '',
@@ -109,14 +110,14 @@ export default function NovaSolicitacao(){
     //         setState({...state.beneficiario, beneficiario:{rua:'',bairro:''}})
     //     }
     // }
-    console.log(data);
+    console.log(editReu);
     const [item, setItem] = useState([{
         item_id: '',
         quantidade_mensal: '',
         d_frequencia_entrega: '',
         quantidade_limite: ''
     }])
-    function onLoad(pessoa){
+    function onLoad(){
         Solicitacao.getEstabelecimento()
         .then((result)=>{
             if(result instanceof Error){
@@ -194,6 +195,16 @@ export default function NovaSolicitacao(){
             setDataItens(result.data.data)
         });
     }
+    function onLoadPrescritor(pessoa){
+        Solicitacao.getPessoa(pessoa)
+        .then((result)=>{
+            if(result instanceof Error){
+                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setPrescritor(result.data.data)
+        });
+    }
     function onAddItem(){
         setItem([...item,{ item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}])
         setState({...state, itens:[...state.itens, {item_id:'',quantidade_mensal:'',d_frequencia_entrega:'',quantidade_limite:''}]})
@@ -251,6 +262,7 @@ export default function NovaSolicitacao(){
                 return;
             }
             setOpenModal(false)
+            onLoadPrescritor(pessoa)
         })  
     }
     function dadosPrescritor(id){
@@ -262,6 +274,14 @@ export default function NovaSolicitacao(){
             }
             setDataPrescritor({conselho_regional: result.data.conselho_regional, registro_conselho: result.data.registro_conselho})
         });
+    }
+    function editSelect(value){
+        setEditReu(typeof value==='string'? value.split(',') : value)
+        reu.forEach(r=>{
+            console.log(r.valor);
+        })
+        // console.log(reu);
+
     }
     function onLoadEdit(data){
         const itensEdit = data.itens?.map((item)=>({
@@ -305,8 +325,10 @@ export default function NovaSolicitacao(){
         })
         setDataId(data.id)
     }
+
     useEffect(()=>{ 
-        onLoad(pessoa)
+        onLoad()
+        onLoadPrescritor(pessoa)
     },[openModal])
 
     useEffect(()=>{
@@ -409,13 +431,13 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={5}>
                             <TextField
-                                value={state.reu_acao}
+                                value={editReu}
                                 select
                                 id="reuAcao"
                                 name="reu_acao"
                                 label="Réu da ação"
                                 fullWidth
-                                onChange={(e) => {setState({...state,reu_acao: e.target.value})}}
+                                onChange={(e) => {editSelect(e.target.value)}}
                                 variant="outlined"
                                 SelectProps={{
                                     multiple:true,

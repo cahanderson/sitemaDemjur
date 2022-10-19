@@ -69,7 +69,7 @@ export default function Saidas(){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setTipo(result.data.dados.filter((tipos)=> {return tipos.metadata?.includes("saida")}))
+            setTipo(result.data.dados.filter((tipos)=> {return (tipos.metadata?.includes('"tipo": "saida"') && !tipos.metadata?.includes('"solicitacao_id": true'))}))
         });
 
         Fornecedor.getPessoa(pessoa)

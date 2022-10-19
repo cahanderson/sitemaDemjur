@@ -10,11 +10,11 @@ import { Box, Typography, Paper, TextField, Snackbar, CssBaseline, Alert, Grid} 
 import { GridActionsCellItem } from '@mui/x-data-grid'
 
 export default function Usuarios() {
-    
+    const [usuario, setUsuario] = useState([])
     const [state, setState] = useState({
         openModal:false,
         usuario:[],
-        data:[''],
+        data:[],
         filter:[],
         buscaNome:'',
         buscaEmail:'',
@@ -61,7 +61,8 @@ export default function Usuarios() {
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
             }
-            setState({...state, usuario:result.data, openModal:true})
+            setState({...state, openModal:true})
+            setUsuario(result.data)
         })
     }
 
@@ -147,7 +148,7 @@ export default function Usuarios() {
                 </Box>
                 <Box alignItems='center' display='flex'>
                     <Button
-                        onClick={() => {setState({...state, usuario:{}, openModal:true})}} 
+                        onClick={() => {setState({...state,openModal:true}), setUsuario([])}} 
                     >
                         Novo usuário
                     </Button>
@@ -207,7 +208,7 @@ export default function Usuarios() {
             <Usuario
                 openModal={state.openModal} 
                 onClose={() => setState({...state, openModal: false})} 
-                usuario={state.usuario}
+                usuario={usuario}
                 onSave = {(id,data)=> onSave(id,data)}
                 keyDown = {(event, data) => handleKeyDown(event, data)}
             /> 

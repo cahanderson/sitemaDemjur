@@ -36,14 +36,14 @@ export default function Item(){
         codigo:row.codigo,
         nome:row.nome,
         principio_ativo:row.principio_ativo.nome,
-        // tipo:tipoItem[row.d_tipo-1]?.descricao,
+        tipo:row.tipo_item.descricao,
         categoria:row.categoria.nome,
     }));
     const columns = [
         { field: 'codigo', headerName: 'Código', width: 180 },
         { field: 'nome', headerName: 'Descrição', width: 150 },
         { field: 'principio_ativo', headerName: 'Princípio Ativo', width: 400 },
-        // { field: 'tipo', headerName: 'Tipo', width: 210 },
+        { field: 'tipo', headerName: 'Tipo', width: 210 },
         { field: 'categoria', headerName: 'Categoria', width: 210 },
         { field: 'actions',type:'actions',getActions: (params) => [
             <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
@@ -160,16 +160,17 @@ export default function Item(){
             setState({...state, filter: dataItens?.filter((data)=>{return data.nome?.toUpperCase().startsWith(descricao?.toUpperCase())})})
         }else if(principio_ativo){
             setState({...state, filter: dataItens?.filter((data)=>{return data.principio_ativo?.nome.toUpperCase().includes(principio_ativo.toUpperCase())})})
-        }else if(principio_ativo){
-            setState({...state, filter: dataItens?.filter((data)=>{return data.d_tipo?.includes(d_tipo)})})
+        }else if(d_tipo){
+            setState({...state, filter: dataItens?.filter((data)=>{return data.tipo_item.descricao?.toUpperCase().includes(d_tipo.toUpperCase())})})
         }else if(categoria){
             setState({...state, filter: dataItens?.filter((data)=>{return data.categoria?.nome.toUpperCase().includes(categoria.toUpperCase())})})
         }else{
             setState({...state, filter: dataItens})
         }
         
+        console.log(d_tipo);
     }
-    console.log(state.filter);
+    console.log(state.filter)
     return(
         <AppLayout>
             <CssBaseline />
