@@ -409,7 +409,7 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={5}>
                             <TextField
-                            value={state.reu_acao}
+                                value={state.reu_acao}
                                 select
                                 id="reuAcao"
                                 name="reu_acao"
@@ -417,6 +417,9 @@ export default function NovaSolicitacao(){
                                 fullWidth
                                 onChange={(e) => {setState({...state,reu_acao: e.target.value})}}
                                 variant="outlined"
+                                SelectProps={{
+                                    multiple:true,
+                                }}
                             >
                                 {reu.map((r, index)=>(
                                     <MenuItem key={index} value={r.valor}>{r.descricao}</MenuItem>

@@ -24,16 +24,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
-    ],
-    "/solicitacao": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/solicitacao.js"
-    ],
-    "/solicitacao/form": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/solicitacao/form.js"
     ]
   },
   "ampFirstPages": []
