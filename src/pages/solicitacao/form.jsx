@@ -4,7 +4,7 @@ import { Box, Button, CssBaseline, Divider, Grid, IconButton, MenuItem, Paper, T
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import ClearIcon from '@mui/icons-material/Clear';
 import AppLayout from "@/components/Layouts/AppLayout";
-import { Solicitacao } from "@/lib/_solicitacao";
+import { Solicitacao } from "@/lib/solicitacao";
 import { NovoPrescritor } from "@/components/Modal/novoPrescritor";
 import { Itens } from "@/lib/item";
 import useSolicitacaoStore from "@/hooks/solicitacao";

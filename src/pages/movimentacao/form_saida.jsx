@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Dispensacao } from "@/components/Modal/dispensacao";
 import { Itens } from "@/lib/item";
 import { Movimentacoes } from "@/lib/movimentacao";
-import { Fornecedor } from "@/lib/_fornecedor";
+import { Fornecedor } from "@/lib/fornecedor";
 import { Estoque } from "@/lib/estoque";
 import { useRef } from "react";
 import useMovimentacaoSaidaStore from "@/hooks/movimentacaoSaida";

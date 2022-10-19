@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { Box, Button, CssBaseline, Grid, Paper, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
-import { Solicitacao } from "@/lib/_solicitacao";
+import { Solicitacao } from "@/lib/solicitacao";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
