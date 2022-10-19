@@ -8,7 +8,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { DispensacaoCliente } from "@/components/Modal/dispensacaoCliente";
 import { Movimentacoes } from "@/lib/movimentacao";
 import { Itens } from "@/lib/item";
-import { Solicitacao } from "@/lib/solicitacao";
+import { Solicitacao } from "@/lib/_solicitacao";
 import { Estoque } from "@/lib/estoque";
 import { Table } from "@/components/Table";
 import { GridActionsCellItem } from "@mui/x-data-grid";

@@ -5,7 +5,7 @@ import { Box, Button, CssBaseline, Grid, Paper, TextField, Typography } from "@m
 import AppLayout from "@/components/Layouts/AppLayout";
 import { NovoFornecedor } from "@/components/Modal/fonecedor";
 import { Table } from "@/components/Table";
-import { Fornecedor } from "@/lib/fornecedor";
+import { Fornecedor } from "@/lib/_fornecedor";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import { mask, unMask } from 'remask'
 
