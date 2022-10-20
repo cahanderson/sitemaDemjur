@@ -137,7 +137,7 @@ export default function Entradas(){
         }
     }
     function onLoadEdit(data){
-        reload(data.d_tipo_movimentacao)
+        // reload(data.d_tipo_movimentacao)
         const itensEdit = data.itens?.map((item)=>({
             id:item.id,
             item_id:item.item_id,
@@ -149,7 +149,7 @@ export default function Entradas(){
         }));
         setState({
             d_tipo_movimentacao:data.d_tipo_movimentacao,
-            movimentable_id:8,
+            movimentable_id:data.movimentable_id,
             documento: "URI::localhost",
             data:data.data,
             valor:data.valor,
@@ -208,6 +208,13 @@ export default function Entradas(){
         }
     },[dados])
 
+    useEffect(()=>{
+        if(state.d_tipo_movimentacao){
+            reload(state.d_tipo_movimentacao)
+        }
+    },[state.d_tipo_movimentacao])
+
+    console.log(state)
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>
@@ -224,7 +231,7 @@ export default function Entradas(){
                                 label="Tipo de entrada"
                                 fullWidth
                                 variant="outlined"
-                                onChange={(e) => {setState({...state, d_tipo_movimentacao: e.target.value}),reload(e.target.value)}}
+                                onChange={(e) => {setState({...state, d_tipo_movimentacao: e.target.value})}}
                             >
                                 {tipo.map((tipo, index)=>(
                                     <MenuItem key={index} value={tipo.valor}>{tipo.descricao}</MenuItem>

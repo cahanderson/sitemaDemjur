@@ -11,6 +11,7 @@ import { GridActionsCellItem } from '@mui/x-data-grid'
 
 export default function Usuarios() {
     const [usuario, setUsuario] = useState([])
+    const[openModal, setOpenModal] = useState(false)
     const [state, setState] = useState({
         openModal:false,
         usuario:[],
@@ -26,7 +27,7 @@ export default function Usuarios() {
 
     useEffect(()=>{
         onLoad()
-    },[state.openModal])
+    },[])
 
     const columns = [
         { field: 'id', headerName: 'ID', width: 70 },
@@ -52,7 +53,7 @@ export default function Usuarios() {
                 return;
             }
             setState({...state, data:result.data.data, filter:result.data.data, busca:''})
-        }) 
+        })
     }
     function onEdit(id){
         UsuariosService.
@@ -61,7 +62,7 @@ export default function Usuarios() {
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
             }
-            setState({...state, openModal:true})
+            setOpenModal(true)
             setUsuario(result.data)
         })
     }
@@ -76,7 +77,6 @@ export default function Usuarios() {
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
                 }
-                setState({...state,openModal:false})
             })   
         }else{
             UsuariosService.create(data).then((result)=>{
@@ -84,9 +84,10 @@ export default function Usuarios() {
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
                         return;
                     }
-                setState({...state, openModal:false})
-            })
-        }
+                })
+            }
+        setOpenModal(false)
+        onLoad()
     }
 
     function onDelete(id){
@@ -98,7 +99,7 @@ export default function Usuarios() {
                 }else{
                     setState({...state, openSnakebar:true, message:'Apagado com Sucesso', statusSnake:'success'});  
                 }    
-                onLoad()
+            onLoad()
             })    
         }else return;   
     }
@@ -121,7 +122,6 @@ export default function Usuarios() {
     function closeSnakebar(){
         setState({...state, openSnakebar:false})
     }
-    // console.log(state.data);
 
   return (
     <AppLayout>
@@ -148,7 +148,7 @@ export default function Usuarios() {
                 </Box>
                 <Box alignItems='center' display='flex'>
                     <Button
-                        onClick={() => {setState({...state,openModal:true}), setUsuario([])}} 
+                        onClick={() => {setOpenModal(true), setUsuario([])}} 
                     >
                         Novo usuário
                     </Button>
@@ -206,8 +206,8 @@ export default function Usuarios() {
     
     
             <Usuario
-                openModal={state.openModal} 
-                onClose={() => setState({...state, openModal: false})} 
+                openModal={openModal} 
+                onClose={() => setOpenModal(false)} 
                 usuario={usuario}
                 onSave = {(id,data)=> onSave(id,data)}
                 keyDown = {(event, data) => handleKeyDown(event, data)}

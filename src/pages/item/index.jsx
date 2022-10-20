@@ -35,9 +35,9 @@ export default function Item(){
         id : row.id,
         codigo:row.codigo,
         nome:row.nome,
-        principio_ativo:row.principio_ativo.nome,
-        tipo:row.tipo_item.descricao,
-        categoria:row.categoria.nome,
+        principio_ativo:row.principio_ativo?.nome,
+        tipo:row.tipo_item?.descricao,
+        categoria:row.categoria?.nome,
     }));
     const columns = [
         { field: 'codigo', headerName: 'Código', width: 180 },

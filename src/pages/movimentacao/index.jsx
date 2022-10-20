@@ -73,6 +73,8 @@ export default function Movimentacao(){
     useEffect(()=>{
         onLoad()
         addDataEntrada('');
+        addDataSaida('');
+        addDataSaidaPaciente('');
     },[])
     useEffect(()=>{
         onLoadTipo()

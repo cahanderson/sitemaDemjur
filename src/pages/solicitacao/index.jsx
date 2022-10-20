@@ -9,7 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import useSolicitacaoStore from "@/hooks/solicitacao";
 
-export default function Solicitacoes(){   
+export default function Solicitacoes(){
     const router = useRouter();
     const [state, setState] = useState({
         data:[],
@@ -50,7 +50,6 @@ export default function Solicitacoes(){
         nome_da_mae:row.beneficiario?.nome_mae,
         dt_nascimento:row.beneficiario?.data_nascimento,
     }));
-
     function onEdit(id){
         Solicitacao.getById(id).
         then((result)=>{
@@ -84,6 +83,7 @@ export default function Solicitacoes(){
     }
     useEffect(()=>{
         onLoad()
+        addData('')
     },[])
     return(
         <AppLayout>

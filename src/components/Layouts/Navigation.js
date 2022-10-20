@@ -93,7 +93,7 @@ const Navigation = ({ user }) => {
                             transformOrigin={{ horizontal: "right", vertical: "top" }}
                             anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                         >
-                            <MenuItem>
+                            {/* <MenuItem>
                                 <Avatar /> Profile
                             </MenuItem>
                             <MenuItem>
@@ -111,7 +111,7 @@ const Navigation = ({ user }) => {
                                     <Settings fontSize="small" />
                                 </ListItemIcon>
                                 Settings
-                            </MenuItem>
+                            </MenuItem> */}
                             <MenuItem onClick={handleLogout}>
                                 <ListItemIcon >
                                     <Logout fontSize="small" />

@@ -37,7 +37,7 @@ export default function Paciente(){
     const [itensInseridos, setItensInseridos] = useState([])
     const [state, setState] = useState({
         solicitacao_id:'',
-        d_tipo_movimentacao:null,
+        d_tipo_movimentacao:4,
         movimentable_id:'',
         data: '',
         documento: "URI::localhost",

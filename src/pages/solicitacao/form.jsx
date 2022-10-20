@@ -30,6 +30,7 @@ export default function NovaSolicitacao(){
     const [dataItens, setDataItens] = useState([''])
     const [openModal, setOpenModal] = useState(false)
     const [editReu, setEditReu] = useState([])
+    const [editCID, setEditCID] = useState([])
     const [state, setState] = useState({
         numero_solicitacao: '',
         d_tipo: '',
@@ -93,24 +94,19 @@ export default function NovaSolicitacao(){
             }
         });
     }
-    // function checkCep(){
-    //     if(state.beneficiario.cep){
-    //         setState({...state,beneficiario:{cep: state.beneficiario.cep?.replace(/\D/g, '')}})
-    //         fetch(`https://viacep.com.br/ws/${state.beneficiario.cep}/json/`).
-    //         then(res => res.json()).
-    //         then(data=>{
-    //             setState({
-    //                 ...state,beneficiario:{
-    //                     bairro:data.bairro, 
-    //                     rua:data.logradouro
-    //                 } 
-    //             })
-    //         })
-    //     }else{
-    //         setState({...state.beneficiario, beneficiario:{rua:'',bairro:''}})
-    //     }
-    // }
-    console.log(editReu);
+    function checkCep(){
+        // setState({...state,beneficiario:{...state.beneficiario, cep:state.beneficiario.cep?.replace(/\D/g, '')}})
+        if(state.beneficiario.cep){
+            setState({...state,beneficiario:{...state.beneficiario, cep:state.beneficiario.cep?.replace(/\D/g, '')}})
+            fetch(`https://viacep.com.br/ws/${state.beneficiario.cep}/json/`).
+            then(res => res.json()).
+            then(data=>{
+                setState({...state,beneficiario:{...state.beneficiario,bairro:data.bairro, rua:data.logradouro}})
+                })
+        }else{
+            setState({...state, beneficiario:{...state.beneficiario,rua:'',bairro:''}})
+        }
+    }
     const [item, setItem] = useState([{
         item_id: '',
         quantidade_mensal: '',
@@ -275,15 +271,61 @@ export default function NovaSolicitacao(){
             setDataPrescritor({conselho_regional: result.data.conselho_regional, registro_conselho: result.data.registro_conselho})
         });
     }
-    function editSelect(value){
-        reu.forEach(r=>{
-            if(r.valor == value){
-
+    function getSelectReu(value){
+        setEditReu(typeof value==='string'? value.split(',') : value)
+    }
+    function editSelectReu(){
+        let newLinha='';
+        editReu.forEach(e=>{
+            let linha = reu.find(r=>r.valor == e)
+            if(newLinha !=''){
+                newLinha = newLinha + `,{'id':'${linha.valor}','descricao':'${linha.descricao}'}`
+            }else{
+                newLinha = `{'id':'${linha.valor}','descricao':'${linha.descricao}'}`
+            }
+            setState({...state, reu_acao:newLinha})
+        })
+    }
+    function getEditReu(value){
+        let linha='';
+        let newLinha = [];
+        linha = value.split("},{");
+        linha.forEach(n=>{
+            if(newLinha!=''){
+                newLinha.push(n.replace(/[^0-9]/g,''))
+            }else{
+                newLinha[0] = n.replace(/[^0-9]/g,'')
             }
         })
-        // console.log(reu);
-        // setEditReu(typeof value==='string'? value.split(',') : value)
-
+        setEditReu(newLinha)
+    }
+    function getEditCID(value){
+        let linha='';
+        let newLinha = [];
+        linha = value.split("},{");
+        linha.forEach(n=>{
+            if(newLinha!=''){
+                newLinha.push(parseInt(n.replace(/[^0-9]/g,'')))
+            }else{
+                newLinha[0] = parseInt(n.replace(/[^0-9]/g,''))
+            }
+        })
+        setEditCID(newLinha)
+    }
+    function getSelectCID(value){
+        setEditCID(typeof value==='string'? value.split(',') : value)
+    }
+    function editSelectCID(){
+        let newLinha='';
+        editCID.forEach(e=>{
+            let linha = cid.find(c=>c.id == e)
+            if(newLinha !=''){
+                newLinha = newLinha + `,{'id':'${linha.id}','descricao':'${linha.nome}'}`
+            }else{
+                newLinha = `{'id':'${linha.id}','descricao':'${linha.nome}'}`
+            }
+            setState({...state, cid_id:newLinha})
+        })
     }
     function onLoadEdit(data){
         const itensEdit = data.itens?.map((item)=>({
@@ -326,6 +368,8 @@ export default function NovaSolicitacao(){
             itens: itensEdit,
         })
         setDataId(data.id)
+        getEditReu(data.reu_acao)
+        getEditCID(data.cid_id)
     }
 
     useEffect(()=>{ 
@@ -344,6 +388,7 @@ export default function NovaSolicitacao(){
             onLoadEdit(data)
         }
     },[data])
+    console.log(state)
     return(
         <AppLayout>
             <CssBaseline />
@@ -433,13 +478,14 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={5}>
                             <TextField
+                                onBlur={editSelectReu}
                                 value={editReu}
                                 select
                                 id="reuAcao"
                                 name="reu_acao"
                                 label="Réu da ação"
                                 fullWidth
-                                onChange={(e) => {editSelect(e.target.value)}}
+                                onChange={(e) => {getSelectReu(e.target.value)}}
                                 variant="outlined"
                                 SelectProps={{
                                     multiple:true,
@@ -467,13 +513,17 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
-                                value={state.cid_id}
+                                onBlur={editSelectCID}
+                                value={editCID}
                                 select
                                 name="cid_id"
                                 label="CID"
                                 fullWidth
                                 variant="outlined"
-                                onChange={(e) => {setState({...state,cid_id: e.target.value})}}
+                                onChange={(e) => {getSelectCID(e.target.value)}}
+                                SelectProps={{
+                                    multiple:true,
+                                }}
                             >
                                 {cid.map((r, index)=>(
                                     <MenuItem key={index} value={r.id}>{r.nome}</MenuItem>
@@ -513,9 +563,7 @@ export default function NovaSolicitacao(){
                         <Grid item xs={12} sm={4}>
                             {/* <Typography>Data de entrada</Typography> */}
                             <TextField
-
-                                id="address2"
-                                name="address2"
+                                name='conselhoRegional'
                                 value={dataPrescritor.conselho_regional}
                                 label='Conselho regional'
                                 fullWidth
@@ -527,7 +575,6 @@ export default function NovaSolicitacao(){
                             <TextField
                             name="registro_conselho"
                             value={dataPrescritor.registro_conselho}
-                            // value={prescritor[prescritor_id].registro_conselho}
                             label="Nº Registro no conselho"
                             fullWidth
                             variant="outlined"
@@ -681,7 +728,7 @@ export default function NovaSolicitacao(){
 
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            // onBlur={()=>checkCep()}
+                            onBlur={()=>checkCep()}
                             value={state.beneficiario.cep}
                             id="cep"
                             name="cep"

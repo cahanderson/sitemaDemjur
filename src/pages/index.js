@@ -1,39 +1,128 @@
-import Head from 'next/head'
+import AuthSessionStatus from '@/components/AuthSessionStatus'
+import AuthValidationErrors from '@/components/AuthValidationErrors'
+import Button from '@/components/Button'
+import GuestLayout from '@/components/Layouts/GuestLayout'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/auth'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { Box, Checkbox, CssBaseline, FormControlLabel, Grid, TextField, Typography } from '@mui/material'
 
-export default function Home() {
-    const { user } = useAuth({ middleware: 'guest' })
+
+const Login = () => {
+    const router = useRouter()
+
+    const { login } = useAuth({
+        middleware: 'guest',
+        redirectIfAuthenticated: '/usuario',
+    })
+    // const [state, setState] = useState({
+    //     email: '',
+    //     password: '',
+    //     errors: [],
+    //     status: null,
+    // });
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [errors, setErrors] = useState([])
+    const [status, setStatus] = useState(null)
+
+    useEffect(() => {
+        if (router.query.reset?.length > 0 && errors.length === 0) {
+            // setState({...state, status:window.atob(router.query.reset)})
+            setStatus(window.atob(router.query.reset))
+        } else {
+            // setState({...state,status:null})
+            setStatus(null)
+        }
+    },[])
+
+    const submitForm = async event => {
+        event.preventDefault()
+        // login(setState)
+        login({ email, password, setErrors, setStatus })
+    }
 
     return (
         <>
-            <Head>
-                <title>Laravel</title>
-            </Head>
+            <GuestLayout>
+                <CssBaseline />
+                <Box display='flex' justifyContent='center'>
+                    <Typography component="h1" variant="h5">
+                        Sign up
+                    </Typography>
+                </Box>
+                <Box display='flex' justifyContent='center'>
 
-            <div className="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center sm:pt-0">
-                <div className="hidden fixed top-0 right-0 px-6 py-4 sm:block">
-                    {user ?
-                        <Link href="/cadastroUsuarios">
-                            <a className="ml-4 text-sm text-gray-700 underline">
-                                Dashboard
-                            </a>
-                        </Link>
-                        :
-                        <>
-                            <Link href="/login">
-                                <a className="text-sm text-gray-700 underline">Login</a>
-                            </Link>
+                </Box>
+                {/* Session Status */}
+                <AuthSessionStatus className="mb-4" status={status} />
 
-                            <Link href="/register">
-                                <a className="ml-4 text-sm text-gray-700 underline">
-                                    Register
+                {/* Validation Errors */}
+                <AuthValidationErrors className="mb-4" errors={errors} />
+        
+
+                <Box component="form" onSubmit={submitForm} noValidate sx={{ mt: 3 }}>
+                    <TextField
+                        sx={{ mb : 3 }}
+                        variant='standard'
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        value={email}
+                        // onChange={e => setState({...state, email:e.target.value})}
+                        onChange={e => setEmail(e.target.value)}
+                    />
+                    <TextField
+                        variant='standard'
+                        type="password"
+                        value={password}
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Senha"
+                        autoComplete="current-password"
+                        // onChange={e => setState({...state, password:e.target.value})}
+                        onChange={event => setPassword(event.target.value)}
+                    />     
+
+                    <FormControlLabel
+                        control={<Checkbox value="remember" color="primary" />}
+                        label="Remember me"
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        sx={{ mt: 5, mb: 3, borderRadius:3}}
+                        variant="contained"
+                    >
+                        Login
+                    </Button>
+                    <Grid container>
+                        <Grid item xs>
+                            <Link href="/forgot-password" variant="body2">
+                                <a>
+                                    Esqueceu a senha?
                                 </a>
                             </Link>
-                        </>
-                    }
-                </div>
-            </div>
+                        </Grid>
+                        <Grid item>
+                            <Link href="/register" variant="body2">
+                                <a>
+                                    Criar nova conta
+                                </a>
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </Box> 
+            </GuestLayout>
         </>
     )
-}
+}  
+export default Login         

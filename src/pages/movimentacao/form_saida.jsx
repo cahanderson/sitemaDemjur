@@ -32,7 +32,7 @@ export default function Saidas(){
         "is_fornecedor": '',
     })
     const [state, setState] = useState({
-        solicitacao_id:5,
+        solicitacao_id:'',
         d_tipo_movimentacao:'',
         movimentable_id:'',
         documento: "URI::localhost",
@@ -218,7 +218,8 @@ export default function Saidas(){
                     // setMovimentacaoId(result.dados.id)
                     alert(result.message)
             })
-        }   
+        }
+           
         router.push('/movimentacao')
     }
 
@@ -235,9 +236,9 @@ export default function Saidas(){
             onLoadEdit(dados)
         }
     },[dados])
-
-    console.log(estoque);
+    console.log(state);
     console.log(dataItens);
+
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>

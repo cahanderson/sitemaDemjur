@@ -100,7 +100,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
                 .then(() => mutate())
         }
 
-        window.location.pathname = '/login'
+        window.location.pathname = '/'
     }
 
     useEffect(() => {

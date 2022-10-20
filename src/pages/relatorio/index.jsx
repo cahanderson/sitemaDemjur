@@ -16,11 +16,18 @@ export default function Relatorio() {
         itens:'',
     })
     function gerarRelatorio(){
-        const url = `http://reportserver.sms.fortaleza.ce.gov.br:8080/jasperserver/flow.html?j_username=jasperadmin&j_password=jasperadmin&_flowId=viewReportFlow&_flowId=viewReportFlow&standAlone=true&output=pdf&ParentFolderUri=Relat%C3%B3rios/DEMJUR/Din%C3%A2micos&reportUnit=/Relat%C3%B3rios/DEMJUR/Din%C3%A2micos/ESTOQUE_SIMPLIFICADO&CATEGORIA_ID=${state.categoria}`
-        const win = window.open(url, 'blank')
-        // console.log(url);
-        win.focus()
-        setState({...state, categoria:''})
+        if(!onRelatorio){
+            const url = `http://reportserver.sms.fortaleza.ce.gov.br:8080/jasperserver/flow.html?j_username=jasperadmin&j_password=jasperadmin&_flowId=viewReportFlow&_flowId=viewReportFlow&standAlone=true&output=pdf&ParentFolderUri=Relat%C3%B3rios/DEMJUR/Din%C3%A2micos&reportUnit=/Relat%C3%B3rios/DEMJUR/Din%C3%A2micos/ESTOQUE_SIMPLIFICADO&CATEGORIA_ID=${state.categoria}`
+            const win = window.open(url, 'blank')
+            // console.log(url);
+            win.focus()
+            setState({...state, categoria:''})
+        }else{
+            const url = `http://reportserver.sms.fortaleza.ce.gov.br:8080/jasperserver/flow.html?j_username=jasperadmin&j_password=jasperadmin&_flowId=viewReportFlow&_flowId=viewReportFlow&standAlone=true&output=pdf&ParentFolderUri=Relat%C3%B3rios/DEMJUR/Din%C3%A2micos&reportUnit=/Relat%C3%B3rios/DEMJUR/Din%C3%A2micos/ESTOQUE_DETALHADO&CATEGORIA_ID=${state.categoria}&ITEM_ID=${state.itens}&PRINCIPIO_ATIVO_ID=${state.principioAtivo}`
+            const win = window.open(url, 'blank')
+            win.focus()
+            setState({...state, categoria:'',itens:'',principioAtivo:''})
+        }
     }
 
     function onLoad(){
@@ -54,10 +61,11 @@ export default function Relatorio() {
     useEffect(()=>{
         onLoad();
     },[])
+    console.log(onRelatorio);
   return (
     <AppLayout>
         <CssBaseline />
-            <Container maxWidth="lg" component={Paper}>
+            <Container component={Paper}>
                 <Box
                     display= 'flex'
                     padding='2px'
@@ -109,7 +117,7 @@ export default function Relatorio() {
                                     fullWidth
                                     value={state.itens}
                                     name='itens'
-                                    onChange={(e)=> setItem(e.target.value)}
+                                    onChange={(e)=> setState({...state,itens:e.target.value})}
                                 >
                                     {itens?.map((item, index)=>(
                                         <MenuItem key={index} value={item.id}>{item.nome} </MenuItem>
@@ -128,8 +136,8 @@ export default function Relatorio() {
                         }
                     </Grid>
                     {onRelatorio?
-                    <Grid container spacing={12} >
-                        <Grid item xs={12} sm={6}>
+                    <Grid container spacing={12}>
+                        <Grid item xs={12} sm={6} mb={5}>
                             <TextField
                                 select
                                 variant="outlined"
@@ -137,7 +145,7 @@ export default function Relatorio() {
                                 fullWidth
                                 value={state.principioAtivo}
                                 name='principioAtivo'
-                                onChange={(e)=> setPrincipioAtivo(e.target.value)}
+                                onChange={(e)=> setState({...state,principioAtivo:e.target.value})}
                             >
                                 {principioAtivo?.map((princ, index)=>(
                                      <MenuItem key={index} value={princ.id}>{princ.nome} </MenuItem>
