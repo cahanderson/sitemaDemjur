@@ -1,5 +1,5 @@
 import { useState,useEffect } from 'react';
-import { Box, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
 import { Estoque } from "@/lib/estoque";
@@ -18,21 +18,17 @@ export default function NovoInventario(){
     })
     const rows = estoque.map((row)=>({
         id:row.id,
-        item:row.item_id,
-        validade:row.data_validade,
+        item_id:row.item_id,
         lote:row.lote,
-        fator_embalagem:row.fator_embalagem,
-        valor:row.valor_atual,
+        valor_anterior:row.valor_atual,
         qtd_anterior:row.quantidade,
     }));
 
     const columns = [
         { field: 'id', headerName: '#', width: 50 },
         { field: 'item', headerName: 'Item', width: 150 },
-        { field: 'validade', headerName: 'Validade', width: 150 },
         { field: 'lote', headerName: 'Lote', width: 150 },
-        { field: 'fator_embalagem', headerName: 'Fator embalagem', width: 150 },
-        { field: 'valor', headerName: 'Valor', width: 150 },
+        { field: 'valor_anterior', headerName: 'Valor', width: 150 },
         { field: 'qtd_anterior', headerName: 'Quantidade anterior', width: 210 },
         { field: 'qtd', headerName: 'Quantidade atual', width: 200,
             renderCell: (params) => (
@@ -41,9 +37,22 @@ export default function NovoInventario(){
                     variant="standard"
                     fullWidth
                     label='Quantidade atual'
-                    name='item_id'
+                    name='qtd'
                     maxLength={10}
                     onChange={(e)=>onAddQuantidade(e.target.value,params.row)}
+                />
+            )
+        },
+        { field: 'valor_atual', headerName: 'Quantidade atual', width: 200,
+            renderCell: (params) => (
+                <TextField
+                    type='number'
+                    variant="standard"
+                    fullWidth
+                    label='Valor atual'
+                    name='valor'
+                    maxLength={10}
+                    onChange={(e)=>onAddValor(e.target.value,params.row)}
                 />
             )
         }
@@ -51,18 +60,31 @@ export default function NovoInventario(){
 
     function onAddQuantidade(value, row){
         let clone = Object.assign({}, row);
-        console.log(clone);
-        // clone.quantidade = value;
-        // let itemIndex = itens.findIndex((i)=>i.id == clone.id)
-        // if(itemIndex>=0){
-        //     itens[itemIndex].quantidade = value;
-        //     setItens(itens)
-        // }else{
-        //     let addItem = itens;
-        //     addItem.push(clone)
-        //     setItens(addItem)
-        // }
+        clone.qtd_atual = parseInt(value);
+        let itemIndex = itens.findIndex((i)=>i.id == clone.id)
+        if(itemIndex>=0){
+            itens[itemIndex].qtd_atual = value;
+            setItens(itens)
+        }else{
+            let addItem = itens;
+            addItem.push(clone)
+            setItens(addItem)
+        }
     }
+    function onAddValor(value, row){
+        let clone = Object.assign({}, row);
+        clone.valor_atual = parseInt(value);
+        let itemIndex = itens.findIndex((i)=>i.id == clone.id)
+        if(itemIndex>=0){
+            itens[itemIndex].valor_atual = value;
+            setItens(itens)
+        }else{
+            let addItem = itens;
+            addItem.push(clone)
+            setItens(addItem)
+        }
+    }
+    console.log(itens);
     // const [calc, setCalc] = useState([{
     //     diferenca_qtd:'',
     //     diferenca_valor:'',
@@ -108,7 +130,6 @@ export default function NovoInventario(){
                 Novo inventário
             </Typography>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mt={2}>
-                <Box>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={3}>
                             <TextField
@@ -142,6 +163,12 @@ export default function NovoInventario(){
                             </TextField>
                         </Grid>  
                     </Grid>
+                <Box m={3}>
+                    <Button
+                        variant='outlined'
+                    >
+                        Adicionar item
+                    </Button>
                 </Box>
                 
                 <Table
