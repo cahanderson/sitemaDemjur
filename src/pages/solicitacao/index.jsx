@@ -11,6 +11,7 @@ import useSolicitacaoStore from "@/hooks/solicitacao";
 
 export default function Solicitacoes(){
     const router = useRouter();
+    const addData = useSolicitacaoStore(state=>state.addData);
     const [state, setState] = useState({
         data:[],
         filter:[],
@@ -19,7 +20,6 @@ export default function Solicitacoes(){
         buscaNome: '',
         tableCheckbox: false,
     });
-    const addData = useSolicitacaoStore(state=>state.addData);
     function onLoad(){
         Solicitacao.getAll()
         .then((result)=>{
@@ -70,13 +70,11 @@ export default function Solicitacoes(){
             })    
         }else return;   
     }
-    function pesquisar(solicitacao,cpf, nome){
-        if(solicitacao){
-            setState({...state, filter: state.data?.filter((data)=>{return data.name?.toUpperCase().startsWith(nome?.toUpperCase())})})
-        }else if(cpf){
+    function pesquisar(buscaSolicitacao,email){
+        if(buscaSolicitacao){
+            setState({...state, filter: state.data?.filter((data)=>{return data.numero_solicitacao?.startsWith(buscaSolicitacao)})})
+        }else if(email){
             setState({...state, filter: state.data?.filter((data)=>{return data.email?.toUpperCase().startsWith(email?.toUpperCase())})})
-        }else if(nome){
-            setState({...state, filter: state.data?.filter((data)=>{return data.beneficiario?.nome.toUpperCase().startsWith(nome?.toUpperCase())})})
         }else{
             setState({...state, filter:state.data})
         }
@@ -85,6 +83,7 @@ export default function Solicitacoes(){
         onLoad()
         addData('')
     },[])
+    console.log(state.data);
     return(
         <AppLayout>
             <CssBaseline />

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { Usuario } from '../../components/Modal/usuario';
-import { UsuariosService } from '../../lib/Usuario'
+import { UsuariosService } from '../../lib/usuario'
 import Button from '@/components/Button'
 import AppLayout from '@/components/Layouts/AppLayout'
 import { Table } from '@/components/Table';

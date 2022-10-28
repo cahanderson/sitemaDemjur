@@ -1,196 +1,230 @@
-import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
-import ClearIcon from '@mui/icons-material/Clear';
-import { Box, Button, Checkbox, CssBaseline, Divider, FormControl, FormControlLabel, Grid, IconButton, MenuItem, TextField } from "@mui/material";
-import { useEffect } from 'react';
-import { useState } from "react";
+import { useEffect, useMemo,useState } from 'react';
+import { Autocomplete, Box, Checkbox, createFilterOptions, CssBaseline, FormControl, FormControlLabel, Grid, MenuItem, TextField, Typography } from "@mui/material";
 import { Modal } from '../Layouts/modal';    
 
 export function NovoItem(props){
-    const [item, setItem] = useState([{
-        codigo:null,
+    const filter = createFilterOptions();
+    const [opcaoCategoria, setOpcaoCategoria] = useState()
+    const [opcaoPrincAtivo, setOpcaoPrincAtivo] = useState()
+    const [id, setId] = useState(null)
+    const [item, setItem] = useState({
         nome:'',
         principio_ativo_id:'',
         d_tipo:'',
         categoria_id:'',
         considera_lote_validade:false,
-    }])
-
+    })
+    
     useEffect(()=>{
         if(props.editItem?.id != null|| props.editItem?.id != undefined){
-           setItem([{
-                codigo:props.editItem.codigo, 
+           setItem({
+                id:props.editItem.id,
                 nome:props.editItem.nome, 
                 principio_ativo_id:props.editItem.principio_ativo_id, 
                 d_tipo:props.editItem.d_tipo, 
                 categoria_id:props.editItem.categoria_id,
-                considera_lote_validade:false,
-            }])
+                considera_lote_validade:props.editItem.considera_lote_validade
+            })
+            setId(props.editItem.id)
        }
        else{
            limparItem()
        }
     },[props.editItem?.id])
 
-    function limparItem(){
-        setItem([{ codigo:null,nome:'',principio_ativo_id:'',d_tipo:'', categoria_id:'',considera_lote_validade:false}])
-    }
-    function onAddItem(){
-        // setItem([...item, ''])
-        setItem([...item,{ codigo:null, nome:'',principio_ativo_id:'',d_tipo:'', categoria_id:'',considera_lote_validade:false}])
-    }
-    function onSetItem(e,index){
-        if(e.target.name === 'd_tipo'){
-            item[index].d_tipo = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'categoria_id'){
-            item[index].categoria_id = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'codigo'){
-            item[index].codigo = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'nome'){
-            item[index].nome = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'principio_ativo_id'){
-            item[index].principio_ativo_id = e.target.value;
-            setItem([...item])
-        }else if(e.target.name === 'check'){
-            item[index].considera_lote_validade = e.target.checked;
-            setItem([...item])
-        }
-        
-    }
-    function onDeleteItem(position){
-        if(item.length > 1){
-            setItem([...item.filter((item,index) => index !== position)])
-        }else{
-            limparItem()
-        }
-    }
+    useEffect(()=>{
+       if(props.categoria){
+        setOpcaoCategoria(props.categoria.map(cat=>({id:cat.id, label:cat.nome})))
+        setOpcaoPrincAtivo(props.princAtivo.map(princ=>({id:princ.id, label:princ.nome})))
+       } 
+    },[props.categoria, props.princAtivo])
 
+    useEffect(()=>{
+        if(props.newPrincAtivo){
+            setItem({...item, principio_ativo_id:props.newPrincAtivo})
+        }
+    },[props.newPrincAtivo])
+    
+    //Use memo para popular valor dos AutoComplete's
+    const autoCompleteOptionCategoria = useMemo(()=>{
+        if(!opcaoCategoria) return null
+        const selectedCategoria = opcaoCategoria.find(opcao => opcao.id === item.categoria_id);
+        if(!selectedCategoria) return null
+        return selectedCategoria;
+
+    },[item.categoria_id]);
+
+    const autoCompleteOptionPrincAtivo = useMemo(()=>{
+        if(!opcaoPrincAtivo) return null
+        const selectedPrincAtivo = opcaoPrincAtivo.find(opcao => opcao.id === item.principio_ativo_id);
+        if(!selectedPrincAtivo) return null
+        return selectedPrincAtivo;
+
+    },[item.principio_ativo_id]);
+
+    function limparItem(){
+        setItem({nome:'',principio_ativo_id:'',d_tipo:'', categoria_id:'',considera_lote_validade:false})
+        setId('')
+    }
     return(
         <Modal
             open={props.openModal}
             onClose={()=>{props.onClose(), limparItem()}}
             header='Itens'
-            onSave = {()=>props.Save(props.editItem.id,item)}
+            onSave = {()=>props.Save(id,item)}
         >
             
             <CssBaseline />      
-                {item?.map((item, index)=>(
-                    <Box sx={{flexGrow:1}} key={index} padding='10px' justifyContent='center' alignItems='center' my={2} >
-                        <Grid container mb={3}>
-                            <Grid item xs={11} container spacing={3}>
-                                <Grid item md={1}>
-                                    <TextField
-                                    value={item.codigo}
-                                    id="codigo"
-                                    name="codigo"
-                                    label="Código"
-                                    fullWidth
-                                    onChange={(e)=> onSetItem(e,index)}
-                                    variant="outlined"
-                                    InputLabelProps={{
-                                        shrink: true,  
-                                    }}
-                                />
-                                </Grid>
-                                <Grid item xs={12} md={5}>
-                                    <TextField
-                                    value={item.nome}
-                                    id="nome"
-                                    name="nome"
-                                    label="nome"
-                                    onChange={(e)=> onSetItem(e,index)}
-                                    fullWidth
-                                    variant="outlined"
-                                    />
-                                </Grid>
-                                <Grid item md={6}>
-                                    <TextField
-                                        select
-                                        value={item.principio_ativo_id}
-                                        id="principioAtivo"
-                                        name="principio_ativo_id"
-                                        label='Princípio ativo'
-                                        onChange={(e)=> onSetItem(e,index)}
-                                        fullWidth
-                                        autoComplete="shipping address-line2"
-                                        variant="outlined"
-                                    >
-                                        {props.princAtivo.map((princAtivo, index)=>(
-                                            <MenuItem  key={index} value={princAtivo.id}>{princAtivo.nome}</MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Grid>     
-                            
-                                <Grid item sm={4}>
-                                    <TextField
-                                        select
-                                        value={item.d_tipo}
-                                        id="tipo"
-                                        name="d_tipo"
-                                        label='Tipo'
-                                        fullWidth
-                                        variant="outlined"
-                                        onChange={(e)=> onSetItem(e,index)}
-                                    >
-                                        {props.tipo?.map((tipo, index)=>(
-                                            <MenuItem key={index} value={tipo.valor}>{tipo.descricao}</MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Grid>
-                                <Grid item sm={4}>
-                                    <TextField
-                                        select
-                                        value={item.categoria_id}
-                                        id="categoria"
-                                        name="categoria_id"
-                                        label='Categoria'
-                                        fullWidth
-                                        variant="outlined"
-                                        onChange={(e)=> onSetItem(e,index)}
-                                    >
-                                        {props.categoria.map((categoria, index)=>(
-                                            <MenuItem key={index} value={props.categoria[index].id}>{props.categoria[index].nome}</MenuItem>
-                                        ))}
-                                    </TextField> 
-                                </Grid>
-                            
-                                <Grid item sm={4}>
-                                    <FormControl>
-                                        <FormControlLabel
-                                            name='check'
-                                            onChange={(e)=> onSetItem(e,index)}
-                                            control={<Checkbox />} 
-                                            label='Considera lote e validade' />    
-                                        </FormControl>   
-                                </Grid>
-                            </Grid>
-                            <Grid item xs={1} display='flex' alignItems='center' justifyContent='center'>
-                                <Grid item xs={12} sm={1}>
-                                    <IconButton
-                                        
-                                        onClick={()=>{onDeleteItem(index)}}
-                                    >
-                                        <ClearIcon sx={{color:'red'}} />
-                                    </IconButton>
-                                </Grid>
-                            </Grid>
+                <Box sx={{flexGrow:1}} padding='10px' justifyContent='center' alignItems='center' my={2} >
+                    <Grid item xs={12} container spacing={3}mb={3}>
+                        <Grid item md={1}>
+                            <Typography align='center'>Código</Typography>
+                            <Typography align='center'>{id}</Typography>
                         </Grid>
-                        <Divider />
-                    </Box>
-                ))}
-                <Box display='flex' justifyContent={'center'} my={2}>
-                    <Button
-                        variant='outlined'
-                        onClick={()=>{onAddItem()}}
-                    >
-                        <Box mr='10px' mt='4px'>
-                            <AddCircleSharpIcon />
-                        </Box>
-                        Novo item
-                    </Button>
+                        <Grid item xs={12} md={4}>
+                            <TextField
+                            value={item.nome}
+                            id="nome"
+                            name="nome"
+                            label="nome"
+                            onChange={(e)=> setItem({...item,nome: e.target.value})}
+                            fullWidth
+                            variant="outlined"
+                            />
+                        </Grid>
+                        <Grid item md={7}>
+                            <Autocomplete
+                                value={autoCompleteOptionPrincAtivo}
+                                onChange={(event, newValue) => {
+                                    if (typeof newValue === 'string') {
+                                        setItem({...item, principio_ativo_id: newValue.id})
+                                    } else if (newValue && newValue.inputValue) {
+                                        props.addPrincAtivo({"nome":newValue.inputValue})
+                                    } else {
+                                    setItem({...item, principio_ativo_id: newValue?.id})
+                                    }
+                                }}
+                                filterOptions={(options, params) => {
+                                    const filtered = filter(options, params);
+                                    const { inputValue } = params;
+                                    const isExisting = options.some((option) => inputValue === option.nome);
+                                    if (inputValue !== '' && !isExisting) {
+                                        filtered.push({
+                                            inputValue,
+                                            label: `Adicionar princípio ativo : "${inputValue}"`,
+                                        });
+                                    }
+                                    return filtered;
+                                }}
+                                selectOnFocus
+                                clearOnBlur
+                                handleHomeEndKeys
+                                options={opcaoPrincAtivo}
+                                getOptionLabel={(option) => {
+                                    // Value selected with enter, right from the input
+                                    if (typeof option.label === 'string') {
+                                    return option.label;
+                                    }
+                                    // Add "xxx" option created dynamically
+                                    if (option.inputValue) {
+                                    return option.inputValue;
+                                    }
+                                    // Regular option
+                                    return option.label;
+                                }}
+                                renderOption={(props, option) => <li {...props}>{option.label}</li>}
+                                freeSolo
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Principio Ativo" />
+                                )}
+                            />
+                        </Grid>
+                    
+                        <Grid item sm={6}>
+                            <TextField
+                                select
+                                value={item.d_tipo}
+                                name="d_tipo"
+                                label='Tipo'
+                                fullWidth
+                                variant="outlined"
+                                onChange={(e)=> setItem({...item, d_tipo: e.target.value})}
+                            >
+                                {props.tipo?.map((tipo, index)=>(
+                                    <MenuItem key={index} value={tipo.valor}>{tipo.descricao}</MenuItem>
+                                ))}
+                            </TextField>
+                        </Grid>
+                        <Grid item sm={6}>
+                            {/* <Autocomplete
+                                onChange={(event, newValue) => {
+                                    setItem({...item, categoria_id: newValue.id})
+                                }}
+                                value={autoCompleteOptionCategoria}
+                                freeSolo
+                                options={opcaoCategoria}
+                                renderInput={(params) => <TextField {...params} label="Categoria" />}
+                            />  */}
+
+                            <Autocomplete
+                                value={autoCompleteOptionCategoria}
+                                onChange={(event, newValue) => {
+                                    if (typeof newValue === 'string') {
+                                        setItem({...item, categoria_id: newValue.id})
+                                    } else if (newValue && newValue.inputValue) {
+                                        props.addCategoria({"nome":newValue.inputValue})
+                                    } else {
+                                    setItem({...item, categoria_id: newValue?.id})
+                                    }
+                                }}
+                                filterOptions={(options, params) => {
+                                    const filtered = filter(options, params);
+                                    const { inputValue } = params;
+                                    const isExisting = options.some((option) => inputValue === option.nome);
+                                    if (inputValue !== '' && !isExisting) {
+                                        filtered.push({
+                                            inputValue,
+                                            label: `Adicionar categoria : "${inputValue}"`,
+                                        });
+                                    }
+                                    return filtered;
+                                }}
+                                selectOnFocus
+                                clearOnBlur
+                                handleHomeEndKeys
+                                options={opcaoCategoria}
+                                getOptionLabel={(option) => {
+                                    // Value selected with enter, right from the input
+                                    if (typeof option.label === 'string') {
+                                    return option.label;
+                                    }
+                                    // Add "xxx" option created dynamically
+                                    if (option.inputValue) {
+                                    return option.inputValue;
+                                    }
+                                    // Regular option
+                                    return option.label;
+                                }}
+                                renderOption={(props, option) => <li {...props}>{option.label}</li>}
+                                freeSolo
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Categoria" />
+                                )}
+                            />
+
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={12} container spacing={3}>
+                        <Grid item sm={4}>
+                            <FormControl>
+                                <FormControlLabel
+                                    name='check'
+                                    onChange={(e)=> setItem({...item, considera_lote_validade: e.target.checked})}
+                                    control={<Checkbox />} 
+                                    label='Considera lote e validade' />    
+                                </FormControl>   
+                        </Grid>
+                    </Grid>
                 </Box>
                 
 

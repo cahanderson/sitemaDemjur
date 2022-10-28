@@ -3,19 +3,14 @@ import { Box, Button, CssBaseline, Grid, MenuItem, Paper, TextField, Typography 
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import { Estoque } from "@/lib/estoque";
-import { Itens } from "@/lib/item";
 import { Inventarios } from "@/lib/inventario";
-import { UsuariosService } from "@/lib/Usuario";
 import AppLayout from "@/components/Layouts/AppLayout";
-import { NovoInventario } from "@/components/Modal/inventario";
 import { Table } from "@/components/Table";
+import { useRouter } from "next/router";
 
 export default function Inventario(){   
-
+    const router = useRouter()
     const [usuario, setUsuario] = useState([]);
-    const [estoque, setEstoque] = useState([]);
-    const [item, setItem] = useState([]);
     const [inventario, setInventario] = useState()
     const [openModal, setOpenModal] = useState(false)
     const [state, setState] = useState({
@@ -39,7 +34,7 @@ export default function Inventario(){
     ]
     const rows = state.filter?.map((row)=>({
         id:row.id,
-        nome:row.responsavel_id,
+        nome:row.responsavel?.name,
         data:row.data?.split('-').reverse().join('/')
     }));
     function onLoad(){
@@ -50,32 +45,6 @@ export default function Inventario(){
                 return;
             }
             setState({...state, data:result.data.data, filter:result.data.data})
-        });
-
-        UsuariosService.getAll()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setUsuario(result.data.data)
-        });
-
-        Estoque.getAll()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setEstoque(result.data.data)
-        });
-        Itens.getAll()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setItem(result.data.data)
         });
     }
     function onSave(id,data){
@@ -133,7 +102,6 @@ export default function Inventario(){
             setState({...state, filter:state.dataItens})
         }
     }
-    console.log(state.data);
 
     return(
         <AppLayout>
@@ -157,7 +125,7 @@ export default function Inventario(){
                 <Box alignItems='center' display='flex'>
                     <Button 
                         variant="outlined"
-                        onClick={() => setOpenModal(true)}   
+                        onClick={() => router.push('/inventario/form')}   
                     >
                          Novo inventário
                     </Button>
@@ -210,18 +178,7 @@ export default function Inventario(){
                     check={state.tableCheckbox}
                     height={400}
                 />
-
-                <NovoInventario
-                    openModal={openModal} 
-                    onClose={() => setOpenModal(false)} 
-                    usuario={usuario}
-                    estoque = {estoque}
-                    itens = {item}
-                    inventario = {inventario}
-                    onSave = {(id, dados)=> onSave( id,dados)}
-                />
             </Box>
-
         </AppLayout>
     )
 }

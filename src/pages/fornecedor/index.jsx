@@ -78,11 +78,11 @@ export default function Item(){
         }
     }
     const columns = [
-        { field: 'nome', headerName: 'Nome/Fornecedor', width: 300 },
+        { field: 'nome', headerName: 'Nome/Fornecedor', width: 500 },
         // { field: 'cpf', headerName: 'CPF', width: 280 },
-        { field: 'cnpj', headerName: 'CNPJ', width: 280 },
-        { field: 'telefone', headerName: 'Telefone', width: 280 },
-        { field: 'actions',type:'actions',getActions: (params) => [
+        { field: 'cnpj', headerName: 'CNPJ', width: 320 },
+        { field: 'telefone', headerName: 'Telefone', width: 320 },
+        { field: 'actions',headerName: 'Ações',type:'actions',getActions: (params) => [
             <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
             <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params.id)} label="edit" />,
           ]
@@ -99,6 +99,7 @@ export default function Item(){
         onLoad(pessoa);
     },[openModal])
     // }
+    console.log(state.filter);
 
     function pesquisar(fornecedor,cnpj){
         if(fornecedor){
@@ -154,11 +155,11 @@ export default function Item(){
                     </Grid>
                     <Grid item xs={12} sm={3}>
                         <TextField
-                        value={mask(state.buscaCnpj,['99.999.999/9999-99'])}
+                        value={state.buscaCnpj}
                         label="CPF/CNPJ"
                         fullWidth
                         variant="outlined"
-                        onChange={(e) => setState({...state, buscaCnpj:unMask(e.target.value)})}
+                        onChange={(e) => setState({...state, buscaCnpj:e.target.value})}
                         />
                     </Grid>
                     <Grid item xs={12} sm={4} display='flex' alignItems='center' justifyContent='end' mb={1}>

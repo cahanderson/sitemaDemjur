@@ -1,6 +1,5 @@
-import { Box, Button, CssBaseline, Grid, Paper, TextField } from "@mui/material";
+import { Box, CssBaseline, Grid, Paper, TextField } from "@mui/material";
 import { useEffect,useState } from "react";
-import { useForm } from "react-hook-form";
 import { Modal } from '../Layouts/modal';   
 import { mask, unMask } from 'remask'
 
@@ -36,19 +35,31 @@ export function NovoFornecedor(props){
         limparFornecedor()
        }
     },[props.fornecedor?.id])
+    // function checkCep(){
+    //     if(state.cep){
+            
+    //         setState(state.cep?.replace(/\D/g, ''))
+    //         fetch(`https://viacep.com.br/ws/${state?.cep}/json/`).
+    //         then(res => res.json()).
+    //         then(data=>{
+    //             setState({
+    //                 ...state, 
+    //                 bairro:data.bairro, 
+    //                 rua:data.logradouro
+    //             })
+    //         })
+    //     }
+    // }
     function checkCep(){
         if(state.cep){
-            
             setState(state.cep?.replace(/\D/g, ''))
-            fetch(`https://viacep.com.br/ws/${state?.cep}/json/`).
+            fetch(`https://viacep.com.br/ws/${state.cep}/json/`).
             then(res => res.json()).
             then(data=>{
-                setState({
-                    ...state, 
-                    bairro:data.bairro, 
-                    rua:data.logradouro
+                setState({...state, bairro:data.bairro, rua:data.logradouro, cnpj:''})
                 })
-            })
+        }else{
+            setState({...state, rua:'',bairro:'',cnpj:''})
         }
     }
     function limparFornecedor(){
@@ -107,8 +118,8 @@ export function NovoFornecedor(props){
                             id="cnpj"
                             name="cnpj"
                             label='CNPJ'
-                            value={mask(state.cnpj,['99.999.999/9999-99'])}
-                            onChange={(e) => setState({...state, cnpj: unMask(e.target.value)})}
+                            value={state.cnpj}
+                            onChange={(e) => setState({...state, cnpj: e.target.value})}
                             fullWidth
                             autoComplete="shipping address-line2"
                             variant="outlined"
@@ -119,7 +130,8 @@ export function NovoFornecedor(props){
                             id="telefone"
                             name="telefone"
                             label='Telefone'
-                            value={mask(state.telefone,['(99)99999999','(99)9 99999999'])}
+                            // value={mask(state.telefone,['(99)99999999','(99)9 99999999'])}
+                            value={state.telefone}
                             onChange={(e) => setState({...state, telefone: e.target.value})}
                             fullWidth
                             autoComplete="shipping address-line2"
@@ -131,14 +143,14 @@ export function NovoFornecedor(props){
                     <Grid container spacing={3}mb={4}>
                         <Grid item xs={12} sm={12}>
                             <TextField
-                            value={mask(state.cep,['99.999-999'])}
+                            value={state.cep}
                             onBlur={()=>checkCep()}
                             id="cep"
                             name="cep"
                             label="CEP"
                             fullWidth
                             variant="outlined"
-                            onChange={(e) => setState({...state, cep:unMask(e.target.value)})}
+                            onChange={(e) => setState({...state, cep:e.target.value})}
                             />
                         </Grid>
                     </Grid>

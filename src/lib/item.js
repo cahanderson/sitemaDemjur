@@ -6,7 +6,6 @@ const getAll = async () =>{
   try {
       const{data} = await axios.get('/api/itens')
       if(data){
-        
           return{
             data
           } 
@@ -31,10 +30,10 @@ const getById = async (id) => {
     return new Error('Erro ao consultar o registro.');
   }
 };  
-const create = async (dados) => {
+const create = async (item) => {
   await csrf()
   try {
-    const { data } = await axios.post('/api/itens', dados);
+    const { data } = await axios.post('/api/itens', item);
     if (data) {
       return data.id;
     }
@@ -43,9 +42,9 @@ const create = async (dados) => {
     return new Error('Erro ao consultar o registro.');
   }
 }; 
-const updateById = async (id,dados) => {
+const updateById = async (id,item) => {
   try {
-    await axios.put(`/api/itens/${id}`, dados.itens[0]);
+    await axios.put(`/api/itens/${id}`, item);
   } catch (error) {
     console.error(error);
     return new Error('Erro ao atualizar o registro.');

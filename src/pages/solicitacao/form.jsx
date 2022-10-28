@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { Box, Button, CssBaseline, Divider, Grid, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, CssBaseline, Divider, Grid, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import ClearIcon from '@mui/icons-material/Clear';
 import AppLayout from "@/components/Layouts/AppLayout";
@@ -31,6 +31,7 @@ export default function NovaSolicitacao(){
     const [openModal, setOpenModal] = useState(false)
     const [editReu, setEditReu] = useState([])
     const [editCID, setEditCID] = useState([])
+    const [opcaoCID, setOpcaoCID] = useState()
     const [state, setState] = useState({
         numero_solicitacao: '',
         d_tipo: '',
@@ -86,8 +87,6 @@ export default function NovaSolicitacao(){
             if(result instanceof Error){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
-            }
-            if(result == null){
                 return;
             }else{
                 setState({...state, beneficiario: result})
@@ -372,6 +371,14 @@ export default function NovaSolicitacao(){
         getEditCID(data.cid_id)
     }
 
+    const autoCompleteOptionCID = useMemo(()=>{
+        if(!opcaoCID) return null
+        const selectedPrincAtivo = opcaoCID.find(opcao => opcao.id === item.principio_ativo_id);
+        if(!selectedPrincAtivo) return null
+        return selectedPrincAtivo;
+
+    },[item.principio_ativo_id]);
+
     useEffect(()=>{ 
         onLoad()
         onLoadPrescritor(pessoa)
@@ -388,7 +395,6 @@ export default function NovaSolicitacao(){
             onLoadEdit(data)
         }
     },[data])
-    console.log(state)
     return(
         <AppLayout>
             <CssBaseline />
@@ -512,7 +518,7 @@ export default function NovaSolicitacao(){
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField
+                            {/* <TextField
                                 onBlur={editSelectCID}
                                 value={editCID}
                                 select
@@ -528,7 +534,19 @@ export default function NovaSolicitacao(){
                                 {cid.map((r, index)=>(
                                     <MenuItem key={index} value={r.id}>{r.nome}</MenuItem>
                                 ))}
-                            </TextField>  
+                            </TextField> */}
+
+                            <Autocomplete
+                                onChange={(event, newValue) => {
+                                    getSelectCID(newValue)
+                                }}
+                                value={autoCompleteOptionCID}
+                                freeSolo
+                                options={opcaoCID}
+                                renderInput={(params) => <TextField {...params} label="Princípio Ativo" />}
+                            />
+
+
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField

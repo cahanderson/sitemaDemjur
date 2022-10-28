@@ -8,12 +8,25 @@ import { Link } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-const menu = ['Solicitações', 'Itens', 'Movimentações', 'Fornecedores', 'Usuários', 'Inventários', 'Relatórios'];
+const menu = ['Cadastros','Solicitações', 'Itens', 'Movimentações', 'Fornecedores', 'Usuários', 'Inventários', 'Relatórios'];
 
 export function NavBar(){
   const router = useRouter();
   const [anchorElNav, setAnchorElNav] = useState(null);
+  const [anchorEl, setAnchorE1] = useState(null)
+  const open = Boolean(anchorEl);
 
+  function openMenu(event){
+      setAnchorE1(event.currentTarget)
+  }
+  function closeMenu(event){
+      setAnchorE1(null)
+      if(event.target.value === 1){
+          router.push('/movimentacao/form_saida')
+      }else if(event.target.value === 2){
+          router.push('/movimentacao/form_entrada')
+      }
+  }
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -34,9 +47,46 @@ export function NavBar(){
     }else if(e === 'Inventários'){
       router.push('/inventario')  
     }else if(e === 'Relatórios'){
-      router.push('/relatorio')  
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={closeMenu}
+        MenuListProps={{
+        'aria-labelledby': 'basic-button',
+        }}
+    >
+        <MenuItem  value={1} onClick={(e)=>closeMenu(e)}>Simplificado</MenuItem>
+        <MenuItem  value={2} onClick={(e)=>closeMenu(e)}>Detalhado</MenuItem>
+    </Menu>  
     }
   };
+
+  // <Box alignItems='center' display='flex'>
+  //   <Button
+  //       id="demo-positioned-button"
+  //       variant="outlined"
+  //       onClick={(e)=>openMenu(e)}
+  //       aria-haspopup="true"
+  //       aria-controls={open ? 'basic-menu' : undefined}
+  //       aria-expanded={open ? 'true' : undefined}  
+  //   >
+  //         Nova movimentação
+  //   </Button>
+  //   <Menu
+  //       id="basic-menu"
+  //       anchorEl={state.anchorEl}
+  //       open={open}
+  //       onClose={closeMenu}
+  //       MenuListProps={{
+  //       'aria-labelledby': 'basic-button',
+  //       }}
+  //   >
+  //       {/* <MenuItem  value={1} onClick={(e)=>closeMenu(e)} >Saída para pacientes</MenuItem> */}
+  //       <MenuItem  value={1} onClick={(e)=>closeMenu(e)}>Saídas</MenuItem>
+  //       <MenuItem  value={2} onClick={(e)=>closeMenu(e)}>Entradas</MenuItem>
+  //   </Menu>
+  // </Box>
 
   return (
     <>

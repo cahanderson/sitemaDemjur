@@ -4,6 +4,7 @@ import { PrincAtivo } from "@/lib/princAtivo";
 import { Categoria } from "@/lib/categoria";
 import { Itens } from "@/lib/item";
 import { Box, Button, CssBaseline, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from "react";
 import { NovoItem } from '../../components/Modal/itens';
 import { GridActionsCellItem } from "@mui/x-data-grid";
@@ -11,14 +12,15 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 
 export default function Item(){
-    const [id, setId] = useState(null);
     const [openModal, setOpenModal] = useState(false)
     const [princAtivo, setPrincAtivo] = useState([])
     const [categoria, setCategoria] = useState([])
     const [tipoItem, setTipoItem] = useState()
     const [editItem, setEditItem] = useState([])
+    const[newPrincAtivo, setNewPrincAtivo] = useState(null)
+    const[newCategoria, setNewCategoria] = useState(null)
     const [state, setState] = useState({
-        codigo: '',
+        codigo: null,
         descricao: '',
         principio_ativo: '',
         d_tipo: '',
@@ -28,21 +30,17 @@ export default function Item(){
         filter:[],
     });
     const [dataItens, setDataItens] = useState([])
-    const [item, setItem] = useState({
-        itens:[]
-    })
     const rows = state.filter?.map((row)=>({
         id : row.id,
-        codigo:row.codigo,
         nome:row.nome,
         principio_ativo:row.principio_ativo?.nome,
         tipo:row.tipo_item?.descricao,
         categoria:row.categoria?.nome,
     }));
     const columns = [
-        { field: 'codigo', headerName: 'Código', width: 180 },
-        { field: 'nome', headerName: 'Descrição', width: 150 },
-        { field: 'principio_ativo', headerName: 'Princípio Ativo', width: 400 },
+        { field: 'id', headerName: 'Código', width: 180 },
+        { field: 'nome', headerName: 'Descrição', width: 200 },
+        { field: 'principio_ativo', headerName: 'Princípio Ativo', width: 350 },
         { field: 'tipo', headerName: 'Tipo', width: 210 },
         { field: 'categoria', headerName: 'Categoria', width: 210 },
         { field: 'actions',type:'actions',getActions: (params) => [
@@ -113,15 +111,13 @@ export default function Item(){
             })    
         } 
     }
-    function onSave(){
+    function onSave(id,item){
         if(id){
-            Itens.updateById(id,item).
-            then((result)=>{
+            Itens.updateById(id,item).then((result)=>{
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
                 }
-                setId(null)
             }) 
         }else{
             Itens.create(item).then((result)=>{
@@ -134,28 +130,37 @@ export default function Item(){
         setOpenModal(false)
         onLoadItens()
     }
-    function guardaItem(id,item){
-        setItem({itens:item})
-        setId(id)
+    function adicionarPrincipioAtivo(princ){
+        PrincAtivo.create(princ).then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setNewPrincAtivo(result.dados.id)
+        })
+    }
+    function adicionarCategoria(cat){
+        Categoria.create(princ).then((cat)=>{   
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setNewCategoria(result.dados.id)
+        })
     }
 
     useEffect(()=>{
         onLoad()
-    },[])
+    },[newPrincAtivo])
 
     useEffect(()=>{
         onLoadItens()
     },[openModal])
-    
-    useEffect(()=>{
-        if(item.itens!=''){
-            onSave()
-        }
-    },[item])
+
 
     function pesquisar(codigo, descricao,principio_ativo, d_tipo, categoria){
         if(codigo){
-            setState({...state, filter: dataItens?.filter((data)=>{return data.codigo?.startsWith(codigo)})})
+            setState({...state, filter: dataItens?.filter((data)=>{return data.id?.startsWith(codigo)})})
         }else if(descricao){
             setState({...state, filter: dataItens?.filter((data)=>{return data.nome?.toUpperCase().startsWith(descricao?.toUpperCase())})})
         }else if(principio_ativo){
@@ -167,10 +172,7 @@ export default function Item(){
         }else{
             setState({...state, filter: dataItens})
         }
-        
-        console.log(d_tipo);
     }
-    console.log(state.filter)
     return(
         <AppLayout>
             <CssBaseline />
@@ -213,24 +215,25 @@ export default function Item(){
                     <Grid item xs={12} sm={3}>
                         <TextField
                         label="Descrição"
+                        value={state.descricao}
                         fullWidth
                         variant="outlined"
                         onChange={(e) => setState({...state, descricao:e.target.value})}
                         />
                     </Grid>
                     <Grid item xs={12} sm={3}>
-                        <TextField
-                            select
-                            value={state.buscaPrincAtivo}
-                            label='Princípio ativo'
-                            fullWidth
-                            variant="outlined"
-                            onChange={(e) => setState({...state, principio_ativo:e.target.value})}
-                        >
-                            {princAtivo?.map((item, index)=>(
-                                <MenuItem key={index} value={item.nome}>{item.nome}</MenuItem>
-                            ))}
-                        </TextField>
+                        <Autocomplete
+                            onChange={(event, newValue) => {
+                                princAtivo.forEach(item=>{
+                                    if(item.nome === newValue){
+                                    setState({...state,principio_ativo:item.nome});
+                                    }
+                                })
+                            }}
+                            freeSolo
+                            options={princAtivo.map((option) => option.nome)}
+                            renderInput={(params) => <TextField {...params} label="Princípio Ativo" />}
+                        />
                     </Grid>
                     <Grid item xs={12} sm={2}>
                         <TextField
@@ -290,10 +293,14 @@ export default function Item(){
                     openModal={openModal} 
                     onClose={() => setOpenModal(false)}
                     editItem={editItem}
-                    Save = {(id,item)=> guardaItem(id,item)}
+                    Save = {(id,item)=> onSave(id,item)}
+                    addPrincAtivo = {(princ)=>{adicionarPrincipioAtivo(princ)}}
+                    addCategoria = {(cat)=>{adicionarCategoria(cat)}}
                     princAtivo = {princAtivo}
                     tipo = {tipoItem}
                     categoria = {categoria}
+                    newPrincAtivo = {newPrincAtivo}
+                    newCategoria = {newCategoria}
                 />
             </Box>
 

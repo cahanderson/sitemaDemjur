@@ -1,6 +1,6 @@
 import {axios} from './axios'
 
-// const csrf = () => axios.get('/sanctum/csrf-cookie')
+const csrf = () => axios.get('/sanctum/csrf-cookie')
 
 const getAll = async () =>{
   try {
@@ -32,22 +32,20 @@ const getAll = async () =>{
 //   }
 // };
   
-// const create = async (dados) => {
-//   // await csrf()
-//   // console.log({dados});
-//   try {
-//     const { data } = await axios.post('/itens', dados);
+const create = async (dados) => {
+  await csrf()
+  try {
+    const { data } = await axios.post('/api/principio-ativo', dados);
+    if (data) {
+      return data;
+    }
 
-//     if (data) {
-//       return data.id;
-//     }
-
-//     // return new Error('Erro ao criar o registro.');
-//   } catch (error) {
-//     console.error(error);
-//     return new Error('Erro ao consultar o registro.');
-//   }
-// };
+    // return new Error('Erro ao criar o registro.');
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao consultar o registro.');
+  }
+};
   
 // const updateById = async (dados) => {
 //   try {
@@ -69,7 +67,7 @@ const getAll = async () =>{
 
 export const PrincAtivo = {
   getAll,
-//   create,
+  create,
 //   getById,
 //   updateById,
   // deleteById,

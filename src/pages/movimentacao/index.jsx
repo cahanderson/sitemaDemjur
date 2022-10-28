@@ -106,10 +106,8 @@ export default function Movimentacao(){
     function closeMenu(event){
         setState({...state, anchorEl:null})
         if(event.target.value === 1){
-            router.push('/movimentacao/form_saidaPaciente')
-        }else if(event.target.value === 2){
             router.push('/movimentacao/form_saida')
-        }else if(event.target.value === 3){
+        }else if(event.target.value === 2){
             router.push('/movimentacao/form_entrada')
         }
     }
@@ -192,9 +190,9 @@ export default function Movimentacao(){
                         'aria-labelledby': 'basic-button',
                         }}
                     >
-                        <MenuItem  value={1} onClick={(e)=>closeMenu(e)} >Saída para pacientes</MenuItem>
-                        <MenuItem  value={2} onClick={(e)=>closeMenu(e)}>Saídas</MenuItem>
-                        <MenuItem  value={3} onClick={(e)=>closeMenu(e)}>Entradas</MenuItem>
+                        {/* <MenuItem  value={1} onClick={(e)=>closeMenu(e)} >Saída para pacientes</MenuItem> */}
+                        <MenuItem  value={1} onClick={(e)=>closeMenu(e)}>Saídas</MenuItem>
+                        <MenuItem  value={2} onClick={(e)=>closeMenu(e)}>Entradas</MenuItem>
                     </Menu>
                 </Box>
             </Box>
