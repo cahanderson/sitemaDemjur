@@ -16,10 +16,9 @@ export default function NovaSolicitacao(){
     const [dataPrescritor, setDataPrescritor] = useState({
         conselho_regional:'',
         registro_conselho:''
-
     })
     const [dataId, setDataId] = useState('')
-    const [estabelecimento, setEstabelecimento] = useState([''])
+    const [dataEstabelecimento, setDataEstabelecimento] = useState([''])
     const [acao, setAcao] = useState(['']);
     const [representante, setRepresentante] = useState(['']);
     const [reu, setReu] = useState(['']);
@@ -31,7 +30,7 @@ export default function NovaSolicitacao(){
     const [openModal, setOpenModal] = useState(false)
     const [editReu, setEditReu] = useState([])
     const [editCID, setEditCID] = useState([])
-    const [opcaoCID, setOpcaoCID] = useState()
+    // const [opcaoCID, setOpcaoCID] = useState()
     const [state, setState] = useState({
         numero_solicitacao: '',
         d_tipo: '',
@@ -75,28 +74,49 @@ export default function NovaSolicitacao(){
         "is_beneficiario": false,
         "is_prescritor": true,
         "is_fornecedor": false,
+        "is_estabelecimento":false
+    })
+    const [estabelecimento, setEstabelecimento] = useState({
+        "is_beneficiario": false,
+        "is_prescritor": false,
+        "is_fornecedor": false,
+        "is_estabelecimento":true
     })
     const [message, setMessage] = useState({
         openSnakebar:false,
         message:'',
         statusSnake:'success'
     })
+    const [item, setItem] = useState([{
+        item_id: '',
+        quantidade_mensal: '',
+        d_frequencia_entrega: '',
+        quantidade_limite: ''
+    }])
+
+    // const autoCompleteOptionCID = useMemo(()=>{
+    //     if(!opcaoCID) return null
+    //     const selectedPrincAtivo = opcaoCID.find(opcao => opcao.id === item.principio_ativo_id);
+    //     if(!selectedPrincAtivo) return null
+    //     return selectedPrincAtivo;
+
+    // },[item.principio_ativo_id]);
+
     function checkCpf(cpf){
         Solicitacao.getPessoaByCpf(cpf)
         .then((result)=>{
             if(result instanceof Error){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
-                return;
             }else{
-                setState({...state, beneficiario: result})
+                // setState({...state, beneficiario: result})
+                console.log(result);
             }
         });
     }
     function checkCep(){
-        // setState({...state,beneficiario:{...state.beneficiario, cep:state.beneficiario.cep?.replace(/\D/g, '')}})
         if(state.beneficiario.cep){
-            setState({...state,beneficiario:{...state.beneficiario, cep:state.beneficiario.cep?.replace(/\D/g, '')}})
+            // setState({...state,beneficiario:{...state.beneficiario, cep:state.beneficiario.cep?.replace(/\D/g, '')}})
             fetch(`https://viacep.com.br/ws/${state.beneficiario.cep}/json/`).
             then(res => res.json()).
             then(data=>{
@@ -106,21 +126,16 @@ export default function NovaSolicitacao(){
             setState({...state, beneficiario:{...state.beneficiario,rua:'',bairro:''}})
         }
     }
-    const [item, setItem] = useState([{
-        item_id: '',
-        quantidade_mensal: '',
-        d_frequencia_entrega: '',
-        quantidade_limite: ''
-    }])
     function onLoad(){
-        Solicitacao.getEstabelecimento()
+        Solicitacao.getEstabelecimento(estabelecimento)
         .then((result)=>{
             if(result instanceof Error){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setEstabelecimento(result.data.data)
+            setDataEstabelecimento(result.data.data)
         });
+
         Solicitacao.getTipoAcao()
         .then((result)=>{
             if(result instanceof Error){
@@ -370,14 +385,17 @@ export default function NovaSolicitacao(){
         getEditReu(data.reu_acao)
         getEditCID(data.cid_id)
     }
+    useEffect(()=>{
+        if(state.beneficiario.cep.length == 8){
+            checkCep()
+        }
+    },[state.beneficiario.cep])
 
-    const autoCompleteOptionCID = useMemo(()=>{
-        if(!opcaoCID) return null
-        const selectedPrincAtivo = opcaoCID.find(opcao => opcao.id === item.principio_ativo_id);
-        if(!selectedPrincAtivo) return null
-        return selectedPrincAtivo;
-
-    },[item.principio_ativo_id]);
+    useEffect(()=>{
+        if(state.beneficiario.cpf.length == 11){
+            checkCpf(state.beneficiario.cpf)
+        }
+    },[state.beneficiario.cpf])
 
     useEffect(()=>{ 
         onLoad()
@@ -518,7 +536,7 @@ export default function NovaSolicitacao(){
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            {/* <TextField
+                            <TextField
                                 onBlur={editSelectCID}
                                 value={editCID}
                                 select
@@ -534,9 +552,9 @@ export default function NovaSolicitacao(){
                                 {cid.map((r, index)=>(
                                     <MenuItem key={index} value={r.id}>{r.nome}</MenuItem>
                                 ))}
-                            </TextField> */}
+                            </TextField>
 
-                            <Autocomplete
+                            {/* <Autocomplete
                                 onChange={(event, newValue) => {
                                     getSelectCID(newValue)
                                 }}
@@ -544,7 +562,7 @@ export default function NovaSolicitacao(){
                                 freeSolo
                                 options={opcaoCID}
                                 renderInput={(params) => <TextField {...params} label="Princípio Ativo" />}
-                            />
+                            /> */}
 
 
                         </Grid>
@@ -558,7 +576,7 @@ export default function NovaSolicitacao(){
                                 fullWidth
                                 variant="outlined"
                             >
-                                {estabelecimento.map((e, index)=>(
+                                {dataEstabelecimento.map((e, index)=>(
                                     <MenuItem key={index} value={e.id}>{e.nome}</MenuItem>
                                 ))}
                             </TextField>
@@ -637,8 +655,9 @@ export default function NovaSolicitacao(){
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            value={state.beneficiario.cpf}
-                            onBlur={()=>checkCpf(state.beneficiario.cpf)}
+                            value={mask(unMask(state.beneficiario.cpf),['999.999.999-99'])}
+                            // onBlur={()=>checkCpf(state.beneficiario.cpf)}
+
                             name="cpf"
                             label="CPF"
                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, cpf: unMask(e.target.value)}})}
@@ -723,13 +742,12 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            value={state.beneficiario.telefone}
+                            value={mask(unMask(state.beneficiario.telefone),['(99)99999999','(99)9 99999999'])}
                             name="telefone"
                             label="Telefone"
                             fullWidth
                             variant="outlined"
-
-                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, telefone: e.target.value}})}
+                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, telefone: unMask(e.target.value)}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
@@ -746,14 +764,13 @@ export default function NovaSolicitacao(){
 
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            onBlur={()=>checkCep()}
-                            value={state.beneficiario.cep}
-                            id="cep"
-                            name="cep"
-                            label="CEP"
-                            fullWidth
-                            variant="outlined"
-                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, cep: e.target.value}})}
+                                value={mask(unMask(state.beneficiario.cep,),['99.999-999'])}
+                                id="cep"
+                                name="cep"
+                                label="CEP"
+                                fullWidth
+                                variant="outlined"
+                                onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, cep: unMask(e.target.value)}})}
                             />
                         </Grid>
                         <Grid item xs={12} sm={3}>
@@ -811,7 +828,7 @@ export default function NovaSolicitacao(){
                     {state.itens?.map((item, index)=>(
                         <Grid key={index} container mb={2}>
                             <Grid item xs={11} container spacing={3}>
-                                <Grid item xs={5}>
+                                <Grid item xs={6}>
                                     <TextField
                                         value={item.item_id}
                                         select
@@ -827,7 +844,7 @@ export default function NovaSolicitacao(){
                                         ))}   
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={1}>
+                                <Grid item xs={2}>
                                     <TextField
                                     value={item.quantidade_mensal}
                                     id="quantidade_mensal"
@@ -841,7 +858,7 @@ export default function NovaSolicitacao(){
                                     }}
                                 />
                                 </Grid>
-                                <Grid item xs={2}>
+                                <Grid item xs={3}>
                                     <TextField
                                         value={item.d_frequencia_entrega}
                                         select
@@ -857,7 +874,7 @@ export default function NovaSolicitacao(){
                                         ))}
                                     </TextField>
                                 </Grid>
-                                <Grid item xs={4}>
+                                {/* <Grid item xs={4}>
                                     <TextField
                                         value={item.quantidade_limite}
                                         id="quantidade_limite"
@@ -867,7 +884,7 @@ export default function NovaSolicitacao(){
                                         variant="outlined"
                                         onChange={(e)=> onSetItem(e,index)}
                                     />
-                                </Grid>
+                                </Grid> */}
                             </Grid>
                             <Grid item xs={1} display='flex' alignItems='center' justifyContent='center'>
                                 <Grid display='flex' item xs={12} sm={1}>

@@ -187,7 +187,7 @@ export default function Item(){
                     justifyContent='center'
                         
                 >
-                    <Typography variant='h5' component='h1' color='secondary'>
+                    <Typography variant='h4' component='h1' color='secondary'>
                         Itens
                     </Typography>
                     

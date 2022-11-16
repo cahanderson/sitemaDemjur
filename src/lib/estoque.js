@@ -2,9 +2,10 @@ import {axios} from './axios'
 
 const csrf = () => axios.get('/sanctum/csrf-cookie')
 
-const getAll = async () =>{
+const getAll = async (page) =>{
   try {
-      const{data} = await axios.get('/api/estoque')
+      const urlRelativa = `/api/estoque?page=${page}`
+      const{data} = await axios.get(urlRelativa)
       if(data){
         
           return{

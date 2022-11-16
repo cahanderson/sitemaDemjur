@@ -1,21 +1,40 @@
 import {axios} from './axios'
 
 const csrf = () => axios.get('/sanctum/csrf-cookie')
-const getAll = async () =>{
+const getAll = async (page) =>{
   try {
-      const{data} = await axios.get('/api/inventario')
+    const urlRelativa = `/api/inventario?page=${page}`
+    const{data} = await axios.get(urlRelativa)
       if(data){
-        
-          return{
-            data
-          } 
-      }else{
-        return new Error('Erro ao listar os registros')  
-      }
+      
+        return{
+          data
+        } 
+    }else{
+      return new Error('Erro ao listar os registros')  
+    }
   } catch (error) {
       return error;
   }
 };
+
+// const getAll = async (page) =>{
+//   try {
+//       const urlRelativa = `/api/estoque?page=${page}`
+//       const{data} = await axios.get(urlRelativa)
+//       if(data){
+        
+//           return{
+//             data
+//           } 
+//       }else{
+//         return new Error('Erro ao listar os registros')  
+//       }
+//   } catch (error) {
+//       return error;
+//   }
+// };
+
 const create = async (dados) => {
   await csrf()
   try {

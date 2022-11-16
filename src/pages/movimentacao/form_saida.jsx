@@ -23,7 +23,6 @@ export default function Saidas(){
     const [desability , setDesability] = useState(false)
     const [destino, setDestino] = useState([''])
     const [tipo, setTipo] = useState([''])
-    const [estabelecimento, setEstabelecimento] = useState()
     const [openModal, setOpenModal] = useState(false)
     const [itens, setItens] = useState([])
     const [pessoa, setPessoa] = useState({
@@ -78,11 +77,7 @@ export default function Saidas(){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            if(pessoa.is_beneficiario === ''){
-                setDestino(estabelecimento)
-            }else{
                 setDestino(result.data.data)
-            }
         });
 
         Itens.getAll()
@@ -92,15 +87,6 @@ export default function Saidas(){
                 return;
             }
             setDataItens(result.data.data)
-        });
-
-        Movimentacoes.getEstabelecimento()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setEstabelecimento(result.data.data)
         });
     }
     function onLoadEstoque(id){
@@ -118,12 +104,13 @@ export default function Saidas(){
     }
     function reload(valor){
         if(valor === "4" || valor === "5"){
-            setPessoa({"is_beneficiario": true,"is_prescritor": false,"is_fornecedor": false,"is_doacao": false,})
+            setPessoa({"is_beneficiario": true,"is_prescritor": false,"is_fornecedor": false,})
+            setDesability(false)
         }else if(valor === "6"){
-            setPessoa({"is_beneficiario": '',"is_prescritor": '',"is_fornecedor": '',"is_doacao": '',})
-            // setDestino(estabelecimento)
+            setPessoa({"is_beneficiario": '',"is_prescritor": '',"is_fornecedor": '',})
+            setDesability(false)
         }else if(valor === "7"){
-            setPessoa({"is_beneficiario": '',"is_prescritor": '',"is_fornecedor": '',"is_doacao": '',})
+            setPessoa({"is_beneficiario": '',"is_prescritor": '',"is_fornecedor": '',})
             setDesability(true)
         }
     }
@@ -236,8 +223,9 @@ export default function Saidas(){
             onLoadEdit(dados)
         }
     },[dados])
-    console.log(state);
+    // console.log(state);
     console.log(dataItens);
+    console.log(itens);
 
     return(
         <AppLayout>
@@ -264,25 +252,19 @@ export default function Saidas(){
                         </TextField>
                     </Grid>
                     <Grid item xs={12} sm={7}>
-                        {desability?
-                            <TextField select disabled id="destinoSaida" name="destinoSaida" label='Destino da saída' fullWidth variant="outlined" >
-                                {destino?.map((i, index)=>(
-                                    <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
-                                    ))}</TextField>
-                                : 
-                            <TextField
-                                 select 
-                                 value={state.movimentable_id}  
-                                 name="movimentable_id" 
-                                 label='Destino da saída' 
-                                 fullWidth variant="outlined" 
-                                 onChange={(e) => {setState({...state, movimentable_id: e.target.value})}}
-                            >
-                                {destino?.map((i, index)=>(
-                                    <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
-                                ))}
-                            </TextField>
-                        }                                        
+                        <TextField
+                                select 
+                                value={state.movimentable_id}
+                                disabled={desability? true : false}
+                                name="movimentable_id" 
+                                label='Destino da saída' 
+                                fullWidth variant="outlined" 
+                                onChange={(e) => {setState({...state, movimentable_id: e.target.value})}}
+                        >
+                            {destino?.map((i, index)=>(
+                                <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
+                            ))}
+                        </TextField>                                   
                     </Grid>
                     <Grid item xs={12} sm={3}>
                         <TextField
@@ -310,21 +292,6 @@ export default function Saidas(){
                             <input hidden multiple type="file" />
                         </Button>
                     </Grid>
-                    <Grid item xs={12} sm={2} padding='15px'>
-                            <Box
-                                display='flex'
-                                justifyContent='end'
-                            >
-                                <Button
-                                    sx={{marginTop:'6px'}}
-                                    variant = {state.is_efetivado ? "outlined" : "contained"}
-                                    component="label"
-                                    onClick={()=>setState({...state, is_efetivado: !state.is_efetivado })}    
-                                >
-                                    {state.is_efetivado ? "Efetivado" : "Efetivar"}
-                                </Button>
-                            </Box>
-                        </Grid>
                 </Grid>
                 <Grid container mt={5} mb={3}>
                     <Grid item xs={11} container spacing={3}>
@@ -365,7 +332,7 @@ export default function Saidas(){
                                 // onClick={() => { setOpenModal(true), onLoadEstoque(item.item_id)}}
                                 onClick={() => setOpenModal(true)}
                             >
-                                editar lote
+                                escolher lote
                             </Button>
                         </Grid>
 
@@ -381,65 +348,24 @@ export default function Saidas(){
                     </Grid>
                 </Grid>
                 {itens.map((item, index)=>(
-                    <Grid key={index} container mt={5} mb={3}>
+                    <Grid key={index} container mt={5} mb={3} component={Paper} p={1}>
                         <Grid item xs={11} container spacing={3}>
-                            <Grid item xs={12} sm={6} disabled>
-                                <TextField
-                                    disabled
-                                    value={item.item_id}
-                                    name="item_id"
-                                    label='Itens'
-                                    fullWidth
-                                    variant="outlined"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                >
-                                    {dataItens.map((i, index)=>(
-                                        <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
-                                    ))}
-                                </TextField>    
+                            <Grid item xs={12} sm={3} disabled>
+                                <Typography variant="body1">Item</Typography>
+                                <Typography>{item.item_nome}</Typography>
                             </Grid>
                             
-                            <Grid item xs={12} sm={1}>
-                                <TextField
-                                    id="qtdSaida"
-                                    name="quantidade"
-                                    label='Qtd Saida'
-                                    fullWidth
-                                    disabled
-                                    variant="standard"
-                                    value={item.quantidade}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
+                            <Grid item xs={12} sm={2}>
+                                <Typography variant="body1">Quantidade</Typography>
+                                <Typography>{item.quantidade}</Typography>
                             </Grid>
                             <Grid item xs={12} sm={2}>
-                                <TextField
-                                    name="fatorEmbalagem"
-                                    label='Fator embalagem'
-                                    fullWidth
-                                    disabled
-                                    variant="standard"
-                                    value={item.fator_embalagem}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />
+                                <Typography variant="body1">Fator embalagem</Typography>
+                                <Typography>{item.fator_embalagem}</Typography>
                             </Grid>
                             <Grid item xs={12} sm={2}>
-                                <TextField
-                                    name="lote"
-                                    label='lote'
-                                    fullWidth
-                                    disabled
-                                    variant="standard"
-                                    value={item.lote}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                />    
+                                <Typography variant="body1">Lote</Typography>
+                                <Typography>{item.lote}</Typography>
                             </Grid>
                         </Grid>
                         <Grid item xs={1} display='flex' alignItems='center' justifyContent='center'>

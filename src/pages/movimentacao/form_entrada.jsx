@@ -25,7 +25,7 @@ export default function Entradas(){
         "is_beneficiario": false,
         "is_prescritor": false,
         "is_fornecedor": false,
-        "is_doacao": false,
+        "is_estabelecimento":false,
     })
     const [state, setState] = useState({
         d_tipo_movimentacao:'',
@@ -67,11 +67,12 @@ export default function Entradas(){
             if(result instanceof Error){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
-            }if(pessoa.is_beneficiario === ''){
-                setFornecedor(estabelecimento)
-            }else{
-                setFornecedor(result.data.data)
+            // }if(pessoa.is_beneficiario === ''){
+            //     setFornecedor(estabelecimento)
+            // }else{
+            // }
             }
+            setFornecedor(result.data.data)
         });
 
         Itens.getAll()
@@ -82,15 +83,6 @@ export default function Entradas(){
             }
             setItens(result.data.data)
         });
-
-        Movimentacoes.getEstabelecimento()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setEstabelecimento(result.data.data)
-        })
     }          
     function onAddItem(){
         setItem([...item,{id:null, item_id:'',quantidade:'',fator_embalagem:'',data_validade:'',lote:'',valor_unit:''}])
@@ -128,12 +120,11 @@ export default function Entradas(){
     }
     function reload(valor){
         if(valor === "1"||valor === 1){
-            setPessoa({"is_beneficiario": false,"is_prescritor": false,"is_fornecedor": true,"is_doacao": false,})
+            setPessoa({"is_beneficiario": false,"is_prescritor": false,"is_fornecedor": true,"is_estabelecimento":false})
         }else if(valor === "3"||valor === 3){
-            setPessoa({ "is_beneficiario": false,"is_prescritor": false,"is_fornecedor": false,"is_doacao": true})
+            setPessoa({ "is_beneficiario": false,"is_prescritor": false,"is_fornecedor": false,"is_estabelecimento":false})
         }else if(valor === "2"||valor === 2){
-            setPessoa({"is_beneficiario": '',"is_prescritor": '',"is_fornecedor": '',"is_doacao": '',})
-            setFornecedor(estabelecimento)
+            setPessoa({"is_beneficiario": '',"is_prescritor": '',"is_fornecedor": '',"is_estabelecimento":''})
         }
     }
     function onLoadEdit(data){
@@ -178,29 +169,23 @@ export default function Entradas(){
         }
         router.push('/movimentacao')
     }
-    function onSaveFile(file,movimentacaoId){
-        const formData = new FormData();
+    // function onSaveFile(file,movimentacaoId){
+    //     const formData = new FormData();
 
-        formData.append('movimentacao_id', movimentacaoId);
-        formData.append('file', file);
+    //     formData.append('movimentacao_id', movimentacaoId);
+    //     formData.append('file', file);
         
-        Movimentacoes.updateFile(formData).then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
-                return;
-            }
-            router.push('/movimentacao')
-        })
-    }
+    //     Movimentacoes.updateFile(formData).then((result)=>{
+    //         if(result instanceof Error){
+    //             setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+    //             return;
+    //         }
+    //         router.push('/movimentacao')
+    //     })
+    // }
     useEffect(()=>{
         onLoad(pessoa)
     },[pessoa])
-
-    // useEffect(()=>{
-    //     if(movimentacaoId){
-    //         onSaveFile(file, movimentacaoId)
-    //     }
-    // },[movimentacaoId])
 
     useEffect(()=>{
         if(dados){
@@ -213,8 +198,6 @@ export default function Entradas(){
             reload(state.d_tipo_movimentacao)
         }
     },[state.d_tipo_movimentacao])
-
-    console.log(state)
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>
@@ -290,24 +273,7 @@ export default function Entradas(){
                                 <AttachFileIcon sx={{marginBottom:'5px'}} />
                                 <input hidden multiple type="file" />
                             </Button>
-                        </Grid>
-
-                        <Grid item xs={12} sm={4} padding='15px'>
-                            <Box
-                                display='flex'
-                                justifyContent='end'
-                            >
-                                <Button
-                                    value={state.is_efetivado}
-                                    sx={{marginTop:'6px'}}
-                                    variant = {state.is_efetivado ? "outlined" : "contained"}
-                                    component="label"
-                                    onClick={()=>setState({...state, is_efetivado: !state.is_efetivado })}    
-                                >
-                                    {state.is_efetivado ? "Efetivado" : "Efetivar"}
-                                </Button>
-                            </Box>
-                        </Grid>   
+                        </Grid>  
                         
                     </Grid>   
                     <Box component='div'my={4}>

@@ -18,7 +18,7 @@ const getAll = async () =>{
 };
 const getMovimentacao = async () =>{
   try {
-      const{data} = await axios.get('/api/dominio/tipoDominio/TipoMovimentacao')
+      const{data} = await axios.get('/api/dominio/tipo-dominio/TipoMovimentacao')
       if(data){
         
           return{
@@ -65,21 +65,6 @@ const getPessoa = async (dados) =>{
         return new Error('Erro ao listar os registros')  
       }
   }catch (error) {
-      return error;
-  }
-};
-const getEstabelecimento = async () =>{
-  try {
-      const{data} = await axios.get('/api/estabelecimentos')
-      if(data){
-        
-          return{
-            data
-          } 
-      }else{
-        return new Error('Erro ao listar os registros')  
-      }
-  } catch (error) {
       return error;
   }
 };
@@ -134,7 +119,6 @@ export const Movimentacoes = {
     create,
     updateById,
     getPessoa,
-    getEstabelecimento,
     updateFile,
     getNumeroSolicitacoes,
     deleteById,

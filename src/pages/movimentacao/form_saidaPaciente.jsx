@@ -336,18 +336,7 @@ console.log(state);
                             Anexar
                             <input hidden multiple type="file" />
                         </Button>
-                    </Grid>     
-                    <Grid item xs={12} sm={2} display= 'inline-block' justify-content='space-evenly' align-items='baseline'>
-                        {/* <Typography>Documento da dispensação</Typography> */}
-                        <Button
-                            sx={{marginTop:'7px', marginLeft:'20px'}}
-                            variant = {isEfetivado ? "outlined" : "contained"}
-                            component="label"
-                            onClick={()=>setIsEfetivado(!isEfetivado)}    
-                        >
-                            {isEfetivado ? "Efetivado" : "Efetivar"}
-                        </Button>
-                    </Grid>     
+                    </Grid>
                 </Grid>               
                 { solicitacao?     
                     <TableContainer>

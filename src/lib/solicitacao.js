@@ -16,9 +16,9 @@ const getAll = async () =>{
       return error;
   }
 };
-const getEstabelecimento = async () =>{
+const getEstabelecimento = async (dados) =>{
   try {
-      const{data} = await axios.get('/api/estabelecimentos')
+      const{data} = await axios.post('/api/pessoa/index',dados)
       if(data){
         
         return{
@@ -33,7 +33,7 @@ const getEstabelecimento = async () =>{
 };
 const getTipoAcao = async () =>{
   try {
-      const{data} = await axios.get('/api/dominio/tipoDominio/TipoAcao')
+      const{data} = await axios.get('/api/dominio/tipo-dominio/TipoAcao')
       if(data){
         
         return{
@@ -48,7 +48,7 @@ const getTipoAcao = async () =>{
 };
 const getTipoRepresentante = async () =>{
   try {
-      const{data} = await axios.get('/api/dominio/tipoDominio/TipoRepresentante')
+      const{data} = await axios.get('/api/dominio/tipo-dominio/TipoRepresentante')
       if(data){
         
         return{
@@ -63,7 +63,7 @@ const getTipoRepresentante = async () =>{
 };
 const getTipoReu = async () =>{
   try {
-      const{data} = await axios.get('/api/dominio/tipoDominio/TipoReu')
+      const{data} = await axios.get('/api/dominio/tipo-dominio/TipoReu')
       if(data){
         
         return{
@@ -108,7 +108,7 @@ const getPessoa = async (dados) =>{
 };
 const getSexo = async () =>{
   try {
-      const{data} = await axios.get('/api/dominio/tipoDominio/Sexo')
+      const{data} = await axios.get('/api/dominio/tipo-dominio/Sexo')
       if(data){
         
         return{
@@ -123,7 +123,7 @@ const getSexo = async () =>{
 };
 const getFrequenciaEntrega = async () =>{
   try {
-      const{data} = await axios.get('/api/dominio/tipoDominio/FrequenciaEntrega')
+      const{data} = await axios.get('/api/dominio/tipo-dominio/FrequenciaEntrega')
       if(data){
         
         return{

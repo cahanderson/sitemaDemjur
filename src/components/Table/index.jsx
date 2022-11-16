@@ -14,7 +14,7 @@ export function Table(props){
                     rows={props.rows}
                     columns={props.columns}
                     getRowId={props.rows.id}
-                    pageSize={5}
+                    pageSize={15}
                     rowsPerPageOptions={[5]}
                     checkboxSelection={props.check? true : null}
                     disableSelectionOnClick

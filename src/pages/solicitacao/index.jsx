@@ -8,6 +8,7 @@ import { GridActionsCellItem } from "@mui/x-data-grid";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import useSolicitacaoStore from "@/hooks/solicitacao";
+import { mask, unMask } from 'remask'
 
 export default function Solicitacoes(){
     const router = useRouter();
@@ -35,8 +36,11 @@ export default function Solicitacoes(){
         { field: 'nome', headerName: 'Nome', width: 240 },
         { field: 'cpf', headerName: 'CPF', width: 240 },
         { field: 'nome_da_mae', headerName: 'Nome da mãe', width: 220 },
-        { field: 'dt_nascimento', headerName: 'Data de nascimento', width: 200 }, 
-        { field: 'actions',type:'actions',getActions: (params) => [
+        { field: 'dispensacao',type:'actions', headerName: 'Dispensação',width: 150, getActions: (params) => [
+            <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
+          ]
+        },
+        { field: 'actions',type:'actions', headerName: 'Ações',width: 150,getActions: (params) => [
             <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
             <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params.id)} label="edit" />,
           ]
@@ -70,11 +74,13 @@ export default function Solicitacoes(){
             })    
         }else return;   
     }
-    function pesquisar(buscaSolicitacao,email){
+    function pesquisar(buscaSolicitacao,buscaCPF,buscaNome){
         if(buscaSolicitacao){
             setState({...state, filter: state.data?.filter((data)=>{return data.numero_solicitacao?.startsWith(buscaSolicitacao)})})
-        }else if(email){
-            setState({...state, filter: state.data?.filter((data)=>{return data.email?.toUpperCase().startsWith(email?.toUpperCase())})})
+        }else if(buscaCPF){
+            setState({...state, filter: state.data?.filter((data)=>{return data.beneficiario.cpf?.startsWith(buscaCPF)})})
+        }else if(buscaNome){
+            setState({...state, filter: state.data?.filter((data)=>{return data.beneficiario.nome?.toUpperCase().startsWith(buscaNome?.toUpperCase())})})
         }else{
             setState({...state, filter:state.data})
         }
@@ -98,7 +104,7 @@ export default function Solicitacoes(){
                     justifyContent='center'
                         
                 >
-                    <Typography variant='h5' component='h1' color='secondary'>
+                    <Typography variant='h4' component='h1' color='secondary'>
                         Solicitações
                     </Typography>
                     
@@ -117,26 +123,27 @@ export default function Solicitacoes(){
                 <Grid container spacing={3}>
                     <Grid item xs={12} sm={4}>
                         <TextField
-                        label="Nº da solicitação"
-                        fullWidth
-                        variant="outlined"
-                        onChange={(e) => setState({...state, buscaSolicitacao: e.target.value})}
+                            label="Nº da solicitação"
+                            fullWidth
+                            variant="outlined"
+                            onChange={(e) => setState({...state, buscaSolicitacao: e.target.value})}
                         />
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <TextField
-                        label="CPF"
-                        fullWidth
-                        variant="outlined"
-                        onChange={(e) => setState({...state, buscaCPF:e.target.value})}
+                            label="CPF"
+                            fullWidth
+                            variant="outlined"
+                            value={mask(unMask(state.buscaCPF),['999.999.999-99'])}
+                            onChange={(e) => setState({...state, buscaCPF:unMask(e.target.value)})}
                         />
                     </Grid>
                     <Grid item xs={12} sm={4}>
                         <TextField
-                        label='Nome'
-                        fullWidth
-                        variant="outlined"
-                        onChange={(e) => setState({...state, buscaNome:e.target.value})}
+                            label='Nome'
+                            fullWidth
+                            variant="outlined"
+                            onChange={(e) => setState({...state, buscaNome:e.target.value})}
                         />
                     </Grid>
                 </Grid>

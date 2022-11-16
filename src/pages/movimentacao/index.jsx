@@ -165,7 +165,7 @@ export default function Movimentacao(){
                     justifyContent='center'
                         
                 >
-                    <Typography variant='h5' component='h1' color='secondary'>
+                    <Typography variant='h4' component='h1' color='secondary'>
                         Movimentações
                     </Typography>
                     

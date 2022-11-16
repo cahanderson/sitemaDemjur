@@ -31,9 +31,9 @@ export default function Usuarios() {
 
     const columns = [
         { field: 'id', headerName: 'ID', width: 70 },
-        { field: 'name', headerName: 'Nome', width: 130 },
-        { field: 'email', headerName: 'Email', width: 180 },
-        { field: 'actions',type:'actions',getActions: (params) => [
+        { field: 'name', headerName: 'Nome', width: 330 },
+        { field: 'email', headerName: 'Email', width: 700 },
+        { field: 'actions', headerName: 'Ações', width: 150, type:'actions',getActions: (params) => [
               <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
               <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => {onEdit(params.id)}} label="edit" />,
             ]
@@ -171,30 +171,30 @@ export default function Usuarios() {
 
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Box display='flex' flexDirection='row' mt='20px' mb='50px' gap='20px' >
-            <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        id="outlined-size-normal"
-                        label="Nome"
-                        fullWidth
-                        onChange={(e) => setState({...state, buscaNome: e.target.value})}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        id="outlined-size-normal"
-                        label="Email"
-                        fullWidth
-                        onChange={(e) => setState({...state, buscaEmail: e.target.value})}
-                    />
-                </Grid>
-            </Grid>
-            <Button
-                    onClick={()=> pesquisar(state.buscaNome,state.buscaEmail)}
-                    variant="outlined"  
-                >
-                    Pesquisar
-            </Button>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                id="outlined-size-normal"
+                                label="Nome"
+                                fullWidth
+                                onChange={(e) => setState({...state, buscaNome: e.target.value})}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                id="outlined-size-normal"
+                                label="Email"
+                                fullWidth
+                                onChange={(e) => setState({...state, buscaEmail: e.target.value})}
+                            />
+                        </Grid>
+                    </Grid>
+                    <Button
+                            onClick={()=> pesquisar(state.buscaNome,state.buscaEmail)}
+                            variant="outlined"  
+                        >
+                            Pesquisar
+                    </Button>
                 </Box>
                 <Table 
                     columns = {columns}
@@ -203,8 +203,6 @@ export default function Usuarios() {
                     height={400}
                 />
             </Box>
-    
-    
             <Usuario
                 openModal={openModal} 
                 onClose={() => setOpenModal(false)} 

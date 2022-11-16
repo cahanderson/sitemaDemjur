@@ -39,7 +39,11 @@ export function Usuario(props){
         '&:last-child td, &:last-child th': {
           border: 0,
         },
-      }));
+    }));
+
+    function addPermisions(e){
+        console.log(e);
+    }
     return(
             <Modal
                 open={props.openModal}
@@ -115,7 +119,7 @@ export function Usuario(props){
                                 <TableBody>
                                     {permissoes.map(permissao => (
                                     <StyledTableRow key={permissao}>
-                                        <TableCell sx={{padding:0}} align='left'><Checkbox/>{permissao}</TableCell>
+                                        <TableCell sx={{padding:0}} align='left'><Checkbox onClick={(e)=>addPermisions(e)}/>{permissao}</TableCell>
                                     </StyledTableRow>
                                     ))}
                                 </TableBody>

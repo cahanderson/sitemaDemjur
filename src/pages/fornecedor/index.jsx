@@ -7,7 +7,7 @@ import { NovoFornecedor } from "@/components/Modal/fonecedor";
 import { Table } from "@/components/Table";
 import { Fornecedor } from "@/lib/fornecedor";
 import { GridActionsCellItem } from "@mui/x-data-grid";
-import { mask, unMask } from 'remask'
+// import { mask, unMask } from 'remask';
 
 export default function Item(){
     const[openModal, setOpenModal] = useState(false)
@@ -31,7 +31,7 @@ export default function Item(){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setState({...state, data:result.data.data, filter:result.data.data})
+            setState({...state, data:result.data.data,filter:result.data.data })
     })}
     function onDelete(id){
         if(confirm('Realmente deseja apagar?')){
@@ -98,8 +98,23 @@ export default function Item(){
     useEffect(()=>{
         onLoad(pessoa);
     },[openModal])
-    // }
     console.log(state.filter);
+
+    // const maskedFilter = state.filter.map((i)=>({
+    //         cnpj : mask(unMask(i.cnpj),['99.999.999/9999-99']),
+    //         telefone : mask(unMask(i.telefone),['(99)99999999','(99)9 99999999'])
+    //     // if(i.cnpj!=null){
+    //     //     cnpj = mask(unMask(i.cnpj),['99.999.999/9999-99']);
+    //     // }else{
+    //     //     cnpj=i.cnpj
+    //     // }
+    //     // if(i.telefone!=null){
+    //     //     telefone = mask(unMask(i.telefone),['(99)99999999','(99)9 99999999'])
+    //     // }else{
+    //     //     telefone=i.telefone
+    //     // }
+    // }))
+    // console.log(maskedFilter);
 
     function pesquisar(fornecedor,cnpj){
         if(fornecedor){
@@ -125,7 +140,7 @@ export default function Item(){
                     justifyContent='center'
                         
                 >
-                    <Typography variant='h5' component='h1' color='secondary'>
+                    <Typography variant='h4' component='h1' color='secondary'>
                         Fornecedores
                     </Typography>
                     
@@ -133,7 +148,7 @@ export default function Item(){
                 <Box alignItems='center' display='flex'>
                     <Button 
                         variant="outlined"
-                        onClick={() => {setState({...state,fornecedor:[]}),setOpenModal(true)}}   
+                        onClick={() => {setState({...state,fornecedor:[]}),setOpenModal(true)}}
                     >
                          Novo Fornecedor
                     </Button>

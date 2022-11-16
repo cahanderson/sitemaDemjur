@@ -1,12 +1,20 @@
 import { useState,useEffect } from 'react';
 import { Box, Button, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
-import { Table } from "@/components/Table";
+import {Table} from '../../components/Table'
 import { Estoque } from "@/lib/estoque";
 import { Itens } from "@/lib/item";
+import { Inventarios } from "@/lib/inventario";
 import { UsuariosService } from "@/lib/usuario";
+import { NovoItem } from '../../components/Modal/novoItem';
+import { useRouter } from 'next/router';
+import useInventarioStore from '@/hooks/inventarioEdit';
 
 export default function NovoInventario(){
+    const dados = useInventarioStore(state=>state.datas)
+    const router = useRouter();
+    const [openModal, setOpenModal] = useState(false)
+    const [paginaEstoque, setPaginaEstoque] = useState(1)
     const [usuario, setUsuario] = useState([]);
     const [estoque, setEstoque] = useState([]);
     const [itens, setItens] = useState([]);
@@ -16,40 +24,39 @@ export default function NovoInventario(){
         responsavel_id:'',
         itens:[]
     })
+    console.log(dados);
     const rows = estoque.map((row)=>({
         id:row.id,
         item_id:row.item_id,
         lote:row.lote,
+        data_validade:row.data_validade,
+        fator_embalagem:row.fator_embalagem,
         valor_anterior:row.valor_atual,
         qtd_anterior:row.quantidade,
     }));
-
     const columns = [
-        { field: 'id', headerName: '#', width: 50 },
-        { field: 'item', headerName: 'Item', width: 150 },
-        { field: 'lote', headerName: 'Lote', width: 150 },
-        { field: 'valor_anterior', headerName: 'Valor', width: 150 },
-        { field: 'qtd_anterior', headerName: 'Quantidade anterior', width: 210 },
-        { field: 'qtd', headerName: 'Quantidade atual', width: 200,
+        { field: 'item_id', headerName: 'Item', width: 180 },
+        { field: 'lote', headerName: 'Lote', width: 180 },
+        { field: 'valor_anterior', headerName: 'Valor', width:180 },
+        { field: 'qtd_anterior', headerName: 'Quantidade anterior', width: 180 },
+        { field: 'qtd', headerName: 'Quantidade atual', width: 250,
             renderCell: (params) => (
                 <TextField
-                    type='number'
                     variant="standard"
-                    fullWidth
-                    label='Quantidade atual'
+                    // fullWidth
+                    label='Digite quantidade atual'
                     name='qtd'
-                    maxLength={10}
                     onChange={(e)=>onAddQuantidade(e.target.value,params.row)}
                 />
             )
         },
-        { field: 'valor_atual', headerName: 'Quantidade atual', width: 200,
+        { field: 'valor_atual', headerName: 'Valor atual', width: 250,
             renderCell: (params) => (
                 <TextField
                     type='number'
                     variant="standard"
-                    fullWidth
-                    label='Valor atual'
+                    // fullWidth
+                    label='Digite valor atual'
                     name='valor'
                     maxLength={10}
                     onChange={(e)=>onAddValor(e.target.value,params.row)}
@@ -57,10 +64,11 @@ export default function NovoInventario(){
             )
         }
     ]
-
     function onAddQuantidade(value, row){
         let clone = Object.assign({}, row);
         clone.qtd_atual = parseInt(value);
+        if(clone.qtd_anterior)delete clone.qtd_anterior
+        if(clone.valor_anterior)delete clone.valor_anterior
         let itemIndex = itens.findIndex((i)=>i.id == clone.id)
         if(itemIndex>=0){
             itens[itemIndex].qtd_atual = value;
@@ -69,6 +77,7 @@ export default function NovoInventario(){
             let addItem = itens;
             addItem.push(clone)
             setItens(addItem)
+            setState({...state,itens:addItem})
         }
     }
     function onAddValor(value, row){
@@ -82,18 +91,9 @@ export default function NovoInventario(){
             let addItem = itens;
             addItem.push(clone)
             setItens(addItem)
+            setState({...state,itens:addItem})
         }
     }
-    console.log(itens);
-    // const [calc, setCalc] = useState([{
-    //     diferenca_qtd:'',
-    //     diferenca_valor:'',
-    // }])
-    // function limparItem(){
-    //     setState({data:'',responsavel_id:'',itens:[]})
-    //     setItem([{item_id:'',qtd_atual:'',valor_atual:'',valor_anterior:'',qtd_anterior:'',diferenca_qtd:'',diferenca_valor:'',lote:''}])
-    //     setCalc([{diferenca_qtd:'',diferenca_valor:''}])
-    // }
     function onLoad(){
         UsuariosService.getAll()
         .then((result)=>{
@@ -102,15 +102,6 @@ export default function NovoInventario(){
                 return;
             }
             setUsuario(result.data.data)
-        });
-
-        Estoque.getAll()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setEstoque(result.data.data)
         });
         Itens.getAll()
         .then((result)=>{
@@ -121,16 +112,87 @@ export default function NovoInventario(){
             setItensCadastrados(result.data.data)
         });
     }
+    function onLoadEstoque(){
+        Estoque.getAll(paginaEstoque).then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }    
+            addPaginationEstoque(result)
+            if(result.data.meta.to < result.data.meta.total){
+                setPaginaEstoque(paginaEstoque+1)
+            }
+        });
+    }
+    function addPaginationEstoque(i){
+        if(estoque.length < i.data.meta.total){
+            let clone = Object.assign([], estoque);
+            i.data.data.forEach(item=>{
+                    clone.push(item);
+                })
+                // addItem.push(clone)
+                setEstoque(clone)
+            }
+        }
+    function onAddNovoItem(item){
+        let clone = Object.assign([], estoque);
+        let cloneItens = Object.assign([], itens);
+            clone.push(item)
+            cloneItens.push(item)
+            cloneItens.forEach(i=>{
+                if(i.novoItem){
+                    delete i.novoItem;
+                    i.id = '';
+                }
+            })
+            setItens(cloneItens)
+            setEstoque(clone)
+            setState({...state,itens:cloneItens})
+    }
+    function onSave(){
+        // if(id){
+        //     Fornecedor.updateById(id, fornecedor).
+        //     then((result)=>{
+        //         if(result instanceof Error){
+        //             setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+        //             return;
+        //         }
+        //         setOpenModal(false)
+        //     })   
+        // }else{
+        Inventarios.create(state).then((result)=>{
+            if(result instanceof Error){
+            }
+        })
+    }
+
     useEffect(()=>{
         onLoad()
     },[])
+
+    useEffect(()=>{
+        onLoadEstoque()
+    },[paginaEstoque])
+
     return(
         <AppLayout>
-            <Typography variant='h5' component='h1' color='secondary'>
+            <Box
+                display= 'flex'
+                justifyContent='space-between'
+                mb={4}
+            >
+            <Typography variant='h4' component='h1' color='secondary'>
                 Novo inventário
             </Typography>
+            <Button
+                    onClick={() => setOpenModal(true)}
+                    variant='outlined'
+                >
+                    Adicionar item
+                </Button>
+            </Box>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mt={2}>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={3} mb={5}>
                         <Grid item xs={12} sm={3}>
                             <TextField
                             value={state.data}
@@ -163,22 +225,24 @@ export default function NovoInventario(){
                             </TextField>
                         </Grid>  
                     </Grid>
-                <Box m={3}>
-                    <Button
-                        variant='outlined'
-                    >
-                        Adicionar item
-                    </Button>
-                </Box>
-                
                 <Table
                     columns = {columns}
                     rows = {rows}
                     check={state.tableCheckbox}
                     height={400}
-                />      
-                
+                /> 
+                <Box display='flex' justifyContent={"end"} gap='10px' p={2}>
+                    <Button variant="text" onClick={()=> router.push('/inventario')}>Cancelar alterações</Button>
+                    <Button type="submit" variant="contained" onClick={()=> { onSave(), router.push('/inventario')}}> Salvar</Button>
+                    {/* <Button type="submit" variant="contained" onClick={()=> onSave(state),router.push('/inventario')}> Salvar</Button> */}
+                </Box>   
             </Box>
+            <NovoItem
+                openModal={openModal} 
+                onClose={() => setOpenModal(false)}
+                itens={itensCadastrados}
+                Save = {(item)=> onAddNovoItem(item)}
+            />
         </AppLayout>
     )
 }
@@ -186,39 +250,70 @@ export default function NovoInventario(){
 
 
 
+                {/*<TableContainer 
+                    component={Paper} 
+                    variant='outlined' 
+                    style={{
+                        width:'auto'
+                    }}
+                >
+                     <Table size="small">
+                        <TableHead>
+                        <TableRow>
+                            <TableCell>id</TableCell>
+                            <TableCell align="right">item</TableCell>
+                            <TableCell align="right">lote</TableCell>
+                            <TableCell align="right">valor</TableCell>
+                            <TableCell align="right">Quantidade anterior</TableCell>
+                            <TableCell align="center">Quantidade atual</TableCell>
+                        </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {rows.map((row,index) => (
+                                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                    <TableCell component="th" scope="row">{row.id}</TableCell>
+                                    <TableCell align="right">{row.item_id}</TableCell>
+                                    <TableCell align="right">{row.lote}</TableCell>
+                                    <TableCell align="right">{row.valor_atual}</TableCell>
+                                    <TableCell align="right">{row.quantidade}</TableCell>
+                                    <TableCell align="center">
+                                        <TextField
+                                            variant="standard"
+                                            label='Valor atual'
+                                            size="small"
+                                            name='valor'
+                                            maxLength='5'
+                                            onChange={(e)=>onAddValor(e.target.value,params.row)}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
 
-
-
-
-
-
-
-
-
-
-
-
-
-//     useEffect(()=>{
-//         if(props.inventario?.id != null|| props.inventario?.id != undefined){
-//             setState({...state,data:props.inventario.data, responsavel_id:props.inventario.responsavel_id})
-//             const editItem = props.inventario.itens.map((item)=>({
-//                 id:item.id,
-//                 item_id:item.item_id,
-//                 qtd_atual:item.qtd_atual,
-//                 valor_atual:item.valor_atual,
-//                 qtd_anterior: item.qtd_anterior,
-//                 lote:item.lote,
-//                 valor_anterior:item.valor_atual,
-
-//             }))
-//             const editcalc = props.inventario.itens.map(item=>({
-//                 diferenca_qtd:item.diferenca_qtd,
-//                 diferenca_valor:item.diferenca_valor,
-//             }))
-//             setItem(editItem)
-//             setCalc(editcalc)
-//        }else{
-//            limparItem()
-//        }
-//    },[props.inventario?.id])
+                        </TableBody>
+                        {estoque === null && !isLoading &&(
+                            <caption><Typography variant='body1'>Nenhum registro encontrado!</Typography></caption>
+                        )}
+                        <TableFooter>
+                            {isLoading && (
+                            <TableRow>
+                                <TableCell colSpan={6}>
+                                    <LinearProgress variant='indeterminate' />
+                                </TableCell>
+                            </TableRow>
+                            )}
+                            {(totalEstoque>0) && totalEstoque > 10 && (
+                                <TableRow align='right'>
+                                    <TableCell colSpan={6}>
+                                    <Divider />
+                                        <Pagination 
+                                            count={Math.ceil(totalEstoque/10)}
+                                            onChange={(_,newPage)=>{setPaginaEstoque(newPage)}}
+                                            color="primary"
+                                            size="small"
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableFooter>
+                    </Table>
+                </TableContainer> */}

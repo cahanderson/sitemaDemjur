@@ -1,147 +1,107 @@
-import Box from '@mui/material/Box';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { Link } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
-const menu = ['Cadastros','Solicitações', 'Itens', 'Movimentações', 'Fornecedores', 'Usuários', 'Inventários', 'Relatórios'];
-
 export function NavBar(){
   const router = useRouter();
-  const [anchorElNav, setAnchorElNav] = useState(null);
-  const [anchorEl, setAnchorE1] = useState(null)
-  const open = Boolean(anchorEl);
+  const [menuRelatorio, setMenuRelatorio] = useState(null)
+  const [menuCadastro, setMenuCadastro] = useState(null)
+  const openRelatorio = Boolean(menuRelatorio);
+  const openCadastro = Boolean(menuCadastro);
 
-  function openMenu(event){
-      setAnchorE1(event.currentTarget)
+  const handleClickRelatorio = (event) =>{
+    setMenuRelatorio(event.currentTarget)
   }
-  function closeMenu(event){
-      setAnchorE1(null)
-      if(event.target.value === 1){
-          router.push('/movimentacao/form_saida')
-      }else if(event.target.value === 2){
-          router.push('/movimentacao/form_entrada')
-      }
+  const handleClickCadastro = (event) =>{
+    setMenuCadastro(event.currentTarget)
   }
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-  const handleMenu = () => {
-    // if(event.target.value)
-  };
-  const clickMenu = (e) => {
-    if(e === 'Solicitações'){
+  const handleRelatorio = (event) =>{
+    if(event.target.value == 1){
+      router.push('/relatorio/simplificado')  
+    }else if(event.target.value == 2){
+      router.push('/relatorio/detalhado')  
+    }
+  }
+  const handleCadastro = (event) =>{
+    if(event.target.value == 1){
+      router.push('/principio_ativo')  
+    }else if(event.target.value == 2){
+      router.push('/categoria')  
+    }else if(event.target.value == 3){
+      router.push('/item')   
+    }else if(event.target.value == 4){
+      router.push('/fornecedor')   
+    }else if(event.target.value == 5){
+      router.push('/usuario')   
+    }
+  }
+  function onClose(){
+    setMenuCadastro(null)
+    setMenuRelatorio(null)
+  }
+  function clickMenu(e){
+    if(e.target.id === 'solicitacoes'){
       router.push('/solicitacao')
-    }else if(e === 'Usuários'){
-      router.push('/usuario')
-    }else if(e === 'Itens'){
-      router.push('/item')  
-    }else if(e === 'Movimentações'){
+    }else if(e.target.id === 'movimentacoes'){
       router.push('/movimentacao')  
-    }else if(e === 'Fornecedores'){
-      router.push('/fornecedor')  
-    }else if(e === 'Inventários'){
+    }else if(e.target.id === 'inventarios'){
       router.push('/inventario')  
-    }else if(e === 'Relatórios'){
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={closeMenu}
-        MenuListProps={{
-        'aria-labelledby': 'basic-button',
-        }}
-    >
-        <MenuItem  value={1} onClick={(e)=>closeMenu(e)}>Simplificado</MenuItem>
-        <MenuItem  value={2} onClick={(e)=>closeMenu(e)}>Detalhado</MenuItem>
-    </Menu>  
+    }else if(e.target.id === 'relatorios'){
+      router.push('/relatorios')
     }
   };
-
-  // <Box alignItems='center' display='flex'>
-  //   <Button
-  //       id="demo-positioned-button"
-  //       variant="outlined"
-  //       onClick={(e)=>openMenu(e)}
-  //       aria-haspopup="true"
-  //       aria-controls={open ? 'basic-menu' : undefined}
-  //       aria-expanded={open ? 'true' : undefined}  
-  //   >
-  //         Nova movimentação
-  //   </Button>
-  //   <Menu
-  //       id="basic-menu"
-  //       anchorEl={state.anchorEl}
-  //       open={open}
-  //       onClose={closeMenu}
-  //       MenuListProps={{
-  //       'aria-labelledby': 'basic-button',
-  //       }}
-  //   >
-  //       {/* <MenuItem  value={1} onClick={(e)=>closeMenu(e)} >Saída para pacientes</MenuItem> */}
-  //       <MenuItem  value={1} onClick={(e)=>closeMenu(e)}>Saídas</MenuItem>
-  //       <MenuItem  value={2} onClick={(e)=>closeMenu(e)}>Entradas</MenuItem>
-  //   </Menu>
-  // </Box>
-
   return (
-    <>
-      <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-        <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="menu-appbar"
-          aria-haspopup="true"
-          onClick={handleOpenNavMenu}
-          color="inherit"
-        >
-          <MenuIcon />
-        </IconButton>
-        <Menu
-          id="menu-appbar"
-          anchorEl={anchorElNav}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left"
-          }}
-          keepMounted
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "left"
-          }}
-          open={Boolean(anchorElNav)}
-          onClose={handleMenu}
-          sx={{
-            display: { xs: "block", md: "none" }
-          }}
-        >
-          {menu.map((page) => (
-            <MenuItem key={page} onClick={handleMenu}>
-              <Typography textAlign="center">{page}</Typography>
-            </MenuItem>
-          ))}
-        </Menu>
-      </Box>
-
-      <Box sx={{ flexGrow: 1, p:1, display: { xs: "none", md: "flex" }, gap:3 }}>
-        {menu.map((page) => (
-          <Link
-            component="button"
-            name={page}
-            variant="body2"
-            underline="hover"
-            key={page}
-            sx={{display: "block" }}
-            onClick={(event)=> clickMenu(event.target.name)}
+        <Stack direction='row' spacing={2}>
+          <Button 
+            id='cadastros' 
+            onClick={handleClickCadastro}
+            aria-controls={openCadastro? 'cadastro-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={openCadastro?'true':undefined}
           >
-            {page}
-          </Link>
-        ))}
-      </Box>
-    </>
+            cadastros
+          </Button>
+          <Menu 
+            id='cadastro-menu' 
+            anchorEl={menuCadastro}
+            open={openCadastro}
+            onClose={onClose}
+            MenuListProps={{
+              'aria-labelledby':'cadastros'
+            }}
+          >
+            <MenuItem value={1} onClick={handleCadastro}>Princípio Ativo</MenuItem>
+            <MenuItem value={2} onClick={handleCadastro}>Categoria</MenuItem>
+            <MenuItem value={3} onClick={handleCadastro}>Itens</MenuItem>
+            <MenuItem value={4} onClick={handleCadastro}>Fornecedores</MenuItem>
+            <MenuItem value={5} onClick={handleCadastro}>Usuários</MenuItem>
+          </Menu>
+          <Button id='solicitacoes' onClick={(e)=> clickMenu(e)}>solicitações</Button>
+          <Button id='movimentacoes' onClick={(e)=> clickMenu(e)}>movimentações</Button>
+          <Button id='inventarios' onClick={(e)=> clickMenu(e)}>inventarios</Button>
+          <Button 
+            id='relatorios' 
+            onClick={handleClickRelatorio}
+            aria-controls={openRelatorio? 'relatorio-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={openRelatorio?'true':undefined}
+          >
+            relatorios
+          </Button>
+          <Menu 
+            id='relatorio-menu' 
+            anchorEl={menuRelatorio}
+            open={openRelatorio}
+            onClose={onClose}
+            // MenuListProps={{
+            //   'aria-labelledby:':'relatorios'
+            // }}
+          >
+            <MenuItem value={1} onClick={handleRelatorio}>Simplificado</MenuItem>
+            <MenuItem value={2} onClick={handleRelatorio}>Detalhado</MenuItem>
+          </Menu>
+        </Stack>
   );
 }

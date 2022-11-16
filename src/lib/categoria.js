@@ -34,44 +34,41 @@ const create = async (dados) => {
     return new Error('Erro ao consultar o registro.');
   }
 };
+const getById = async (id) => {
+  try {
+    const { data } = await axios.get(`/api/categorias/${id}`);
 
-// const getById = async (id) => {
-//   try {
-//     const { data } = await axios.get(`/itens/${id}`);
+    if (data) {
+      return data;
+    }
 
-//     if (data) {
-//       return data;
-//     }
-
-//     return new Error('Erro ao consultar o registro.');
-//   } catch (error) {
-//     console.error(error);
-//     return new Error('Erro ao consultar o registro.');
-//   }
-// };
-    
-// const updateById = async (dados) => {
-//   try {
-//     await axios.put(`/itens/${id}`, dados);
-//   } catch (error) {
-//     console.error(error);
-//     return new Error('Erro ao atualizar o registro.');
-//   }
-// };
-  
-// const deleteById = async (id)=> {
-//   try {
-//     await axios.delete(`/itens${id}`);
-//   } catch (error) {
-//     console.error(error);
-//     return new Error('Erro ao apagar o registro.');
-//   }
-// };
+    return new Error('Erro ao consultar o registro.');
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao consultar o registro.');
+  }
+};
+const updateById = async (id,dados) => {
+  try {
+    await axios.put(`/api/categorias/${id}`, dados);
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao atualizar o registro.');
+  }
+};
+const deleteById = async (id)=> {
+  try {
+    await axios.delete(`/api/categorias/${id}`);
+  } catch (error) {
+    console.error(error);
+    return new Error('Erro ao apagar o registro.');
+  }
+};
 
 export const Categoria = {
   getAll,
   create,
-//   getById,
-//   updateById,
-  // deleteById,
+  getById,
+  updateById,
+  deleteById,
 };

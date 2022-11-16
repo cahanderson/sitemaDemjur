@@ -1,55 +1,29 @@
-import { Box, CssBaseline, Grid, Paper, TextField } from "@mui/material";
-import { useEffect,useState } from "react";
+import { Box, CssBaseline, Grid, MenuItem, Paper, TextField } from "@mui/material";
+import { useState } from "react";
 import { Modal } from '../Layouts/modal';   
 
-export function NovoFornecedor(props){
-
-            // "estoque_item_id": null,
-            // "id": null,
-            // "item_id": 27,
-            // "lote": "XYZ0001",
-            // "valor_anterior": 10,
-            // "qtd_anterior": 250,
-            // "valor_atual": 65.0,
-            // "qtd_atual": 10
+export function NovoItem(props){
 
     const [state, setState] = useState({
-        nome:'',
-        email:'',
-        telefone:'',
-        cpf:'',
-        cnpj:'',
-        cep:'',
-        rua:'',
-        numero:'',
-        bairro:'',
-        "is_beneficiario": false,
-        "is_prescritor": false,
-        "is_fornecedor": true
+        id:Date.now(),
+        item_id:'',
+        lote:'',
+        data_validade:'',
+        fator_embalagem:'',
+        qtd_atual:'',
+        valor_atual:'',
+        novoItem:true,
     })
-    function checkCep(){
-        if(state.cep){
-            setState(state.cep?.replace(/\D/g, ''))
-            fetch(`https://viacep.com.br/ws/${state.cep}/json/`).
-            then(res => res.json()).
-            then(data=>{
-                setState({...state, bairro:data.bairro, rua:data.logradouro, cnpj:''})
-                })
-        }else{
-            setState({...state, rua:'',bairro:'',cnpj:''})
-        }
-    }
     function limparFornecedor(){
         setState({
-            nome:'',
-            email:'',
-            telefone:'',
-            cpf:'',
-            cnpj:'',
-            cep:'',
-            rua:'',
-            numero:'',
-            bairro:'',
+            id:Date.now(),
+            item_id:'',
+            lote:'',
+            data_validade:'',
+            fator_embalagem:'',
+            qtd_atual:'',
+            valor_atual:'',
+            novoItem:true,
         })
     }
     return(
@@ -57,114 +31,101 @@ export function NovoFornecedor(props){
             open={props.openModal}
             onClose={()=>{props.onClose(), limparFornecedor()}}
             header='Novo Item'
-            onSave = {()=>{props.Save(state,props.fornecedor?.id)}}
-
+            onSave = {()=>{props.Save(state)}}
         >
             <CssBaseline />
             <Box >
-                <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' >
-                    <Grid container spacing={3} mb={4}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                id="nome"
-                                name="nome"
-                                label="Nome"
-                                value={state.nome}
-                                onChange={(e) => setState({...state, nome: e.target.value})}
-                                fullWidth
-                                variant="outlined"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                            id="email"
-                            name="email"
-                            label="E-mail"
-                            value={state.email}
-                            onChange={(e) => setState({...state, email: e.target.value})}
+
+                <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
+                <Grid item xs={12} container spacing={3}>
+                    <Grid item xs={12} sm={9}>
+                        <TextField
+                            value={state.item_id}
+                            select
+                            name="item_id"
+                            label='Item'
                             fullWidth
                             variant="outlined"
-                            />
-                        </Grid>
-                    </Grid>
-                    <Grid container spacing={3} mb={4}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                            id="cnpj"
-                            name="cnpj"
-                            label='CNPJ'
-                            value={state.cnpj}
-                            onChange={(e) => setState({...state, cnpj: e.target.value})}
-                            fullWidth
-                            autoComplete="shipping address-line2"
-                            variant="outlined"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                            id="telefone"
-                            name="telefone"
-                            label='Telefone'
-                            // value={mask(state.telefone,['(99)99999999','(99)9 99999999'])}
-                            value={state.telefone}
-                            onChange={(e) => setState({...state, telefone: e.target.value})}
-                            fullWidth
-                            autoComplete="shipping address-line2"
-                            variant="outlined"
-                            />
-                        </Grid>  
-                        
-                    </Grid>
-                    <Grid container spacing={3}mb={4}>
-                        <Grid item xs={12} sm={12}>
-                            <TextField
-                            value={state.cep}
-                            onBlur={()=>checkCep()}
-                            id="cep"
-                            name="cep"
-                            label="CEP"
-                            fullWidth
-                            variant="outlined"
-                            onChange={(e) => setState({...state, cep:e.target.value})}
-                            />
-                        </Grid>
-                    </Grid>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} sm={5}>
-                            <TextField
-                            id="rua"
-                            name="rua"
-                            value={state.rua}
-                            label="Rua"
-                            onChange={(e) => setState({...state, rua:e.target.value})}
-                            fullWidth
-                            variant="outlined"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={2}>
-                            <TextField
-                            id="numero"
-                            name="numero"
-                            label='Nº'
-                            value={state.numero}
-                            onChange={(e) => setState({...state, numero:e.target.value})}
-                            fullWidth
-                            variant="outlined"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={5}>
-                            <TextField
-                            id="bairro"
-                            name="bairro"
-                            label='Bairro'
-                            value={state.bairro}
-                            onChange={(e) => setState({...state, bairro:e.target.value})}
-                            fullWidth
-                            variant="outlined"
-                            />
-                        </Grid>
+                            onChange={(e)=> setState({...state, item_id:e.target.value})}
+                        >
+                            {props.itens?.map((i, index)=>(
+                                <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
+                            ))}
+                        </TextField>    
                     </Grid>
                     
+                    <Grid item xs={12} sm={3}>
+                        <TextField
+                            value={state.data_validade}
+                            type='date'
+                            name="data_validade"
+                            label='Data de validade'
+                            fullWidth
+                            variant="outlined"
+                            onChange={(e)=> setState({...state, data_validade:e.target.value})}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                    </Grid>
+                </Grid>
+                <Grid item xs={12} container spacing={3} my={1}>
+                    <Grid item xs={12} sm={3}>
+                        <TextField
+                            value={state.fator_embalagem}
+                            name="fator_embalagem"
+                            label='Fator emb'
+                            fullWidth
+                            variant="outlined"
+                            onChange={(e)=> setState({...state, fator_embalagem:e.target.value})}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={3}>
+                        <TextField
+                            value={state.qtd_atual}
+                            name="qtd_atual"
+                            label='Quantidade'
+                            fullWidth
+                            variant="outlined"
+                            onChange={(e)=> setState({...state, qtd_atual:e.target.value})}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={3}>
+                        <TextField
+                            value={state.lote}
+                            name="lote"
+                            label='Lote'
+                            fullWidth
+                            variant="outlined"
+                            onChange={(e)=> setState({...state, lote:e.target.value})}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={3}>
+                        <TextField
+                            value={state.valor_atual}
+                            name="valor_atual"
+                            label='Valor'
+                            fullWidth
+                            variant="outlined"
+                            onChange={(e)=> setState({...state, valor_atual:e.target.value})}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+                    </Grid>
+                </Grid>                
                 </Box>
             </Box>
 

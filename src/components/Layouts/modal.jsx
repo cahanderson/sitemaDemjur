@@ -4,26 +4,6 @@ import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import { useForm } from "react-hook-form";
 
 export function Modal(props){
-    // const styles = theme => ({
-    //     modal:{
-    //       position:'absolute',
-    //       top:'10%',
-    //       left:'50%',
-    //       transform: 'translate(-50%, -50%)',
-    //       overflow:'hidden',
-    //       height:'100%',
-    //       maxHeight: 500,
-    //       display:'block'
-    //     },
-    //     header: {
-    //       padding: '12px 0',
-    //       borderBottom: '1px solid darkgrey'
-    //     },
-    //     content: {
-    //       padding: 12,
-    //       overflow: 'scroll'
-    //     }
-    //   });
     const style = {
         position: 'absolute',
         top: '50%',

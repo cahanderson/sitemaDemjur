@@ -23,7 +23,8 @@ export function NovoFornecedor(props){
            setState({
                 nome:props.fornecedor.nome,
                 email:props.fornecedor.email, 
-                telefone:props.fornecedor.telefone, 
+                telefone:props.fornecedor.telefone,
+                cpf:props.fornecedor.cpf,
                 cnpj:props.fornecedor.cnpj,
                 cep:props.fornecedor.cep,
                 rua:props.fornecedor.rua,
@@ -52,16 +53,20 @@ export function NovoFornecedor(props){
     // }
     function checkCep(){
         if(state.cep){
-            setState(state.cep?.replace(/\D/g, ''))
             fetch(`https://viacep.com.br/ws/${state.cep}/json/`).
             then(res => res.json()).
             then(data=>{
-                setState({...state, bairro:data.bairro, rua:data.logradouro, cnpj:''})
+                setState({...state, bairro:data.bairro, rua:data.logradouro})
                 })
         }else{
-            setState({...state, rua:'',bairro:'',cnpj:''})
+            setState({...state, rua:'',bairro:''})
         }
     }
+    useEffect(()=>{
+        if(state.cep.length == 8){
+            checkCep()
+        }
+    },[state.cep])
     function limparFornecedor(){
         setState({
         nome:'',
@@ -82,12 +87,12 @@ export function NovoFornecedor(props){
             open={props.openModal}
             onClose={()=>{props.onClose(), limparFornecedor()}}
             header='Novo Fornecedor'
-            onSave = {()=>{props.Save(state,props.fornecedor?.id)}}
+            onSave = {()=>{props.Save(state,props.fornecedor?.id),console.log(state);}}
 
         >
             <CssBaseline />
             <Box >
-                <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' >
+                <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                     <Grid container spacing={3} mb={4}>
                         <Grid item xs={12} sm={6}>
                             <TextField
@@ -102,40 +107,50 @@ export function NovoFornecedor(props){
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
-                            id="email"
-                            name="email"
-                            label="E-mail"
-                            value={state.email}
-                            onChange={(e) => setState({...state, email: e.target.value})}
-                            fullWidth
-                            variant="outlined"
+                                id="email"
+                                name="email"
+                                label="E-mail"
+                                value={state.email}
+                                onChange={(e) => setState({...state, email: e.target.value})}
+                                fullWidth
+                                variant="outlined"
                             />
                         </Grid>
                     </Grid>
                     <Grid container spacing={3} mb={4}>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={4}>
                             <TextField
-                            id="cnpj"
-                            name="cnpj"
-                            label='CNPJ'
-                            value={state.cnpj}
-                            onChange={(e) => setState({...state, cnpj: e.target.value})}
-                            fullWidth
-                            autoComplete="shipping address-line2"
-                            variant="outlined"
+                                name="cpf"
+                                label='CPF'
+                                value={mask(unMask(state.cpf),['999.999.999-99'])}
+                                fullWidth
+                                autoComplete="shipping address-line2"
+                                variant="outlined"
+                                onChange={(e) => setState({...state, cpf:unMask(e.target.value)})}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={4}>
                             <TextField
-                            id="telefone"
-                            name="telefone"
-                            label='Telefone'
-                            // value={mask(state.telefone,['(99)99999999','(99)9 99999999'])}
-                            value={state.telefone}
-                            onChange={(e) => setState({...state, telefone: e.target.value})}
-                            fullWidth
-                            autoComplete="shipping address-line2"
-                            variant="outlined"
+                                id="cnpj"
+                                name="cnpj"
+                                label='CNPJ'
+                                value={mask(unMask(state.cnpj),['99.999.999/9999-99'])}
+                                fullWidth
+                                autoComplete="shipping address-line2"
+                                variant="outlined"
+                                onChange={(e) => setState({...state, cnpj:unMask(e.target.value)})}
+                            />
+                        </Grid>  
+                        <Grid item xs={12} sm={4}>
+                            <TextField
+                                id="telefone"
+                                name="telefone"
+                                label='Telefone'
+                                value={mask(unMask(state.telefone),['(99)99999999','(99)9 99999999'])}
+                                onChange={(e) => setState({...state, telefone:unMask(e.target.value)})}
+                                fullWidth
+                                autoComplete="shipping address-line2"
+                                variant="outlined"
                             />
                         </Grid>  
                         
@@ -143,49 +158,48 @@ export function NovoFornecedor(props){
                     <Grid container spacing={3}mb={4}>
                         <Grid item xs={12} sm={12}>
                             <TextField
-                            value={state.cep}
-                            onBlur={()=>checkCep()}
-                            id="cep"
-                            name="cep"
-                            label="CEP"
-                            fullWidth
-                            variant="outlined"
-                            onChange={(e) => setState({...state, cep:e.target.value})}
+                                value={mask(unMask(state.cep),['99.999-999'])}
+                                id="cep"
+                                name="cep"
+                                label="CEP"
+                                fullWidth
+                                variant="outlined"
+                                onChange={(e) => setState({...state, cep:unMask(e.target.value)})}
                             />
                         </Grid>
                     </Grid>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={5}>
                             <TextField
-                            id="rua"
-                            name="rua"
-                            value={state.rua}
-                            label="Rua"
-                            onChange={(e) => setState({...state, rua:e.target.value})}
-                            fullWidth
-                            variant="outlined"
+                                id="rua"
+                                name="rua"
+                                value={state.rua}
+                                label="Rua"
+                                onChange={(e) => setState({...state, rua:e.target.value})}
+                                fullWidth
+                                variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            id="numero"
-                            name="numero"
-                            label='Nº'
-                            value={state.numero}
-                            onChange={(e) => setState({...state, numero:e.target.value})}
-                            fullWidth
-                            variant="outlined"
+                                id="numero"
+                                name="numero"
+                                label='Nº'
+                                value={state.numero}
+                                onChange={(e) => setState({...state, numero:e.target.value})}
+                                fullWidth
+                                variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={12} sm={5}>
                             <TextField
-                            id="bairro"
-                            name="bairro"
-                            label='Bairro'
-                            value={state.bairro}
-                            onChange={(e) => setState({...state, bairro:e.target.value})}
-                            fullWidth
-                            variant="outlined"
+                                id="bairro"
+                                name="bairro"
+                                label='Bairro'
+                                value={state.bairro}
+                                onChange={(e) => setState({...state, bairro:e.target.value})}
+                                fullWidth
+                                variant="outlined"
                             />
                         </Grid>
                     </Grid>

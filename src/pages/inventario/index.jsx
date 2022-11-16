@@ -1,18 +1,19 @@
 import { useState,useEffect } from "react";
 import { Box, Button, CssBaseline, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import { GridActionsCellItem } from "@mui/x-data-grid";
-import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { Inventarios } from "@/lib/inventario";
+import { UsuariosService } from "@/lib/usuario";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
 import { useRouter } from "next/router";
+import useInventarioStore from "@/hooks/inventarioEdit";
 
 export default function Inventario(){   
     const router = useRouter()
+    const addEditInventario = useInventarioStore(state=>state.addData);
     const [usuario, setUsuario] = useState([]);
-    const [inventario, setInventario] = useState()
-    const [openModal, setOpenModal] = useState(false)
+    const [paginaInventario, setPaginaInventario] = useState(1)
     const [state, setState] = useState({
         data:'',
         responsavel_id:'',
@@ -23,60 +24,51 @@ export default function Inventario(){
     });
     
     const columns = [
-        { field: 'id', headerName: '#', width: 50 },
-        { field: 'nome', headerName: 'Nome', width: 210 },
-        { field: 'data', headerName: 'Data', width: 210 },
-        { field: 'actions',headerName: 'Ações',type:'actions',getActions: (params) => [
-            <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
+        { field: 'id', headerName: '#', width: 100 },
+        { field: 'nome', headerName: 'Nome do responsável', width: 410 },
+        { field: 'data', headerName: 'Data do inventário', width: 410 },
+        { field: 'actions',headerName: 'Editar',type:'actions',width: 300, getActions: (params) => [
             <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => {onEdit(params.id)}} label="edit" />,
+            // <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
           ]
-      }
+        }
     ]
-    const rows = state.filter?.map((row)=>({
+    const rows = state.filter.reverse()?.map((row)=>({
         id:row.id,
         nome:row.responsavel?.name,
         data:row.data?.split('-').reverse().join('/')
     }));
     function onLoad(){
-        Inventarios.getAll()
+        UsuariosService.getAll()
         .then((result)=>{
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            setState({...state, data:result.data.data, filter:result.data.data})
+            setUsuario(result.data.data)
         });
     }
-    function onSave(id,data){
-        if(id!==undefined){
-            Inventarios.updateById(id,data).then((result)=>{
-                if(result instanceof Error){
-                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                    return;
-                }
-            })
-        }else{
-            Inventarios.create(data).then((result)=>{
-                if(result instanceof Error){
-                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
-                        return;
-                    }
-                })
+    function onLoadInventario(){
+        Inventarios.getAll(paginaInventario)
+        .then((result)=>{
+            if(result instanceof Error){
+                return;
             }
-        setOpenModal(false)
+            addPaginationInventario(result)
+            if(result.data.meta.to < result.data.meta.total){
+                setPaginaInventario(paginaInventario+1)
+            }
+        });
     }
-    function onDelete(id){
-        if(confirm('Realmente deseja apagar?')){
-            Inventarios.deleteById(id)
-            .then(result => {
-                if(result instanceof Error){
-                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});  
-                }else{
-                    setState({...state, openSnakebar:true, message:'Apagado com Sucesso', statusSnake:'success'});  
-                }    
-                onLoad()
-            })    
-        }else return;   
+    function addPaginationInventario(i){
+        if(state.data.length < i.data.meta.total){
+            let clone = Object.assign([], state.data);
+                i.data.data.forEach(item=>{
+                    clone.push(item);
+                })
+                setState({...state, data:clone, filter:clone})
+
+        }
     }
     function onEdit(id){
         Inventarios.
@@ -85,13 +77,17 @@ export default function Inventario(){
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
             }
-            setInventario(result)
-            setOpenModal(true)
+            addEditInventario(result)
+            router.push('inventario/form')
         })
     }
     useEffect(()=>{
         onLoad()
-    },[openModal])
+    },[])
+
+    useEffect(()=>{
+        onLoadInventario()
+    },[paginaInventario])
 
     function pesquisar(data,responsavel){
         if(data){
@@ -102,7 +98,6 @@ export default function Inventario(){
             setState({...state, filter:state.dataItens})
         }
     }
-
     return(
         <AppLayout>
             <CssBaseline />
@@ -111,6 +106,7 @@ export default function Inventario(){
                 justifyContent='space-between'
                 mb={4}
              >
+
                 <Box
                     display='flex'
                     flexDirection='column'
@@ -182,3 +178,37 @@ export default function Inventario(){
         </AppLayout>
     )
 }
+
+
+    // function onSave(id,data){
+    //     if(id!==undefined){
+    //         Inventarios.updateById(id,data).then((result)=>{
+    //             if(result instanceof Error){
+    //                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+    //                 return;
+    //             }
+    //         })
+    //     }else{
+    //         Inventarios.create(data).then((result)=>{
+    //             if(result instanceof Error){
+    //                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
+    //                     return;
+    //                 }
+    //             })
+    //         }
+    //     setOpenModal(false)
+    // }
+
+    // function onDelete(id){
+    //     if(confirm('Realmente deseja apagar?')){
+    //         Inventarios.deleteById(id)
+    //         .then(result => {
+    //             if(result instanceof Error){
+    //                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});  
+    //             }else{
+    //                 setState({...state, openSnakebar:true, message:'Apagado com Sucesso', statusSnake:'success'});  
+    //             }    
+    //             onLoad()
+    //         })    
+    //     }else return;   
+    // }
