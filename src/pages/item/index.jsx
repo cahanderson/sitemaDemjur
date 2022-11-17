@@ -17,8 +17,9 @@ export default function Item(){
     const [categoria, setCategoria] = useState([])
     const [tipoItem, setTipoItem] = useState()
     const [editItem, setEditItem] = useState([])
-    const[newPrincAtivo, setNewPrincAtivo] = useState(null)
-    const[newCategoria, setNewCategoria] = useState(null)
+    const [newPrincAtivo, setNewPrincAtivo] = useState(null)
+    const [newCategoria, setNewCategoria] = useState(null)
+    const [dataItens, setDataItens] = useState([])
     const [state, setState] = useState({
         codigo: null,
         descricao: '',
@@ -29,7 +30,6 @@ export default function Item(){
         dataItens:[],
         filter:[],
     });
-    const [dataItens, setDataItens] = useState([])
     const rows = state.filter?.map((row)=>({
         id : row.id,
         nome:row.nome,

@@ -15,9 +15,11 @@ import { GridActionsCellItem } from "@mui/x-data-grid";
 import { useRouter } from "next/router";
 import useMovimentacaoSaidaPacienteStore from "@/hooks/movimentacaoSaidaPaciente";
 import { mask, unMask } from 'remask'
+import useSolicitacaoDispensacaoStore from "@/hooks/solicitacaoDispensacao";
 
 export default function Paciente(){
-
+    
+    const idSolicitacaoStore = useSolicitacaoDispensacaoStore(state=>state.datas)
     let tableCheckbox = false;
     let itemEditado = []
     let soma=0.0;
@@ -117,6 +119,7 @@ export default function Paciente(){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
+            console.log(result);
             setSolicitacao(result.data)
             const itemFormated = result.data.itens?.map((item)=>({
                 id:item.id,
@@ -226,17 +229,17 @@ export default function Paciente(){
                     }
             })
         }
-        router.push('/movimentacao')
+        router.push('/solicitacao')
     }
     useEffect(()=>{
         onLoad()
     },[])
 
     useEffect(()=>{
-        if(idSolicitacoes){
-            onLoadSolicitacao(idSolicitacoes)
+        if(idSolicitacaoStore){
+            onLoadSolicitacao(idSolicitacaoStore)
         }
-    },[idSolicitacoes])
+    },[idSolicitacaoStore])
     
     useEffect(()=>{
         if(dados){
@@ -250,8 +253,12 @@ export default function Paciente(){
         }
     },[itensInseridos])
 
-// console.log(dados);
-console.log(state);
+    // useEffect(()=>{
+    //     if(idSolicitacaoStore){
+    //         setIdSolicitacoes(idSolicitacaoStore)
+    //         console.log(idSolicitacaoStore);
+    //     }
+    // },[])
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>
@@ -259,22 +266,7 @@ console.log(state);
             </Typography>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mt={2}>
                 <Grid container spacing={3} mb={1}>
-                    <Grid item xs={12} sm={2}>
-                        <TextField
-                            select
-                            value={idSolicitacoes}
-                            name="tipo_Saida"
-                            label="Nº da solicitação"
-                            fullWidth
-                            variant="outlined"
-                            onChange={(e)=>{setIdSolicitacoes(e.target.value), setState({...state, solicitacao_id:e.target.value})}}
-                        >
-                            {nSolicitacoes.map((sol,index)=>(
-                                <MenuItem key={index} value={sol.id}>{sol.numero_solicitacao}</MenuItem>
-                            ))}
-                        </TextField>
-                    </Grid>
-                    <Grid item xs={12} sm={7}>
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             value={solicitacao?.beneficiario.nome}
                             name="solicitante"
@@ -298,8 +290,6 @@ console.log(state);
                             }}
                         />
                     </Grid>
-                </Grid>    
-                <Grid container spacing={3} my={1} mb={4} justifyContent='start'>
                     <Grid item xs={12} sm={3}>
                         <TextField
                             value={solicitacao?.beneficiario.cns}
@@ -312,6 +302,8 @@ console.log(state);
                             }}
                         />
                     </Grid>
+                </Grid>    
+                <Grid container spacing={3} my={1} mb={4} justifyContent='start'>
                     <Grid item xs={12} sm={3}>
                         <TextField
                             value={solicitacao?.data_entrada}
@@ -410,7 +402,7 @@ console.log(state);
                 : null}
                 <Divider sx={{marginTop:"100px"}} />
                 <Box display='flex' justifyContent={"end"} gap='10px' p={2}>
-                    <Button variant="text" onClick={() => router.push('/movimentacao')}> Cancelar Edição</Button>
+                    <Button variant="text" onClick={() => router.push('/solicitacao')}> Cancelar Edição</Button>
                     <Button variant="contained" onClick={() => onSave(state)}> Salvar</Button>
                 </Box> 
 

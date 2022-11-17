@@ -25,10 +25,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/fornecedor": [
+    "/item": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/fornecedor.js"
+      "static/chunks/pages/item.js"
     ],
     "/solicitacao/form": [
       "static/chunks/webpack.js",

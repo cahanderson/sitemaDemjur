@@ -8,11 +8,13 @@ import { GridActionsCellItem } from "@mui/x-data-grid";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import useSolicitacaoStore from "@/hooks/solicitacao";
+import useSolicitacaoDispensacaoStore from "@/hooks/solicitacaoDispensacao";
 import { mask, unMask } from 'remask'
 
 export default function Solicitacoes(){
-    const router = useRouter();
+    const addDispensacao = useSolicitacaoDispensacaoStore(state=>state.addData);
     const addData = useSolicitacaoStore(state=>state.addData);
+    const router = useRouter();
     const [state, setState] = useState({
         data:[],
         filter:[],
@@ -36,9 +38,16 @@ export default function Solicitacoes(){
         { field: 'nome', headerName: 'Nome', width: 240 },
         { field: 'cpf', headerName: 'CPF', width: 240 },
         { field: 'nome_da_mae', headerName: 'Nome da mãe', width: 220 },
-        { field: 'dispensacao',type:'actions', headerName: 'Dispensação',width: 150, getActions: (params) => [
-            <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
-          ]
+        { field: 'dispensacao',type:'actions', headerName: 'Dispensação',width: 150,
+            renderCell: (params) => (
+                <Button
+                    variant="contained"
+                    size='small'
+                    onClick={()=>dispensarPaciente(params)}
+                >
+                    Dispensação
+                </Button>
+            )
         },
         { field: 'actions',type:'actions', headerName: 'Ações',width: 150,getActions: (params) => [
             <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
@@ -54,6 +63,10 @@ export default function Solicitacoes(){
         nome_da_mae:row.beneficiario?.nome_mae,
         dt_nascimento:row.beneficiario?.data_nascimento,
     }));
+    function dispensarPaciente(params){
+        addDispensacao(params.row.id)
+        router.push('movimentacao/form_saidaPaciente')
+    }
     function onEdit(id){
         Solicitacao.getById(id).
         then((result)=>{
@@ -89,7 +102,6 @@ export default function Solicitacoes(){
         onLoad()
         addData('')
     },[])
-    console.log(state.data);
     return(
         <AppLayout>
             <CssBaseline />
