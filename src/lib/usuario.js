@@ -4,12 +4,9 @@ const csrf = () => axios.get('/sanctum/csrf-cookie')
 
 const getAll = async () =>{
   try {
-      const{data} = await axios.get('/api/users')
+      const data = await axios.get('/api/users')
       if(data){
-        
-          return{
-            data
-          } 
+        return data 
       }else{
         return new Error('Erro ao listar os registros')  
       }
@@ -24,11 +21,11 @@ const getById = async (id) => {
     if (data) {
       return data;
     }
-
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 }; 
 const create = async (dados) => {
@@ -40,18 +37,18 @@ const create = async (dados) => {
     if (data) {
       return data.id;
     }
-    return new Error('Erro ao criar o registro.');
+    // return new Error('Erro ao criar o registro.');
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 const updateById = async (id, dados) => {
   try {
     await axios.put(`/api/users/${id}`, dados);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao atualizar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
   

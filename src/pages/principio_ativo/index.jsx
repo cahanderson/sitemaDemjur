@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { PrincAtivo } from "../../lib/princAtivo";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
-import { Box, Button, CssBaseline, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, CssBaseline, Grid, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
@@ -17,14 +17,17 @@ export default function PrincipioAtivo(){
         principioAtivo_id: '',
         tableCheckbox: false,
         filter:[],
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
     });
     const rows = state.filter?.map((row)=>({
         id : row.id,
         nome:row.nome,
     }));
     const columns = [
-        { field: 'id', headerName: 'Código', width: 130 },
-        { field: 'nome', headerName: 'Descrição', width: 1000 },
+        { field: 'id', headerName: 'Código', width: 200},
+        { field: 'nome', headerName: 'Descrição', width: 250},
         { field: 'actions',type:'actions',getActions: (params) => [
             <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
             <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params.id)} label="edit" />,
@@ -72,16 +75,18 @@ export default function PrincipioAtivo(){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
                 }
-            }) 
+                setOpenModal(false)
+            })
         }else{
             PrincAtivo.create(item).then((result)=>{
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
                         return;
-                    }
+                }
+                setOpenModal(false)
             })
         }
-        setOpenModal(false)
+        
         onLoad()
     }
     function pesquisar(principio_Ativo){
@@ -90,6 +95,10 @@ export default function PrincipioAtivo(){
         }else{
             setState({...state, filter: categoria})
         }
+    }
+
+    function closeSnakebar(){
+        setState({...state, openSnakebar:false})
     }
     useEffect(()=>{
         onLoad()
@@ -122,6 +131,19 @@ export default function PrincipioAtivo(){
                          Novo princípio ativo
                     </Button>
                 </Box>
+                <Snackbar 
+                    open={state.openSnakebar} 
+                    autoHideDuration={3000} 
+                    onClose={closeSnakebar}
+                    anchorOrigin={{
+                        horizontal: "right",
+                        vertical: "top",
+                    }}
+                >
+                    <Alert onClose={closeSnakebar} severity={state.statusSnake} sx={{ width: '100%' }}>
+                        {state.message}
+                    </Alert>
+                </Snackbar>
 
             </Box>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>

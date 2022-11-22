@@ -1,4 +1,4 @@
-import { Box, Button, createTheme, Divider, Grid, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, createTheme, Divider, Grid, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import DeleteOutlineTwoToneIcon from '@mui/icons-material/DeleteOutlineTwoTone';
@@ -44,9 +44,9 @@ export default function Saidas(){
         item_id: '',
         quantidade:'',
     })
-    function onSetItem(e){
-        if(e.target.name === 'item_id'){
-            itemPesquisa.item_id = e.target.value;
+    function onSetItem(e, value){
+        if(e.target.id.startsWith('item_id')){
+            itemPesquisa.item_id = value;
             setItemPesquisa({...itemPesquisa})
         }else if(e.target.name === 'quantidade'){
             itemPesquisa.quantidade = e.target.value;
@@ -223,10 +223,7 @@ export default function Saidas(){
             onLoadEdit(dados)
         }
     },[dados])
-    // console.log(state);
-    console.log(dataItens);
-    console.log(itens);
-
+    console.log(state.movimentable_id);
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>
@@ -252,19 +249,24 @@ export default function Saidas(){
                         </TextField>
                     </Grid>
                     <Grid item xs={12} sm={7}>
-                        <TextField
-                                select 
-                                value={state.movimentable_id}
-                                disabled={desability? true : false}
-                                name="movimentable_id" 
-                                label='Destino da saída' 
-                                fullWidth variant="outlined" 
-                                onChange={(e) => {setState({...state, movimentable_id: e.target.value})}}
-                        >
-                            {destino?.map((i, index)=>(
-                                <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
-                            ))}
-                        </TextField>                                   
+                        <Autocomplete
+                            value={destino.forEach(i=>{if(i.id == state.movimentable_id)i.nome})}
+                            options={destino?.map((option) => option.nome)}
+                            onChange={(_, newValue) => {
+                                destino.forEach((i)=>{
+                                    if(i.nome == newValue){
+                                        setState({...state, movimentable_id: i.id})
+                                    }
+                                })
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    variant="outlined"
+                                    label="Destino da saída"
+                                />
+                            )}
+                        />                                   
                     </Grid>
                     <Grid item xs={12} sm={3}>
                         <TextField
@@ -296,19 +298,27 @@ export default function Saidas(){
                 <Grid container mt={5} mb={3}>
                     <Grid item xs={11} container spacing={3}>
                         <Grid item xs={12} sm={6}>
-                            <TextField
-                                select
-                                value={itemPesquisa.item_id}
-                                name="item_id"
-                                label='Itens'
-                                fullWidth
-                                variant="outlined"
-                                onChange={(e)=> {onSetItem(e), onLoadEstoque(e.target.value)}}
-                            >
-                                {dataItens.map((i, index)=>(
-                                    <MenuItem key={index} value={i.id}>{i.nome}</MenuItem>
-                                ))}
-                            </TextField>    
+                            <Autocomplete
+                                value={dataItens.forEach(i=>{if(i.id == state.movimentable_id)i.nome})}
+                                options={dataItens?.map((option) => option.nome)}
+                                id="item_id"
+                                name='item_id'
+                                onChange={(e, newValue) => {
+                                    dataItens.forEach((i)=>{
+                                        if(i.nome == newValue){
+                                            onSetItem(e,i.id)
+                                        }
+                                    })
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        label="Item"
+                                        name="item_id"
+                                    />
+                                )}
+                            />  
                         </Grid>
                         
                         <Grid item xs={12} sm={1}>

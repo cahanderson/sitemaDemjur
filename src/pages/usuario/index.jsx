@@ -68,7 +68,6 @@ export default function Usuarios() {
     }
 
     function onSave(id,data){
-        
         if(id){
             UsuariosService.
             updateById(id, data).
@@ -76,17 +75,22 @@ export default function Usuarios() {
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
+                }else{
+                    setOpenModal(false)
                 }
-            })   
+            })
+            onLoad()
         }else{
             UsuariosService.create(data).then((result)=>{
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
                         return;
+                    }else{
+                        setOpenModal(false)
                     }
-                })
-            }
-        setOpenModal(false)
+                    })
+                }
+            
         onLoad()
     }
 

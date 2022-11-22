@@ -74,7 +74,6 @@ export default function Item(){
         Itens.getTipoItem()
         .then((result)=>{
             if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setTipoItem(result.data.dados)
