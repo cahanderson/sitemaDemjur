@@ -1,22 +1,36 @@
-import { useState, useEffect } from "react";
-import { Box, Button, CssBaseline, Grid, Menu, MenuItem, Paper, TextField, Typography } from "@mui/material";
-import { GridActionsCellItem } from "@mui/x-data-grid";
-import DeleteIcon from '@mui/icons-material/Delete';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import { useState, useEffect, forwardRef } from "react";
+import { Alert, Box, Button, CssBaseline, Divider, Grid, Menu, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
+import { GridActionsCellItem } from "@mui/x-data-grid";
+import { useRouter } from "next/router";
+import {Preview} from "../../components/Modal/previewMovimentacao"
 import { Table } from "@/components/Table";
 import { Movimentacoes } from "@/lib/movimentacao";
-import { useRouter } from "next/router";
 import useMovimentacaoEntradaStore from "@/hooks/movimentacaoEntrada";
 import useMovimentacaoSaidaStore from "@/hooks/movimentacaoSaida";
 import useMovimentacaoSaidaPacienteStore from "@/hooks/movimentacaoSaidaPaciente";
+import CallMadeIcon from '@mui/icons-material/CallMade';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Slide from '@mui/material/Slide';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
 
 export default function Movimentacao(){   
     const addDataEntrada = useMovimentacaoEntradaStore(state=>state.addData);
     const addDataSaida = useMovimentacaoSaidaStore(state=>state.addData);
     const addDataSaidaPaciente = useMovimentacaoSaidaPacienteStore(state=>state.addData);
     const router = useRouter()
+    const [openModal, setOpenModal] = useState(false)
     const [tipo, setTipo] = useState([''])
+    const [paramsMovimentable, setParamsMovimentable] = useState([])
+    const [efetivacao, setEfetivacao] = useState({
+        movimentacao_id: null
+    })
     const [state, setState] = useState({
         buscaTipoMovimentacao: '',
         buscaDtMovimentacao: '',
@@ -29,16 +43,24 @@ export default function Movimentacao(){
         filter:[],
         data:[],
         dataTipo:[],
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
     });
     const columns = [
         { field: 'id', headerName: 'Nº movimentação', width:280 },
         { field: 'tipo_movimentacao', headerName: 'Tipo movimentação', width: 280 },
         { field: 'data', headerName: 'Data da movimentação', width: 280 },
-        { field: 'efetivado', headerName: 'Efetivação', width: 280 },
-        { field: 'actions',type:'actions',getActions: (params) => [
-            <GridActionsCellItem  icon={<DeleteIcon/>} onClick={() => onDelete(params)} label="Delete" />,
-            <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params)} label="edit" />,
-          ]
+        { field: 'efetivado', headerName: 'Efetivação', width: 230 },
+        // { field: 'actions',type:'actions',getActions: (params) => [
+        //     <GridActionsCellItem  icon={<DeleteIcon/>} onClick={() => onDelete(params)} label="Delete" />,
+        //     <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params)} label="edit" />,
+        //   ]
+        // }
+        { 
+            field: 'actions',headerName: 'Ver Movimentação',width: 170,type:'actions',getActions: (params) => [
+                <GridActionsCellItem  icon={<CallMadeIcon/>} onClick={() => openPreview(params.id)} label="Delete" />,
+            ]
         }
     ]
     const rows = state.data?.map((row)=>({
@@ -48,7 +70,19 @@ export default function Movimentacao(){
         data:row.data.split('-').reverse().join('/'),
         efetivado: row.is_efetivado?"Efetivado":"Não efetivado",
     }));
-
+    const open = Boolean(state.anchorEl);
+    function openPreview(params){
+        setEfetivacao({movimentacao_id: params})
+        setOpenModal(true)
+        Movimentacoes.getById(params)
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setParamsMovimentable(result)
+        })
+    }
     function onLoad(){
         Movimentacoes.getAll()
         .then((result)=>{
@@ -58,7 +92,7 @@ export default function Movimentacao(){
             }
             setState({...state,data:result.data.data})
         })
-    } 
+    }
     function onLoadTipo(){
         Movimentacoes.getMovimentacao()
         .then((result)=>{
@@ -69,7 +103,6 @@ export default function Movimentacao(){
             setTipo(result.data.dados)
         })
     } 
-
     useEffect(()=>{
         onLoad()
         addDataEntrada('');
@@ -79,7 +112,10 @@ export default function Movimentacao(){
     useEffect(()=>{
         onLoadTipo()
     },[state.data])
-    
+
+    const Transition = forwardRef(function Transition(props, ref) {
+        return <Slide direction="up" ref={ref} {...props} />;
+      });
     function pesquisar(buscaTipoMovimentacao,buscaDtMovimentacao,buscaNSolicitacao,buscaSolicitante,buscaCPF){
         if(buscaTipoMovimentacao !==''){    
             setState({...state, filter: data.filter((data)=>{ return data.d_tipo_movimentacao.startsWith(buscaTipoMovimentacao)})})
@@ -97,8 +133,6 @@ export default function Movimentacao(){
             setState({...state, filter:data.filter((data)=>{ return data.descricao.toUpperCase().startsWith(buscaDescricao.toUpperCase())})})
         };
     }
-    const open = Boolean(state.anchorEl);
-
     function openMenu(event){
         setState({...state, anchorEl:event.currentTarget})
         // console.log(event.currentTarget);
@@ -129,7 +163,7 @@ export default function Movimentacao(){
         }
     }
     function onEdit(params){
-        if(params.row.efetivado == 'Efetivado'){
+        if(params.is_efetivado == 'Efetivado'){
             alert('Não é possível realizar ação! Movimentação efetivada')
         }else{
             Movimentacoes.getById(params.id).
@@ -150,7 +184,24 @@ export default function Movimentacao(){
             })
         }
     }
-
+    function onEfetivar(params){
+        Movimentacoes.efetivar(params).
+        then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+            }else{
+                setState({...state, openSnakebar:true, message:'Efetivado com sucesso', statusSnake:'success'});
+                setOpenModal(false)
+            }
+        })
+    }
+    function closeSnakebar(){
+        setState({...state, openSnakebar:false})
+    }
+    function handleClose(){
+        setOpenModal(false)
+    }
+    console.log(paramsMovimentable);
     return(
         <AppLayout>
             <CssBaseline />
@@ -170,6 +221,19 @@ export default function Movimentacao(){
                     </Typography>
                     
                 </Box>
+                <Snackbar 
+                    open={state.openSnakebar} 
+                    autoHideDuration={3000} 
+                    onClose={closeSnakebar}
+                    anchorOrigin={{
+                        horizontal: "right",
+                        vertical: "top",
+                    }}
+                >
+                    <Alert onClose={closeSnakebar} severity={state.statusSnake} sx={{ width: '100%' }}>
+                        {state.message}
+                    </Alert>
+                </Snackbar>
                 <Box alignItems='center' display='flex'>
                     <Button
                         id="demo-positioned-button"
@@ -205,7 +269,6 @@ export default function Movimentacao(){
                             fullWidth
                             variant="outlined"
                             onChange={(e) => setState({...state, buscaTipoMovimentacao: e.target.value})}
-
                         >
                             {tipo.map((t, index)=>(
                                 <MenuItem key={index} value={t.id}>{t.descricao}</MenuItem>
@@ -284,6 +347,86 @@ export default function Movimentacao(){
                     check={state.tableCheckbox}
                     height={350}
                 />
+                {/* <Preview
+                    openModal={openModal}
+                    onClose={() => setOpenModal(false)}
+                    onSave = {(dados)=> populaItem(dados)}
+                    params={paramsMovimentable}
+                /> */}
+            </Box>
+            <Box>
+            <Dialog
+                open={openModal}
+                TransitionComponent={Transition}
+                onClose={handleClose}
+                maxWidth={'lg'}
+                fullWidth
+            >
+                <DialogTitle color='secondary' fontSize={24} mb={2}>{"Movimentação"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-slide-description">
+                            <Box p={1}>
+                                <Grid container spacing={3} >
+                                    <Grid item xs={4}>
+                                        <Typography variant="h6" fontWeight={'bold'}>Tipo movimentação</Typography>
+                                        <Typography>{paramsMovimentable.d_tipo_movimentacao}</Typography>
+                                    </Grid>
+                                    <Divider orientation="vertical" flexItem />
+                                    <Grid item xs={5}>
+                                        <Typography variant="h6" fontWeight={'bold'}>Fornecedor</Typography>
+                                        <Typography>{paramsMovimentable.fornecedor?.nome}</Typography>
+                                    </Grid>
+                                    <Divider orientation="vertical" flexItem />
+                                    <Grid item xs={2}>
+                                        <Typography variant="h6" fontWeight={'bold'}>Valor</Typography>
+                                        <Typography>{paramsMovimentable.valor}</Typography>
+                                    </Grid>
+                                    
+                                </Grid>
+                                <Typography my={4} mt={10} variant='h6' >Itens da movimentação</Typography>
+                                <Box>
+                                    <List sx={{ width: '100%', maxWidth: 350}}>
+                                    {paramsMovimentable.itens?.map((i,index) =>(
+                                        <>
+                                            <ListItem alignItems="flex-start">
+                                                    <ListItemText
+                                                        primary={
+                                                            <Typography
+                                                                component='span'
+                                                                variant="body1"
+                                                                color="text.primary"
+                                                            >
+                                                                {`Item: ${i.item.nome}`}
+                                                            </Typography>
+                                                        }
+                                                        secondary={`Quantidade: ${i.quantidade}`}
+                                                    />
+                                            </ListItem>
+                                            <Divider component="li" />
+                                        </>
+                                        ))}
+                                    </List>
+                                </Box>
+                            </Box>
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions sx={paramsMovimentable?.is_efetivado?null:{display:'flex', justifyContent:'space-between'}}>
+                        <Box display={paramsMovimentable?.is_efetivado?'none':'flex'} gap={1}>
+                            <Button onClick={() => onEdit(paramsMovimentable)} variant='outlined'>Editar</Button>
+                            <Button onClick={() => onDelete(paramsMovimentable)} variant='outlined' >Excluir</Button>
+                            <Button
+                                onClick={() => onEfetivar(efetivacao)} 
+                                variant='outlined'
+                                // display={paramsMovimentable?.is_efetivado?'none':null} 
+                            >
+                                Efetivar
+                            </Button>
+                        </Box>
+                        <Box id='close'>
+                            <Button onClick={handleClose} variant='contained'>Fechar</Button>
+                        </Box>
+                    </DialogActions>
+                </Dialog>
             </Box>
 
         </AppLayout>

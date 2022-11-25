@@ -2,11 +2,16 @@ import AppLayout from "@/components/Layouts/AppLayout"
 import { Categoria } from "@/lib/categoria";
 import { Itens } from "@/lib/item";
 import { PrincAtivo } from "@/lib/princAtivo";
-import { Box, Button, Container, CssBaseline, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material"
+import { Alert, Box, Button, Container, CssBaseline, Grid, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material"
 import { useState, useEffect } from "react";
 
 export default function Relatorio() {
     const [categoria, setCategoria] = useState()
+    const [retornoUsuario,setRetornoUsuario] = useState({
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
+    })
     const [state, setState] = useState({
         categoria:'',
     })
@@ -21,11 +26,14 @@ export default function Relatorio() {
         Categoria.getAll()
         .then((result)=>{
             if(result instanceof Error){
-                // setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setCategoria(result.data.data)
         });
+    }
+    function closeSnakebar(){
+        setRetornoUsuario({...retornoUsuario, openSnakebar:false})
     }
     useEffect(()=>{
         onLoad();
@@ -50,6 +58,19 @@ export default function Relatorio() {
                         </Typography>
                     </Box>
                 </Box>
+                <Snackbar 
+                    open={retornoUsuario.openSnakebar} 
+                    autoHideDuration={3000} 
+                    onClose={closeSnakebar}
+                    anchorOrigin={{
+                        horizontal: "right",
+                        vertical: "top",
+                    }}
+                >
+                    <Alert onClose={closeSnakebar} severity={retornoUsuario.statusSnake} sx={{ width: '100%' }}>
+                        {retornoUsuario.message}
+                    </Alert>
+                </Snackbar>
                 <Box>
                     <Grid container spacing={12}>
                         <Grid item xs={12} sm={6} mb={5}>

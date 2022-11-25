@@ -14,7 +14,8 @@ const getAll = async (page) =>{
       return new Error('Erro ao listar os registros')  
     }
   } catch (error) {
-      return error;
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 
@@ -44,8 +45,8 @@ const create = async (dados) => {
     }
     // return new Error('Erro ao criar o registro.');
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 const deleteById = async (id)=> {
@@ -64,16 +65,16 @@ const getById = async (id) => {
     }
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 const updateById = async (id, dados) => {
   try {
     await axios.put(`/api/inventario/${id}`, dados);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao atualizar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 export const Inventarios = {

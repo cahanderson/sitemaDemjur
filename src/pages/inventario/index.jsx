@@ -1,5 +1,5 @@
 import { useState,useEffect } from "react";
-import { Box, Button, CssBaseline, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, CssBaseline, Grid, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { Inventarios } from "@/lib/inventario";
@@ -21,6 +21,9 @@ export default function Inventario(){
         usuarios:[{}],
         dataItens:[],
         filter:[],
+        statusSnake:'success',
+        message:'',
+        checktableCheckbox:true,
     });
     
     const columns = [
@@ -52,6 +55,7 @@ export default function Inventario(){
         Inventarios.getAll(paginaInventario)
         .then((result)=>{
             if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             addPaginationInventario(result)
@@ -98,6 +102,9 @@ export default function Inventario(){
             setState({...state, filter:state.dataItens})
         }
     }
+    function closeSnakebar(){
+        setState({...state, openSnakebar:false})
+    }
     return(
         <AppLayout>
             <CssBaseline />
@@ -106,18 +113,28 @@ export default function Inventario(){
                 justifyContent='space-between'
                 mb={4}
              >
-
                 <Box
                     display='flex'
                     flexDirection='column'
-                    justifyContent='center'
-                        
+                    justifyContent='center'     
                 >
                     <Typography variant='h5' component='h1' color='secondary'>
                         Inventário
                     </Typography>
-                    
                 </Box>
+                <Snackbar 
+                    open={state.openSnakebar} 
+                    autoHideDuration={3000} 
+                    onClose={closeSnakebar}
+                    anchorOrigin={{
+                        horizontal: "right",
+                        vertical: "top",
+                    }}
+                >
+                    <Alert onClose={closeSnakebar} severity={state.statusSnake} sx={{ width: '100%' }}>
+                        {state.message}
+                    </Alert>
+                </Snackbar>
                 <Box alignItems='center' display='flex'>
                     <Button 
                         variant="outlined"

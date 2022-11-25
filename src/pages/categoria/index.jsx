@@ -1,7 +1,7 @@
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
 import { Categoria } from "@/lib/categoria";
-import { Box, Button, CssBaseline, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, CssBaseline, Grid, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { NovaCategoria } from '../../components/Modal/categoria';
 import { GridActionsCellItem } from "@mui/x-data-grid";
@@ -17,6 +17,9 @@ export default function Item(){
         categoria_id: '',
         tableCheckbox: false,
         filter:[],
+        statusSnake:'success',
+        message:'',
+        checktableCheckbox:true,
     });
     const rows = state.filter?.map((row)=>({
         id : row.id,
@@ -71,6 +74,10 @@ export default function Item(){
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
+                }else{
+                    setOpenModal(false)
+                    setState({...state, openSnakebar:true, message:'Categoria editado com sucesso', statusSnake:'success'}); 
+                    onLoad()
                 }
             }) 
         }else{
@@ -78,11 +85,14 @@ export default function Item(){
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
                         return;
+                    }else{
+                        setOpenModal(false)
+                        setState({...state, openSnakebar:true, message:'Categoria criado com sucesso', statusSnake:'success'});
+                        onLoad()
                     }
             })
         }
-        setOpenModal(false)
-        onLoad()
+        
     }
     function pesquisar(categoria){
         if(categoria){
@@ -90,6 +100,9 @@ export default function Item(){
         }else{
             setState({...state, filter: categoria})
         }
+    }
+    function closeSnakebar(){
+        setState({...state, openSnakebar:false})
     }
     useEffect(()=>{
         onLoad()
@@ -122,7 +135,19 @@ export default function Item(){
                          Nova categoria
                     </Button>
                 </Box>
-
+                <Snackbar 
+                    open={state.openSnakebar} 
+                    autoHideDuration={3000} 
+                    onClose={closeSnakebar}
+                    anchorOrigin={{
+                        horizontal: "right",
+                        vertical: "top",
+                    }}
+                >
+                    <Alert onClose={closeSnakebar} severity={state.statusSnake} sx={{ width: '100%' }}>
+                        {state.message}
+                    </Alert>
+                </Snackbar>
             </Box>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Box display='flex' flexDirection='row' mt='20px' mb='30px' gap='20px' >

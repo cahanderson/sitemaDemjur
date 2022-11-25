@@ -13,7 +13,8 @@ const getAll = async () =>{
         return new Error('Erro ao listar os registros')  
       }
   } catch (error) {
-      return error;
+      const erro = error.response.data
+      return new Error(erro.message);
   }
 };
 const getById = async (id) => {
@@ -26,8 +27,8 @@ const getById = async (id) => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };  
 const create = async (item) => {
@@ -38,39 +39,40 @@ const create = async (item) => {
       return data.id;
     }
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 }; 
 const updateById = async (id,item) => {
   try {
     await axios.put(`/api/itens/${id}`, item);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao atualizar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 }; 
 const deleteById = async (id)=> {
   try {
     await axios.delete(`/api/itens/${id}`);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao apagar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 const getTipoItem = async () =>{
   try {
-      const{data} = await axios.get('/api/dominio/tipoDominio/TipoItem')
+      const{data} = await axios.get('/api/dominio/tipo-dominio/TipoItem')
       if(data){
         
         return{
           data
         } 
       }else{
-        return new Error('Erro ao listar os registros')  
+        return new Error('Erro ao listar os tipos de itens')  
       }
   } catch (error) {
-      return error;
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 

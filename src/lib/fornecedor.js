@@ -12,7 +12,8 @@ const getPessoa = async (dados) =>{
         return new Error('Erro ao listar os registros')  
       }
   }catch (error) {
-      return error;
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 const create = async (dados) => {
@@ -26,11 +27,10 @@ const create = async (dados) => {
 
     // return new Error('Erro ao criar o registro.');
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
-
 const getById = async (id) => {
   try {
     const { data } = await axios.get(`/api/pessoa/${id}`);
@@ -41,26 +41,24 @@ const getById = async (id) => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);;
   }
 };
-
 const deleteById = async (id)=> {
   try {
     await axios.delete(`/api/pessoa/${id}`);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao apagar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);;
   }
 };
-
 const updateById = async (id, dados) => {
   try {
     await axios.put(`/api/pessoa/${id}`, dados);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao atualizar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 

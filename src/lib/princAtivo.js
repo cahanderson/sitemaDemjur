@@ -27,23 +27,34 @@ const getById = async (id) => {
 
     return new Error('Erro ao consultar o registro.');
   } catch (error) {
-    console.error(error);
+    const erro = error.response.data
+    return new Error(erro.message);
+  }
+};
+const search = async (dados) => {
+  try {
+    const { data } = await axios.post('/api/principio-ativo/search',dados);
+    if (data) {
+      return data;
+    }
+
     return new Error('Erro ao consultar o registro.');
+  } catch (error) {
+    const erro = error.response
+    return new Error(erro);
   }
 };
   
 const create = async (dados) => {
   await csrf()
   try {
-    const { data } = await axios.post('/api/principio-ativo', dados);
+   const { data } = await axios.post('/api/principio-ativo', dados);
     if (data) {
       return data;
     }
-
-    // return new Error('Erro ao criar o registro.');
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
   
@@ -51,8 +62,8 @@ const updateById = async (id, dados) => {
   try {
     await axios.put(`/api/principio-ativo/${id}`, dados);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao atualizar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
   
@@ -60,8 +71,8 @@ const deleteById = async (id)=> {
   try {
     await axios.delete(`/api/principio-ativo/${id}`);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao apagar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 
@@ -71,4 +82,5 @@ export const PrincAtivo = {
   getById,
   updateById,
   deleteById,
+  search
 };

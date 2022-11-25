@@ -3,7 +3,7 @@ import { Table } from "@/components/Table";
 import { PrincAtivo } from "@/lib/princAtivo";
 import { Categoria } from "@/lib/categoria";
 import { Itens } from "@/lib/item";
-import { Box, Button, CssBaseline, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, CssBaseline, Grid, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from "react";
 import { NovoItem } from '../../components/Modal/itens';
@@ -13,7 +13,9 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 
 export default function Item(){
     const [openModal, setOpenModal] = useState(false)
-    const [princAtivo, setPrincAtivo] = useState([])
+    const [princAtivo, setPrincAtivo] = useState([{
+        nome:' '
+    }])
     const [categoria, setCategoria] = useState([])
     const [tipoItem, setTipoItem] = useState()
     const [editItem, setEditItem] = useState([])
@@ -29,6 +31,9 @@ export default function Item(){
         tableCheckbox: false,
         dataItens:[],
         filter:[],
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
     });
     const rows = state.filter?.map((row)=>({
         id : row.id,
@@ -37,6 +42,12 @@ export default function Item(){
         tipo:row.tipo_item?.descricao,
         categoria:row.categoria?.nome,
     }));
+    const [searchPrincAtivo,setSearchPrincAtivo] = useState({
+        nome:'',
+    })
+    const [searchCategoria,setSearchCategoria] = useState({
+        nome:'',
+    })
     const columns = [
         { field: 'id', headerName: 'Código', width: 180 },
         { field: 'nome', headerName: 'Descrição', width: 200 },
@@ -45,12 +56,12 @@ export default function Item(){
         { field: 'categoria', headerName: 'Categoria', width: 210 },
         { field: 'actions',type:'actions',getActions: (params) => [
             <GridActionsCellItem icon={<DeleteIcon/>} onClick={() => onDelete(params.id)} label="Delete" />,
-            <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params.id)} label="edit" />,
+            <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params)} label="edit" />,
           ]
         }
     ]
-    function onEdit(id){
-        Itens.getById(id).
+    function onEdit(params){
+        Itens.getById(params.id).
         then((result)=>{
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
@@ -70,7 +81,27 @@ export default function Item(){
             setState({...state, filter:result.data.data})
         });
     }
-    function onLoad(){
+    function onLoadPrincAtivo(search){
+        PrincAtivo.search(search)
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setPrincAtivo(result.results)
+        });
+    }
+    function onLoadCategoria(search){
+        Categoria.search(search)
+        .then((result)=>{
+            if(result instanceof Error){
+                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setCategoria(result.results)
+        });
+    }
+    function onLoadTipoItem(){
         Itens.getTipoItem()
         .then((result)=>{
             if(result instanceof Error){
@@ -78,24 +109,6 @@ export default function Item(){
             }
             setTipoItem(result.data.dados)
         });
-
-        PrincAtivo.getAll()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setPrincAtivo(result.data.data)
-        });
-        Categoria.getAll()
-        .then((result)=>{
-            if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setCategoria(result.data.data)
-        });
-
     }
     function onDelete(id){
         if(confirm('Realmente deseja apagar?')){
@@ -116,46 +129,68 @@ export default function Item(){
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
+                }else{
+                    setState({...state, openSnakebar:true, message:'Item atualizado com sucesso', statusSnake:'success'});
+                    setOpenModal(false)
+                    onLoadItens()
                 }
             }) 
         }else{
             Itens.create(item).then((result)=>{
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
-                        return;
-                    }
+                    return;
+                }else{
+                    setState({...state, openSnakebar:true, message:'Item salvo com sucesso', statusSnake:'success'});
+                    setOpenModal(false)
+                    onLoadItens()
+                }
             })
         }
-        setOpenModal(false)
-        onLoadItens()
+        
     }
     function adicionarPrincipioAtivo(princ){
         PrincAtivo.create(princ).then((result)=>{
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
+            }else{
+                setNewPrincAtivo(result.dados.id)
+                // setState({...state, openSnakebar:true, message:'Principio ativo adicionado', statusSnake:'sucess'});
             }
-            setNewPrincAtivo(result.dados.id)
         })
     }
     function adicionarCategoria(cat){
-        Categoria.create(princ).then((cat)=>{   
+        Categoria.create(cat).then((result)=>{   
             if(result instanceof Error){
                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
+            }else{
+                setNewCategoria(result.dados.id)
+                // setState({...state, openSnakebar:true, message:'Categoria adicionada', statusSnake:'sucess'});
             }
-            setNewCategoria(result.dados.id)
         })
     }
 
     useEffect(()=>{
-        onLoad()
-    },[newPrincAtivo])
+        onLoadTipoItem()
+    },[])
 
     useEffect(()=>{
         onLoadItens()
     },[openModal])
 
+    useEffect(()=>{
+        if(searchPrincAtivo.nome!=''){
+            onLoadPrincAtivo(searchPrincAtivo)
+        }
+    },[searchPrincAtivo])
+
+    useEffect(()=>{
+        if(searchCategoria.nome!=''){
+            onLoadCategoria(searchCategoria)
+        }
+    },[searchCategoria])
 
     function pesquisar(codigo, descricao,principio_ativo, d_tipo, categoria){
         if(codigo){
@@ -171,6 +206,9 @@ export default function Item(){
         }else{
             setState({...state, filter: dataItens})
         }
+    }
+    function closeSnakebar(){
+        setState({...state, openSnakebar:false})
     }
     return(
         <AppLayout>
@@ -199,6 +237,19 @@ export default function Item(){
                          Novo item
                     </Button>
                 </Box>
+                <Snackbar 
+                    open={state.openSnakebar} 
+                    autoHideDuration={3000} 
+                    onClose={closeSnakebar}
+                    anchorOrigin={{
+                        horizontal: "right",
+                        vertical: "top",
+                    }}
+                >
+                    <Alert onClose={closeSnakebar} severity={state.statusSnake} sx={{ width: '100%' }}>
+                        {state.message}
+                    </Alert>
+                </Snackbar>
 
             </Box>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
@@ -300,6 +351,8 @@ export default function Item(){
                     categoria = {categoria}
                     newPrincAtivo = {newPrincAtivo}
                     newCategoria = {newCategoria}
+                    searchPrincAtivo={setSearchPrincAtivo}
+                    searchCategoria={setSearchCategoria}
                 />
             </Box>
 

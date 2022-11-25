@@ -27,7 +27,7 @@ export function NovaCategoria(props){
             open={props.openModal}
             onClose={()=>{props.onClose(), limparFornecedor()}}
             header='Nova Categoria'
-            onSave = {()=>{props.Save(state,props.editCategoria?.id)}}
+            onSave = {()=>{props.Save(state,props.editCategoria?.id),limparFornecedor()}}
 
         >
             <CssBaseline />

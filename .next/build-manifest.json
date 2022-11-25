@@ -25,15 +25,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/movimentacao/form_entrada": [
+    "/solicitacao": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/movimentacao/form_entrada.js"
+      "static/chunks/pages/solicitacao.js"
     ],
-    "/principio_ativo": [
+    "/solicitacao/form": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/principio_ativo.js"
+      "static/chunks/pages/solicitacao/form.js"
     ]
   },
   "ampFirstPages": []

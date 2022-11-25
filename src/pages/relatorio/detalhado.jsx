@@ -10,6 +10,11 @@ export default function Relatorio() {
     const [principioAtivo, setPrincipioAtivo] = useState()
     const [itens, setItens] = useState()
     const [onRelatorio, setOnRelatorio] = useState(false)
+    const [retornoUsuario,setRetornoUsuario] = useState({
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
+    })
     const [state, setState] = useState({
         categoria:'',
         principioAtivo:'',
@@ -50,6 +55,9 @@ export default function Relatorio() {
             setItens(result.data.data)
         });
     }
+    function closeSnakebar(){
+        setRetornoUsuario({...retornoUsuario, openSnakebar:false})
+    }
     useEffect(()=>{
         onLoad();
     },[])
@@ -74,6 +82,19 @@ export default function Relatorio() {
                     </Typography>
                 </Box>
             </Box>
+            <Snackbar 
+                open={retornoUsuario.openSnakebar} 
+                autoHideDuration={3000} 
+                onClose={closeSnakebar}
+                anchorOrigin={{
+                    horizontal: "right",
+                    vertical: "top",
+                }}
+            >
+                <Alert onClose={closeSnakebar} severity={retornoUsuario.statusSnake} sx={{ width: '100%' }}>
+                    {retornoUsuario.message}
+                </Alert>
+            </Snackbar>
             <Box>
                 <Grid container spacing={12}>
                     <Grid item xs={12} sm={6} mb={5}>

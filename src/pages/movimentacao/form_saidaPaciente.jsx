@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table as TableMui, Box, Button, Grid, MenuItem, Paper, TableBody, TableContainer, TableHead, TableRow, TextField, Typography, IconButton, Divider } from "@mui/material";
+import { Table as TableMui, Box, Button, Grid, MenuItem, Paper, TableBody, TableContainer, TableHead, TableRow, TextField, Typography, IconButton, Divider, Snackbar, Alert } from "@mui/material";
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import { styled } from '@mui/material/styles';
 import DeleteOutlineTwoToneIcon from '@mui/icons-material/DeleteOutlineTwoTone';
@@ -46,7 +46,12 @@ export default function Paciente(){
         is_efetivado: false,
         valor:'',
         itens:''
-        })
+    })
+    const [retornoUsuario,setRetornoUsuario] = useState({
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
+    })
 
     const columns = [
         { field: 'item_nome', headerName: 'Itens', width: 200,  },
@@ -67,12 +72,11 @@ export default function Paciente(){
         lote:row.lote,
         data_validade:row.data_validade.split('-').reverse().join('/'),
     }));
-
     function onLoad(){
         Itens.getAll()
         .then((result)=>{
             if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setDataItens(result.data.data)
@@ -81,7 +85,7 @@ export default function Paciente(){
         Movimentacoes.getNumeroSolicitacoes()
         .then((result)=>{
             if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setNSolicitacoes(result.data)
@@ -116,10 +120,9 @@ export default function Paciente(){
         Solicitacao.getById(id)
         .then((result)=>{
             if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
-            console.log(result);
             setSolicitacao(result.data)
             const itemFormated = result.data.itens?.map((item)=>({
                 id:item.id,
@@ -140,7 +143,7 @@ export default function Paciente(){
         Estoque.getByItens(id)
         .then((result)=>{
             if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setEstoque(result)
@@ -217,19 +220,23 @@ export default function Paciente(){
         if(dataId!=''){
             Movimentacoes.updateById(dataId,data).then((result)=>{
                 if(result instanceof Error){
-                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                    setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});                   
                         return;
                 }
+                router.push('/solicitacao')
             })
         }else{
             Movimentacoes.create(data).then((result)=>{
                 if(result instanceof Error){
-                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                    setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});                   
                         return;
-                    }
+                }
+                router.push('/solicitacao')
             })
         }
-        router.push('/solicitacao')
+    }
+    function closeSnakebar(){
+        setRetornoUsuario({...retornoUsuario, openSnakebar:false})
     }
     useEffect(()=>{
         onLoad()
@@ -264,6 +271,19 @@ export default function Paciente(){
             <Typography variant='h5' component='h1' color='secondary'>
                 Saidas para paciente
             </Typography>
+            <Snackbar 
+                open={retornoUsuario.openSnakebar} 
+                autoHideDuration={3000} 
+                onClose={closeSnakebar}
+                anchorOrigin={{
+                    horizontal: "right",
+                    vertical: "top",
+                }}
+            >
+                <Alert onClose={closeSnakebar} severity={retornoUsuario.statusSnake} sx={{ width: '100%' }}>
+                    {retornoUsuario.message}
+                </Alert>
+            </Snackbar>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mt={2}>
                 <Grid container spacing={3} mb={1}>
                     <Grid item xs={12} sm={6}>

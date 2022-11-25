@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, createTheme, Divider, Grid, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Autocomplete, Box, Button, createTheme, Divider, Grid, IconButton, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import DeleteOutlineTwoToneIcon from '@mui/icons-material/DeleteOutlineTwoTone';
@@ -39,6 +39,9 @@ export default function Saidas(){
         valor:'',
         is_efetivado:false,
         itens:[],
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
     })    
     const [itemPesquisa, setItemPesquisa] = useState({
         item_id: '',
@@ -209,6 +212,9 @@ export default function Saidas(){
            
         router.push('/movimentacao')
     }
+    function closeSnakebar(){
+        setState({...state, openSnakebar:false})
+    }
 
     useEffect(()=>{
         onLoad(pessoa)
@@ -229,6 +235,19 @@ export default function Saidas(){
             <Typography variant='h5' component='h1' color='secondary'>
                 Saidas
             </Typography>
+            <Snackbar 
+                open={state.openSnakebar} 
+                autoHideDuration={3000} 
+                onClose={closeSnakebar}
+                anchorOrigin={{
+                    horizontal: "right",
+                    vertical: "top",
+                }}
+            >
+                <Alert onClose={closeSnakebar} severity={state.statusSnake} sx={{ width: '100%' }}>
+                    {state.message}
+                </Alert>
+            </Snackbar>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mt={2}>
                 <Grid container spacing={3} mb={1}>
                     <Grid item xs={12} sm={3}>
@@ -250,6 +269,7 @@ export default function Saidas(){
                     </Grid>
                     <Grid item xs={12} sm={7}>
                         <Autocomplete
+                            disabled={desability? true:false}
                             value={destino.forEach(i=>{if(i.id == state.movimentable_id)i.nome})}
                             options={destino?.map((option) => option.nome)}
                             onChange={(_, newValue) => {

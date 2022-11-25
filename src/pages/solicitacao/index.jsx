@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Box, Button, CssBaseline, Grid, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, CssBaseline, Grid, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { Table } from "@/components/Table";
 import { Solicitacao } from "@/lib/solicitacao";
@@ -22,6 +22,9 @@ export default function Solicitacoes(){
         buscaCPF: '',
         buscaNome: '',
         tableCheckbox: false,
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
     });
     function onLoad(){
         Solicitacao.getAll()
@@ -98,6 +101,9 @@ export default function Solicitacoes(){
             setState({...state, filter:state.data})
         }
     }
+    function closeSnakebar(){
+        setState({...state, openSnakebar:false})
+    }
     useEffect(()=>{
         onLoad()
         addData('')
@@ -129,7 +135,19 @@ export default function Solicitacoes(){
                          Nova Solicitação 
                     </Button>
                 </Box>
-
+                <Snackbar 
+                    open={state.openSnakebar} 
+                    autoHideDuration={3000} 
+                    onClose={closeSnakebar}
+                    anchorOrigin={{
+                        horizontal: "right",
+                        vertical: "top",
+                    }}
+                >
+                    <Alert onClose={closeSnakebar} severity={state.statusSnake} sx={{ width: '100%' }}>
+                        {state.message}
+                    </Alert>
+                </Snackbar>
             </Box>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Grid container spacing={3}>

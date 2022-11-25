@@ -1,7 +1,7 @@
 import { useEffect,useState } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import { Box, Button, CssBaseline, Grid, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, CssBaseline, Grid, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
 import { NovoFornecedor } from "@/components/Modal/fonecedor";
 import { Table } from "@/components/Table";
@@ -18,6 +18,9 @@ export default function Item(){
         data:[],
         filter:[],
         fornecedor:[],
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
     });
     const [pessoa, setPessoa] = useState({
         "is_beneficiario": false,
@@ -98,7 +101,6 @@ export default function Item(){
     useEffect(()=>{
         onLoad(pessoa);
     },[openModal])
-    console.log(state.filter);
 
     // const maskedFilter = state.filter.map((i)=>({
     //         cnpj : mask(unMask(i.cnpj),['99.999.999/9999-99']),
@@ -124,7 +126,9 @@ export default function Item(){
         }else{
             setState({...state, filter:state.data})
         }
-        console.log(state.filter);
+    }
+    function closeSnakebar(){
+        setState({...state, openSnakebar:false})
     }
     return(
         <AppLayout>
@@ -153,7 +157,19 @@ export default function Item(){
                          Novo Fornecedor
                     </Button>
                 </Box>
-
+                <Snackbar 
+                    open={state.openSnakebar} 
+                    autoHideDuration={3000} 
+                    onClose={closeSnakebar}
+                    anchorOrigin={{
+                        horizontal: "right",
+                        vertical: "top",
+                    }}
+                >
+                    <Alert onClose={closeSnakebar} severity={state.statusSnake} sx={{ width: '100%' }}>
+                        {state.message}
+                    </Alert>
+                </Snackbar>
             </Box>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Grid container spacing={3} mb={4}>

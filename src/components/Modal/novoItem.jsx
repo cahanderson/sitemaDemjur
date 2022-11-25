@@ -1,4 +1,4 @@
-import { Box, CssBaseline, Grid, MenuItem, Paper, TextField } from "@mui/material";
+import { Alert, Box, CssBaseline, Grid, MenuItem, Paper, Snackbar, TextField } from "@mui/material";
 import { useState } from "react";
 import { Modal } from '../Layouts/modal';   
 
@@ -26,6 +26,14 @@ export function NovoItem(props){
             novoItem:true,
         })
     }
+    const [retornoUsuario,setRetornoUsuario] = useState({
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
+    })
+    function closeSnakebar(){
+        setRetornoUsuario({...retornoUsuario, openSnakebar:false})
+    }
     return(
         <Modal
             open={props.openModal}
@@ -34,8 +42,20 @@ export function NovoItem(props){
             onSave = {()=>{props.Save(state)}}
         >
             <CssBaseline />
-            <Box >
-
+            <Snackbar
+                open={retornoUsuario.openSnakebar} 
+                autoHideDuration={3000} 
+                onClose={closeSnakebar}
+                anchorOrigin={{
+                    horizontal: "right",
+                    vertical: "top",
+                }}
+            >
+                <Alert onClose={closeSnakebar} severity={retornoUsuario.statusSnake} sx={{ width: '100%' }}>
+                    {retornoUsuario.message}
+                </Alert>
+            </Snackbar>
+            <Box>
                 <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Grid item xs={12} container spacing={3}>
                     <Grid item xs={12} sm={9}>

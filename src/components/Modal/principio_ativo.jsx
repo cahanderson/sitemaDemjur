@@ -27,7 +27,7 @@ export function NovoPrincipioAtivo(props){
             open={props.openModal}
             onClose={()=>{props.onClose(), limparPrincipioAtivo()}}
             header='Novo Principio ativo'
-            onSave = {()=>{props.Save(state,props.editPrincipioAtivo?.id)}}
+            onSave = {()=>{props.Save(state,props.editPrincipioAtivo?.id), limparPrincipioAtivo()}}
         >
             <CssBaseline />
             <Box>
@@ -37,7 +37,7 @@ export function NovoPrincipioAtivo(props){
                             <TextField
                                 id="nome"
                                 name="nome"
-                                label="Princípio ativo"
+                                label="Nome"
                                 value={state.nome}
                                 onChange={(e) => setState({...state, nome: e.target.value})}
                                 fullWidth

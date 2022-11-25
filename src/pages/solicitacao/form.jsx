@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { Autocomplete, Box, Button, CssBaseline, Divider, Grid, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Autocomplete, Box, Button, createFilterOptions, CssBaseline, Divider, Grid, IconButton, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import ClearIcon from '@mui/icons-material/Clear';
 import AppLayout from "@/components/Layouts/AppLayout";
@@ -11,18 +11,19 @@ import useSolicitacaoStore from "@/hooks/solicitacao";
 import { mask, unMask } from 'remask'
 
 export default function NovaSolicitacao(){
+    const filter = createFilterOptions();
     const data = useSolicitacaoStore(state=>state.datas)
     const router = useRouter();
-    const [dataPrescritor, setDataPrescritor] = useState({
-        conselho_regional:'',
-        registro_conselho:''
-    })
     const [dataId, setDataId] = useState('')
     const [dataEstabelecimento, setDataEstabelecimento] = useState([''])
     const [acao, setAcao] = useState(['']);
     const [representante, setRepresentante] = useState(['']);
     const [reu, setReu] = useState(['']);
-    const [cid, setCid] = useState(['']);
+    const [cid, setCid] = useState([{
+            id: '',
+            codigo: '',
+            nome: ''
+    }]);
     const [prescritor, setPrescritor] = useState(['']);
     const [sexo, setSexo] = useState([''])
     const [freq, setFreq] = useState([''])
@@ -30,6 +31,18 @@ export default function NovaSolicitacao(){
     const [openModal, setOpenModal] = useState(false)
     const [editReu, setEditReu] = useState([])
     const [editCID, setEditCID] = useState([])
+    const [searchCID, setSearchCID] = useState({
+        nome: "",
+    })
+    const [dataPrescritor, setDataPrescritor] = useState({
+        conselho_regional:'',
+        registro_conselho:''
+    })
+    const [retornoUsuario,setRetornoUsuario] = useState({
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
+    })
     const [state, setState] = useState({
         numero_solicitacao: '',
         d_tipo: '',
@@ -81,10 +94,12 @@ export default function NovaSolicitacao(){
         "is_fornecedor": false,
         "is_estabelecimento":true
     })
-    const [message, setMessage] = useState({
-        openSnakebar:false,
-        message:'',
-        statusSnake:'success'
+    const [addEstabelecimento, setAddEstabelecimento] = useState({
+        nome:'',
+        is_beneficiario: false,
+        is_prescritor: false,
+        is_fornecedor: false,
+        is_estabelecimento:true
     })
     const [item, setItem] = useState([{
         item_id: '',
@@ -92,7 +107,16 @@ export default function NovaSolicitacao(){
         d_frequencia_entrega: '',
         quantidade_limite: ''
     }])
-
+    function onLoadCid(search){
+        Solicitacao.getCids(search)
+        .then((result)=>{
+            if(result instanceof Error){
+                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }
+            setCid(result.data.results)
+        });
+    }
     function checkCpf(cpf){
         Solicitacao.getPessoaByCpf(cpf)
         .then((result)=>{
@@ -122,7 +146,7 @@ export default function NovaSolicitacao(){
         Solicitacao.getEstabelecimento(estabelecimento)
         .then((result)=>{
             if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setDataEstabelecimento(result.data.data)
@@ -131,7 +155,7 @@ export default function NovaSolicitacao(){
         Solicitacao.getTipoAcao()
         .then((result)=>{
             if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setAcao(result.data.dados)
@@ -140,7 +164,7 @@ export default function NovaSolicitacao(){
         Solicitacao.getTipoRepresentante()
         .then((result)=>{
             if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setRepresentante(result.data.dados)
@@ -149,25 +173,17 @@ export default function NovaSolicitacao(){
         Solicitacao.getTipoReu()
         .then((result)=>{
             if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setReu(result.data.dados)
         });
 
-        Solicitacao.getCids()
-        .then((result)=>{
-            if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
-                return;
-            }
-            setCid(result.data.data)
-        });
 
         Solicitacao.getPessoa(pessoa)
         .then((result)=>{
             if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setPrescritor(result.data.data)
@@ -175,7 +191,7 @@ export default function NovaSolicitacao(){
         Solicitacao.getSexo()
         .then((result)=>{
             if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setSexo(result.data.dados)
@@ -183,7 +199,7 @@ export default function NovaSolicitacao(){
         Solicitacao.getFrequenciaEntrega()
         .then((result)=>{
             if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setFreq(result.data.dados)
@@ -240,7 +256,7 @@ export default function NovaSolicitacao(){
             Solicitacao.updateById(dataId, data).
             then((result)=>{
                 if(result instanceof Error){
-                    setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                    setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
                 }
                 router.push('/solicitacao')
@@ -249,18 +265,18 @@ export default function NovaSolicitacao(){
             Solicitacao.create(data).
             then((result)=>{
             if(result instanceof Error){
-                setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});                   
                     return;
-                }
-            })
+            }
             router.push('/solicitacao')
+            })
         }
     }
     function salvarPrescritor(data){
         Solicitacao.createPrescritor(data).
         then((result)=>{
             if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setOpenModal(false)
@@ -371,6 +387,9 @@ export default function NovaSolicitacao(){
         getEditReu(data.reu_acao)
         getEditCID(data.cid_id)
     }
+    function closeSnakebar(){
+        setRetornoUsuario({...retornoUsuario, openSnakebar:false})
+    }
     useEffect(()=>{
         if(state.beneficiario.cep.length == 8){
             checkCep()
@@ -399,8 +418,11 @@ export default function NovaSolicitacao(){
             onLoadEdit(data)
         }
     },[data])
-    console.log(state.cid_id,'CID');
-    console.log(state.reu_acao,'reu acao');
+    useEffect(()=>{
+        if(searchCID.nome !=''){
+            onLoadCid(searchCID)
+        }
+    },[searchCID])
     return(
         <AppLayout>
             <CssBaseline />
@@ -420,6 +442,19 @@ export default function NovaSolicitacao(){
                     </Typography>
                     
                 </Box>
+                <Snackbar 
+                    open={retornoUsuario.openSnakebar} 
+                    autoHideDuration={3000} 
+                    onClose={closeSnakebar}
+                    anchorOrigin={{
+                        horizontal: "right",
+                        vertical: "top",
+                    }}
+                >
+                    <Alert onClose={closeSnakebar} severity={retornoUsuario.statusSnake} sx={{ width: '100%' }}>
+                        {retornoUsuario.message}
+                    </Alert>
+                </Snackbar>
             </Box>
             <Box component="main">
                 <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mb={2} >
@@ -489,24 +524,6 @@ export default function NovaSolicitacao(){
                             />
                         </Grid>
                         <Grid item xs={12} sm={5}>
-                            {/* <TextField
-                                onBlur={editSelectReu}
-                                value={editReu}
-                                select
-                                id="reuAcao"
-                                name="reu_acao"
-                                label="Réu da ação"
-                                fullWidth
-                                onChange={(e) => {getSelectReu(e.target.value)}}
-                                variant="outlined"
-                                SelectProps={{
-                                    multiple:true,
-                                }}
-                            >
-                                {reu.map((r, index)=>(
-                                    <MenuItem key={index} value={r.valor}>{r.descricao}</MenuItem>
-                                ))}
-                            </TextField> */}
                             <Autocomplete
                                 multiple
                                 onBlur={editSelectReu}
@@ -540,22 +557,23 @@ export default function NovaSolicitacao(){
                             />
                         </Grid>
                         <Grid item xs={12} sm={8}>
-                        <Autocomplete
-                            multiple
-                            onBlur={editSelectCID}
-                            id="tags-standard"
-                            options={cid.map((option) => option.nome)}
-                            onChange={(_, newValue) => {
-                                setEditCID(newValue)
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="CID"
-                                />
-                            )}
-                        />
+                            <Autocomplete
+                                multiple
+                                onBlur={editSelectCID}
+                                id="tags-standard"
+                                options={cid?.map((option) => option?.nome)}
+                                onChange={(_, newValue) => {
+                                    setEditCID(newValue)
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        label="CID"
+                                        onChange={(e)=>setSearchCID({nome: e.target.value})}
+                                    />
+                                )}
+                            />
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <TextField
@@ -571,6 +589,52 @@ export default function NovaSolicitacao(){
                                     <MenuItem key={index} value={e.id}>{e.nome}</MenuItem>
                                 ))}
                             </TextField>
+                            <Autocomplete
+                                // value={valueCategoria}
+                                onChange={(event, newValue) => {
+                                    if (typeof newValue === 'string') {
+                                        setItem({...item, categoria_id: newValue.id})
+                                    } else if (newValue && newValue.inputValue) {
+                                        setAddEstabelecimento({...addEstabelecimento,nome:newValue.inputValue})
+                                    } else {
+                                    setItem({...item, categoria_id: newValue?.id})
+                                    }
+                                }}
+                                filterOptions={(options, params) => {
+                                    const filtered = filter(options, params);
+                                    const { inputValue } = params;
+                                    const isExisting = options.some((option) => inputValue === option.nome);
+                                    if (inputValue !== '' && !isExisting) {
+                                        filtered.push({
+                                            inputValue,
+                                            nome: `Adicionar estabelecimento : "${inputValue}"`,
+                                        });
+                                    }
+                                    return filtered;
+                                }}
+                                selectOnFocus
+                                handleHomeEndKeys
+                                options={dataEstabelecimento}
+                                getOptionLabel={(option) => {
+                                    // Value selected with enter, right from the input
+                                    if (typeof option.nome === 'string') {
+                                    return option.nome;
+                                    }
+                                    // Add "xxx" option created dynamically
+                                    if (option.inputValue) {
+                                    return option.inputValue;
+                                    }
+                                    // Regular option
+                                    return option.nome;
+                                }}
+                                renderOption={(props, option) => <li {...props}>{option.nome}</li>}
+                                freeSolo
+                                renderInput={(params) => (
+                                    <TextField {...params} 
+                                        label="Estabelecimento" 
+                                    />
+                                )}
+                            />
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <TextField
@@ -672,7 +736,6 @@ export default function NovaSolicitacao(){
                             name="nome_mae"
                             label='Nome da mãe'
                             fullWidth
-                            autoComplete="shipping address-line2"
                             variant="outlined"
 
                             onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, nome_mae: e.target.value}})}
@@ -685,7 +748,6 @@ export default function NovaSolicitacao(){
                                 name="data_nascimento"
                                 label="Data de nascimento"
                                 fullWidth
-                                autoComplete="shipping address-line2"
                                 variant="outlined"
                                 onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, data_nascimento: e.target.value}})}
                                 InputLabelProps={{
@@ -700,7 +762,6 @@ export default function NovaSolicitacao(){
                                 name="d_sexo"
                                 label="Sexo"
                                 fullWidth
-                                autoComplete="shipping address-line2"
                                 variant="outlined"
 
                                 onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, d_sexo: e.target.value}})}

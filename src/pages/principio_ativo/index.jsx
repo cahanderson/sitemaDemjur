@@ -69,25 +69,32 @@ export default function PrincipioAtivo(){
         } 
     }
     function onSave(item,id){
+        console.log(item,id);
         if(id){
             PrincAtivo.updateById(id,item).then((result)=>{
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
+                }else{
+                    setState({...state, openSnakebar:true, message:'item editado com sucesso', statusSnake:'success'}); 
+                    setOpenModal(false)
+                    setEditPrincipioAtivo([])
+                    onLoad()
                 }
-                setOpenModal(false)
+                
             })
         }else{
             PrincAtivo.create(item).then((result)=>{
                 if(result instanceof Error){
                     setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
                         return;
+                }else{
+                    setState({...state, openSnakebar:true, message:'item criado com sucesso', statusSnake:'success'}); 
+                    onLoad()
+                    setOpenModal(false)
                 }
-                setOpenModal(false)
             })
         }
-        
-        onLoad()
     }
     function pesquisar(principio_Ativo){
         if(principioAtivo){
@@ -96,7 +103,6 @@ export default function PrincipioAtivo(){
             setState({...state, filter: categoria})
         }
     }
-
     function closeSnakebar(){
         setState({...state, openSnakebar:false})
     }
@@ -144,7 +150,6 @@ export default function PrincipioAtivo(){
                         {state.message}
                     </Alert>
                 </Snackbar>
-
             </Box>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Box display='flex' flexDirection='row' mt='20px' mb='30px' gap='20px' >
@@ -152,7 +157,7 @@ export default function PrincipioAtivo(){
                         <Grid item xs={12} sm={3}>
                             <TextField
                                 select
-                                label="Principio Ativo"
+                                label="Nome"
                                 fullWidth
                                 variant="outlined"
                                 onChange={(e) => setState({...state, principioAtivo_id:e.target.value})}

@@ -1,5 +1,5 @@
 import { useState,useEffect } from 'react';
-import { Box, Button, Grid, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Grid, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import AppLayout from "@/components/Layouts/AppLayout";
 import {Table} from '../../components/Table'
 import { Estoque } from "@/lib/estoque";
@@ -24,7 +24,6 @@ export default function NovoInventario(){
         responsavel_id:'',
         itens:[]
     })
-    console.log(dados);
     const rows = estoque.map((row)=>({
         id:row.id,
         item_id:row.item_id,
@@ -64,20 +63,29 @@ export default function NovoInventario(){
             )
         }
     ]
+    const [retornoUsuario,setRetornoUsuario] = useState({
+        openSnakebar:false,
+        statusSnake:'success',
+        message:'',
+    })
     function onAddQuantidade(value, row){
-        let clone = Object.assign({}, row);
-        clone.qtd_atual = parseInt(value);
-        if(clone.qtd_anterior)delete clone.qtd_anterior
-        if(clone.valor_anterior)delete clone.valor_anterior
-        let itemIndex = itens.findIndex((i)=>i.id == clone.id)
-        if(itemIndex>=0){
-            itens[itemIndex].qtd_atual = value;
-            setItens(itens)
+        if(value == 0){
+            return;
         }else{
-            let addItem = itens;
-            addItem.push(clone)
-            setItens(addItem)
-            setState({...state,itens:addItem})
+            let clone = Object.assign({}, row);
+            clone.qtd_atual = parseInt(value);
+            if(clone.qtd_anterior)delete clone.qtd_anterior
+            if(clone.valor_anterior)delete clone.valor_anterior
+            let itemIndex = itens.findIndex((i)=>i.id == clone.id)
+            if(itemIndex>=0){
+                itens[itemIndex].qtd_atual = value;
+                setItens(itens)
+            }else{
+                let addItem = itens;
+                addItem.push(clone)
+                setItens(addItem)
+                setState({...state,itens:addItem})
+            }
         }
     }
     function onAddValor(value, row){
@@ -98,7 +106,7 @@ export default function NovoInventario(){
         UsuariosService.getAll()
         .then((result)=>{
             if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setUsuario(result.data.data)
@@ -106,7 +114,7 @@ export default function NovoInventario(){
         Itens.getAll()
         .then((result)=>{
             if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setItensCadastrados(result.data.data)
@@ -115,7 +123,7 @@ export default function NovoInventario(){
     function onLoadEstoque(){
         Estoque.getAll(paginaEstoque).then((result)=>{
             if(result instanceof Error){
-                setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }    
             addPaginationEstoque(result)
@@ -135,8 +143,11 @@ export default function NovoInventario(){
             }
         }
     function onAddNovoItem(item){
-        let clone = Object.assign([], estoque);
-        let cloneItens = Object.assign([], itens);
+        if(item.item_id == ''){
+            return;
+        }else{
+            let clone = Object.assign([], estoque);
+            let cloneItens = Object.assign([], itens);
             clone.push(item)
             cloneItens.push(item)
             cloneItens.forEach(i=>{
@@ -148,24 +159,18 @@ export default function NovoInventario(){
             setItens(cloneItens)
             setEstoque(clone)
             setState({...state,itens:cloneItens})
+        }
     }
     function onSave(){
-        // if(id){
-        //     Fornecedor.updateById(id, fornecedor).
-        //     then((result)=>{
-        //         if(result instanceof Error){
-        //             setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-        //             return;
-        //         }
-        //         setOpenModal(false)
-        //     })   
-        // }else{
         Inventarios.create(state).then((result)=>{
             if(result instanceof Error){
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
             }
         })
     }
-
+    function closeSnakebar(){
+        setRetornoUsuario({...retornoUsuario, openSnakebar:false})
+    }
     useEffect(()=>{
         onLoad()
     },[])
@@ -191,6 +196,19 @@ export default function NovoInventario(){
                     Adicionar item
                 </Button>
             </Box>
+            <Snackbar 
+                open={retornoUsuario.openSnakebar} 
+                autoHideDuration={3000} 
+                onClose={closeSnakebar}
+                anchorOrigin={{
+                    horizontal: "right",
+                    vertical: "top",
+                }}
+            >
+                <Alert onClose={closeSnakebar} severity={retornoUsuario.statusSnake} sx={{ width: '100%' }}>
+                    {retornoUsuario.message}
+                </Alert>
+            </Snackbar>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mt={2}>
                     <Grid container spacing={3} mb={5}>
                         <Grid item xs={12} sm={3}>
@@ -246,74 +264,3 @@ export default function NovoInventario(){
         </AppLayout>
     )
 }
-
-
-
-
-                {/*<TableContainer 
-                    component={Paper} 
-                    variant='outlined' 
-                    style={{
-                        width:'auto'
-                    }}
-                >
-                     <Table size="small">
-                        <TableHead>
-                        <TableRow>
-                            <TableCell>id</TableCell>
-                            <TableCell align="right">item</TableCell>
-                            <TableCell align="right">lote</TableCell>
-                            <TableCell align="right">valor</TableCell>
-                            <TableCell align="right">Quantidade anterior</TableCell>
-                            <TableCell align="center">Quantidade atual</TableCell>
-                        </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {rows.map((row,index) => (
-                                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                    <TableCell component="th" scope="row">{row.id}</TableCell>
-                                    <TableCell align="right">{row.item_id}</TableCell>
-                                    <TableCell align="right">{row.lote}</TableCell>
-                                    <TableCell align="right">{row.valor_atual}</TableCell>
-                                    <TableCell align="right">{row.quantidade}</TableCell>
-                                    <TableCell align="center">
-                                        <TextField
-                                            variant="standard"
-                                            label='Valor atual'
-                                            size="small"
-                                            name='valor'
-                                            maxLength='5'
-                                            onChange={(e)=>onAddValor(e.target.value,params.row)}
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-
-                        </TableBody>
-                        {estoque === null && !isLoading &&(
-                            <caption><Typography variant='body1'>Nenhum registro encontrado!</Typography></caption>
-                        )}
-                        <TableFooter>
-                            {isLoading && (
-                            <TableRow>
-                                <TableCell colSpan={6}>
-                                    <LinearProgress variant='indeterminate' />
-                                </TableCell>
-                            </TableRow>
-                            )}
-                            {(totalEstoque>0) && totalEstoque > 10 && (
-                                <TableRow align='right'>
-                                    <TableCell colSpan={6}>
-                                    <Divider />
-                                        <Pagination 
-                                            count={Math.ceil(totalEstoque/10)}
-                                            onChange={(_,newPage)=>{setPaginaEstoque(newPage)}}
-                                            color="primary"
-                                            size="small"
-                                        />
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableFooter>
-                    </Table>
-                </TableContainer> */}

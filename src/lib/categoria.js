@@ -14,7 +14,8 @@ const getAll = async () =>{
         return new Error('Erro ao listar os registros')  
       }
   } catch (error) {
-      return error;
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 
@@ -30,8 +31,8 @@ const create = async (dados) => {
 
     // return new Error('Erro ao criar o registro.');
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao consultar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 const getById = async (id) => {
@@ -52,16 +53,29 @@ const updateById = async (id,dados) => {
   try {
     await axios.put(`/api/categorias/${id}`, dados);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao atualizar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
   }
 };
 const deleteById = async (id)=> {
   try {
     await axios.delete(`/api/categorias/${id}`);
   } catch (error) {
-    console.error(error);
-    return new Error('Erro ao apagar o registro.');
+    const erro = error.response.data
+    return new Error(erro.message);
+  }
+};
+const search = async (dados) => {
+  try {
+    const { data } = await axios.post('/api/categorias/search',dados);
+    if (data) {
+      return data;
+    }
+
+    return new Error('Erro ao consultar o registro.');
+  } catch (error) {
+    const erro = error.response
+    return new Error(erro);
   }
 };
 
@@ -71,4 +85,5 @@ export const Categoria = {
   getById,
   updateById,
   deleteById,
+  search,
 };

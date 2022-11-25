@@ -50,8 +50,7 @@ const updateById = async (id, dados) => {
     const erro = error.response.data
     return new Error(erro.message);
   }
-};
-  
+};  
 const deleteById = async (id)=> {
   try {
     await axios.delete(`/api/users/${id}`);
