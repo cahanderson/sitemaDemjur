@@ -25,6 +25,11 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/movimentacao/form_saidaPaciente": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/movimentacao/form_saidaPaciente.js"
+    ],
     "/solicitacao": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",

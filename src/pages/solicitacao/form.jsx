@@ -19,11 +19,6 @@ export default function NovaSolicitacao(){
     const [acao, setAcao] = useState(['']);
     const [representante, setRepresentante] = useState(['']);
     const [reu, setReu] = useState(['']);
-    const [cid, setCid] = useState([{
-            id: '',
-            codigo: '',
-            nome: ''
-    }]);
     const [prescritor, setPrescritor] = useState(['']);
     const [sexo, setSexo] = useState([''])
     const [freq, setFreq] = useState([''])
@@ -31,9 +26,15 @@ export default function NovaSolicitacao(){
     const [openModal, setOpenModal] = useState(false)
     const [editReu, setEditReu] = useState([])
     const [editCID, setEditCID] = useState([])
+    const [valueEstabelecimento, setValueEstabelecimento] = useState(null)
     const [searchCID, setSearchCID] = useState({
         nome: "",
     })
+    const [cid, setCid] = useState([{
+        id: '',
+        codigo: '',
+        nome: ''
+}]);
     const [dataPrescritor, setDataPrescritor] = useState({
         conselho_regional:'',
         registro_conselho:''
@@ -123,10 +124,8 @@ export default function NovaSolicitacao(){
             if(result instanceof Error){
                 setMessage({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
-            }else if(state.beneficiario.cpf != null){
+            }else if(result!=null){
                 setState({...state, beneficiario: result})
-            }else { 
-                return;
             }
         });
     }
@@ -258,17 +257,21 @@ export default function NovaSolicitacao(){
                 if(result instanceof Error){
                     setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                     return;
+                }else{
+                    router.push('/solicitacao')
+                    setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 }
-                router.push('/solicitacao')
             })   
         }else{
             Solicitacao.create(data).
             then((result)=>{
             if(result instanceof Error){
-                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});                   
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});              
                     return;
+            }else{
+                router.push('/solicitacao')
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});   
             }
-            router.push('/solicitacao')
             })
         }
     }
@@ -344,6 +347,7 @@ export default function NovaSolicitacao(){
         })
     }
     function onLoadEdit(data){
+        console.log(data);
         const itensEdit = data.itens?.map((item)=>({
             id:item.id,
             item_id:item.item_id,
@@ -386,21 +390,33 @@ export default function NovaSolicitacao(){
         setDataId(data.id)
         getEditReu(data.reu_acao)
         getEditCID(data.cid_id)
+        setValueEstabelecimento({id:data.estabelecimento_id, nome:data.estabelecimento})
     }
     function closeSnakebar(){
         setRetornoUsuario({...retornoUsuario, openSnakebar:false})
+    }
+    function onNewEstabelecimento(estabelecimento){
+        Solicitacao.createEstabelecimento(estabelecimento).
+        then((result)=>{
+            if(result instanceof Error){
+                setRetornoUsuario({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
+                return;
+            }else{
+                setState({...state,estabelecimento_id: result.dados.id})
+            }
+        })  
     }
     useEffect(()=>{
         if(state.beneficiario.cep.length == 8){
             checkCep()
         }
-    },[state.beneficiario.cep])
+    },[state.beneficiario?.cep])
 
     useEffect(()=>{
         if(state.beneficiario.cpf.length == 11){
             checkCpf(state.beneficiario.cpf)
         }
-    },[state.beneficiario.cpf])
+    },[state.beneficiario?.cpf])
 
     useEffect(()=>{ 
         onLoad()
@@ -423,6 +439,13 @@ export default function NovaSolicitacao(){
             onLoadCid(searchCID)
         }
     },[searchCID])
+
+    useEffect(()=>{
+        if(addEstabelecimento.nome !=''){
+            onNewEstabelecimento(addEstabelecimento)
+        }
+    },[addEstabelecimento])
+    console.log(state);
     return(
         <AppLayout>
             <CssBaseline />
@@ -525,6 +548,7 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={5}>
                             <Autocomplete
+                                // value={}
                                 multiple
                                 onBlur={editSelectReu}
                                 id="tags-standard"
@@ -576,28 +600,15 @@ export default function NovaSolicitacao(){
                             />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField
-                                value={state.estabelecimento_id}
-                                select
-                                name="estabelecimento"
-                                onChange={(e) => {setState({...state,estabelecimento_id: e.target.value})}}
-                                label='Estabelecimento'
-                                fullWidth
-                                variant="outlined"
-                            >
-                                {dataEstabelecimento.map((e, index)=>(
-                                    <MenuItem key={index} value={e.id}>{e.nome}</MenuItem>
-                                ))}
-                            </TextField>
                             <Autocomplete
-                                // value={valueCategoria}
+                                value={valueEstabelecimento}
                                 onChange={(event, newValue) => {
                                     if (typeof newValue === 'string') {
-                                        setItem({...item, categoria_id: newValue.id})
+                                        setState({...state, estabelecimento_id: newValue.id})
                                     } else if (newValue && newValue.inputValue) {
                                         setAddEstabelecimento({...addEstabelecimento,nome:newValue.inputValue})
                                     } else {
-                                    setItem({...item, categoria_id: newValue?.id})
+                                    setState({...state, estabelecimento_id: newValue.id})
                                     }
                                 }}
                                 filterOptions={(options, params) => {

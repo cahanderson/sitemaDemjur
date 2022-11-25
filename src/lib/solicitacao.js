@@ -160,6 +160,21 @@ const createPrescritor = async (dados) => {
     return new Error(erro.message);;
   }
 };
+const createEstabelecimento = async (dados) => {
+  await csrf()
+  try {
+    const { data } = await axios.post('/api/pessoa/', dados);
+
+    if (data) {
+      return data;
+    }
+
+    // return new Error('Erro ao criar o registro.');
+  } catch (error) {
+    const erro = error.response.data
+    return new Error(erro.message);;
+  }
+};
 const create = async (dados) => {
   await csrf()
   try {
@@ -243,10 +258,11 @@ export const Solicitacao = {
   getSexo,
   getFrequenciaEntrega,
   createPrescritor,
+  createEstabelecimento,
   create,
   deleteById,
   getById,
   getPessoaByCpf,
   getPessoaById,
-  updateById
+  updateById,
 };
