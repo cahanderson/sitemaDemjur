@@ -18,39 +18,6 @@ export function NovoFornecedor(props){
         "is_prescritor": false,
         "is_fornecedor": true
     })
-    useEffect(()=>{
-        if(props.fornecedor?.id != null|| props.fornecedor?.id != undefined){
-           setState({
-                nome:props.fornecedor.nome,
-                email:props.fornecedor.email, 
-                telefone:props.fornecedor.telefone,
-                cpf:props.fornecedor.cpf,
-                cnpj:props.fornecedor.cnpj,
-                cep:props.fornecedor.cep,
-                rua:props.fornecedor.rua,
-                numero:props.fornecedor.numero, 
-                bairro:props.fornecedor.bairro,
-            })
-       }
-       else{
-        limparFornecedor()
-       }
-    },[props.fornecedor?.id])
-    // function checkCep(){
-    //     if(state.cep){
-            
-    //         setState(state.cep?.replace(/\D/g, ''))
-    //         fetch(`https://viacep.com.br/ws/${state?.cep}/json/`).
-    //         then(res => res.json()).
-    //         then(data=>{
-    //             setState({
-    //                 ...state, 
-    //                 bairro:data.bairro, 
-    //                 rua:data.logradouro
-    //             })
-    //         })
-    //     }
-    // }
     function checkCep(){
         if(state.cep){
             fetch(`https://viacep.com.br/ws/${state.cep}/json/`).
@@ -63,7 +30,26 @@ export function NovoFornecedor(props){
         }
     }
     useEffect(()=>{
-        if(state.cep.length == 8){
+        if(props.fornecedor?.id != null|| props.fornecedor?.id != undefined){
+           setState({
+                nome:props.fornecedor.nome,
+                cpf:props.fornecedor.cpf,
+                cnpj:props.fornecedor.cnpj,
+                telefone:props.fornecedor.telefone,
+                email:props.fornecedor.email, 
+                rua:props.fornecedor.rua,
+                numero:props.fornecedor.numero, 
+                bairro:props.fornecedor.bairro,
+            })
+       }
+       else{
+        // limparFornecedor()
+       }
+    },[props.fornecedor?.id])
+
+    useEffect(()=>{
+
+        if(state.cep && state.cep.length == 8){
             checkCep()
         }
     },[state.cep])
@@ -122,7 +108,7 @@ export function NovoFornecedor(props){
                             <TextField
                                 name="cpf"
                                 label='CPF'
-                                value={mask(unMask(state.cpf),['999.999.999-99'])}
+                                value={state.cpf ? mask(unMask(state.cpf),['999.999.999-99']) : null}
                                 fullWidth
                                 autoComplete="shipping address-line2"
                                 variant="outlined"
@@ -134,7 +120,7 @@ export function NovoFornecedor(props){
                                 id="cnpj"
                                 name="cnpj"
                                 label='CNPJ'
-                                value={mask(unMask(state.cnpj),['99.999.999/9999-99'])}
+                                value={state.cnpj ? mask(unMask(state.cnpj),['99.999.999/9999-99']) : null}
                                 fullWidth
                                 autoComplete="shipping address-line2"
                                 variant="outlined"
@@ -146,7 +132,7 @@ export function NovoFornecedor(props){
                                 id="telefone"
                                 name="telefone"
                                 label='Telefone'
-                                value={mask(unMask(state.telefone),['(99)99999999','(99)9 99999999'])}
+                                value={state.telefone ? mask(unMask(state.telefone),['(99)99999999','(99)9 99999999']) : null}
                                 onChange={(e) => setState({...state, telefone:unMask(e.target.value)})}
                                 fullWidth
                                 autoComplete="shipping address-line2"
@@ -158,7 +144,7 @@ export function NovoFornecedor(props){
                     <Grid container spacing={3}mb={4}>
                         <Grid item xs={12} sm={12}>
                             <TextField
-                                value={mask(unMask(state.cep),['99.999-999'])}
+                                value={state.cep ? mask(unMask(state.cep),['99.999-999']) : null}
                                 id="cep"
                                 name="cep"
                                 label="CEP"

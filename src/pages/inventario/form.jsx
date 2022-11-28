@@ -24,9 +24,10 @@ export default function NovoInventario(){
         responsavel_id:'',
         itens:[]
     })
-    const rows = estoque.map((row)=>({
+    const rows = state.itens.map((row)=>({
         id:row.id,
         item_id:row.item_id,
+        nome:row.item.nome,
         lote:row.lote,
         data_validade:row.data_validade,
         fator_embalagem:row.fator_embalagem,
@@ -34,7 +35,7 @@ export default function NovoInventario(){
         qtd_anterior:row.quantidade,
     }));
     const columns = [
-        { field: 'item_id', headerName: 'Item', width: 180 },
+        { field: 'nome', headerName: 'Item', width: 180 },
         { field: 'lote', headerName: 'Lote', width: 180 },
         { field: 'valor_anterior', headerName: 'Valor', width:180 },
         { field: 'qtd_anterior', headerName: 'Quantidade anterior', width: 180 },
@@ -69,23 +70,19 @@ export default function NovoInventario(){
         message:'',
     })
     function onAddQuantidade(value, row){
-        if(value == 0){
-            return;
+        let clone = Object.assign({}, row);
+        clone.qtd_atual = parseInt(value);
+        if(clone.qtd_anterior)delete clone.qtd_anterior
+        if(clone.valor_anterior)delete clone.valor_anterior
+        let itemIndex = itens.findIndex((i)=>i.id == clone.id)
+        if(itemIndex>=0){
+            itens[itemIndex].qtd_atual = value;
+            setItens(itens)
         }else{
-            let clone = Object.assign({}, row);
-            clone.qtd_atual = parseInt(value);
-            if(clone.qtd_anterior)delete clone.qtd_anterior
-            if(clone.valor_anterior)delete clone.valor_anterior
-            let itemIndex = itens.findIndex((i)=>i.id == clone.id)
-            if(itemIndex>=0){
-                itens[itemIndex].qtd_atual = value;
-                setItens(itens)
-            }else{
-                let addItem = itens;
-                addItem.push(clone)
-                setItens(addItem)
-                setState({...state,itens:addItem})
-            }
+            let addItem = itens;
+            addItem.push(clone)
+            setItens(addItem)
+            setState({...state,itens:addItem})
         }
     }
     function onAddValor(value, row){
@@ -138,35 +135,51 @@ export default function NovoInventario(){
             i.data.data.forEach(item=>{
                     clone.push(item);
                 })
-                // addItem.push(clone)
                 setEstoque(clone)
             }
-        }
+    }
     function onAddNovoItem(item){
         if(item.item_id == ''){
             return;
         }else{
-            let clone = Object.assign([], estoque);
+            // let clone = Object.assign([], estoque);
+            let clone = Object.assign([], state.itens);
             let cloneItens = Object.assign([], itens);
+            if(item){
+                delete item.novoItem
+                item.id=''
+            }
             clone.push(item)
             cloneItens.push(item)
-            cloneItens.forEach(i=>{
-                if(i.novoItem){
-                    delete i.novoItem;
-                    i.id = '';
-                }
-            })
             setItens(cloneItens)
-            setEstoque(clone)
-            setState({...state,itens:cloneItens})
+            setState({...state,itens:clone})
+            setOpenModal(false)
+            // cloneItens.forEach(i=>{
+            //     if(i.novoItem){
+            //         delete i.novoItem;
+            //         i.id = '';
+            //     }
+            // })
         }
     }
     function onSave(){
-        Inventarios.create(state).then((result)=>{
-            if(result instanceof Error){
-                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
-            }
-        })
+        if(dados.id){
+            Inventarios.updateById(dados.id, state).then((result)=>{
+                if(result instanceof Error){
+                    setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
+                }else{
+                    router.push('/inventario')
+                }
+            })
+        }else{
+            Inventarios.create(state).then((result)=>{
+                if(result instanceof Error){
+                    setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
+                }else{
+                    router.push('/inventario')
+                }
+            })
+        }
     }
     function closeSnakebar(){
         setRetornoUsuario({...retornoUsuario, openSnakebar:false})
@@ -179,6 +192,12 @@ export default function NovoInventario(){
         onLoadEstoque()
     },[paginaEstoque])
 
+    useEffect(()=>{
+        if(dados){
+            setState({...state, itens:dados.itens, data:dados.data, responsavel_id:dados.responsavel_id})
+        }
+    },[dados])
+    console.log(state.itens)
     return(
         <AppLayout>
             <Box
@@ -190,11 +209,11 @@ export default function NovoInventario(){
                 Novo inventário
             </Typography>
             <Button
-                    onClick={() => setOpenModal(true)}
-                    variant='outlined'
-                >
-                    Adicionar item
-                </Button>
+                onClick={() => setOpenModal(true)}
+                variant='outlined'
+            >
+                Adicionar item
+            </Button>
             </Box>
             <Snackbar 
                 open={retornoUsuario.openSnakebar} 
@@ -210,39 +229,39 @@ export default function NovoInventario(){
                 </Alert>
             </Snackbar>
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center' mt={2}>
-                    <Grid container spacing={3} mb={5}>
-                        <Grid item xs={12} sm={3}>
-                            <TextField
-                            value={state.data}
-                            type='date'
-                            name="data"
-                            label="Data"
-                            fullWidth
-                            variant="outlined"
-                            onChange={(e)=> setState({...state, data:e.target.value})}
-                            InputLabelProps={{
-                                shrink: true,  
-                            }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={9}>
-                            <TextField
-                                value={state.responsavel_id}
-                                select
-                                name="responsavel_id"
-                                label='Responsável'
-                                fullWidth
-                                placeholder='Usuário responsável pelo inventário'
-                                autoComplete="shipping address-line2"
-                                variant="outlined"
-                                onChange={(e)=> setState({...state, responsavel_id:e.target.value})}
-                            >
-                                {usuario?.map((user, index)=>(
-                                    <MenuItem key={index} value={user.id}>{user.name}</MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid>  
+                <Grid container spacing={3} mb={5}>
+                    <Grid item xs={12} sm={3}>
+                        <TextField
+                        value={state.data}
+                        type='date'
+                        name="data"
+                        label="Data"
+                        fullWidth
+                        variant="outlined"
+                        onChange={(e)=> setState({...state, data:e.target.value})}
+                        InputLabelProps={{
+                            shrink: true,  
+                        }}
+                        />
                     </Grid>
+                    <Grid item xs={12} sm={9}>
+                        <TextField
+                            value={state.responsavel_id}
+                            select
+                            name="responsavel_id"
+                            label='Responsável'
+                            fullWidth
+                            placeholder='Usuário responsável pelo inventário'
+                            autoComplete="shipping address-line2"
+                            variant="outlined"
+                            onChange={(e)=> setState({...state, responsavel_id:e.target.value})}
+                        >
+                            {usuario?.map((user, index)=>(
+                                <MenuItem key={index} value={user.id}>{user.name}</MenuItem>
+                            ))}
+                        </TextField>
+                    </Grid>  
+                </Grid>
                 <Table
                     columns = {columns}
                     rows = {rows}
@@ -251,8 +270,7 @@ export default function NovoInventario(){
                 /> 
                 <Box display='flex' justifyContent={"end"} gap='10px' p={2}>
                     <Button variant="text" onClick={()=> router.push('/inventario')}>Cancelar alterações</Button>
-                    <Button type="submit" variant="contained" onClick={()=> { onSave(), router.push('/inventario')}}> Salvar</Button>
-                    {/* <Button type="submit" variant="contained" onClick={()=> onSave(state),router.push('/inventario')}> Salvar</Button> */}
+                    <Button type="submit" variant="contained" onClick={()=>onSave()}> Salvar</Button>
                 </Box>   
             </Box>
             <NovoItem

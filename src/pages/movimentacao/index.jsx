@@ -52,11 +52,6 @@ export default function Movimentacao(){
         { field: 'tipo_movimentacao', headerName: 'Tipo movimentação', width: 280 },
         { field: 'data', headerName: 'Data da movimentação', width: 280 },
         { field: 'efetivado', headerName: 'Efetivação', width: 230 },
-        // { field: 'actions',type:'actions',getActions: (params) => [
-        //     <GridActionsCellItem  icon={<DeleteIcon/>} onClick={() => onDelete(params)} label="Delete" />,
-        //     <GridActionsCellItem icon={<ModeEditIcon/>} onClick={() => onEdit(params)} label="edit" />,
-        //   ]
-        // }
         { 
             field: 'actions',headerName: 'Ver Movimentação',width: 170,type:'actions',getActions: (params) => [
                 <GridActionsCellItem  icon={<CallMadeIcon/>} onClick={() => openPreview(params.id)} label="Delete" />,
@@ -135,7 +130,6 @@ export default function Movimentacao(){
     }
     function openMenu(event){
         setState({...state, anchorEl:event.currentTarget})
-        // console.log(event.currentTarget);
     }
     function closeMenu(event){
         setState({...state, anchorEl:null})
@@ -201,7 +195,7 @@ export default function Movimentacao(){
     function handleClose(){
         setOpenModal(false)
     }
-    console.log(paramsMovimentable);
+    console.log(paramsMovimentable.itens);
     return(
         <AppLayout>
             <CssBaseline />
@@ -396,7 +390,7 @@ export default function Movimentacao(){
                                                                 variant="body1"
                                                                 color="text.primary"
                                                             >
-                                                                {`Item: ${i.item.nome}`}
+                                                                {`Item: ${i.item?.nome}`}
                                                             </Typography>
                                                         }
                                                         secondary={`Quantidade: ${i.quantidade}`}

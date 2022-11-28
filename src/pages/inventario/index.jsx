@@ -105,6 +105,7 @@ export default function Inventario(){
     function closeSnakebar(){
         setState({...state, openSnakebar:false})
     }
+    console.log(state);
     return(
         <AppLayout>
             <CssBaseline />
@@ -195,37 +196,3 @@ export default function Inventario(){
         </AppLayout>
     )
 }
-
-
-    // function onSave(id,data){
-    //     if(id!==undefined){
-    //         Inventarios.updateById(id,data).then((result)=>{
-    //             if(result instanceof Error){
-    //                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});
-    //                 return;
-    //             }
-    //         })
-    //     }else{
-    //         Inventarios.create(data).then((result)=>{
-    //             if(result instanceof Error){
-    //                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});                      
-    //                     return;
-    //                 }
-    //             })
-    //         }
-    //     setOpenModal(false)
-    // }
-
-    // function onDelete(id){
-    //     if(confirm('Realmente deseja apagar?')){
-    //         Inventarios.deleteById(id)
-    //         .then(result => {
-    //             if(result instanceof Error){
-    //                 setState({...state, openSnakebar:true, message:result.message, statusSnake:'error'});  
-    //             }else{
-    //                 setState({...state, openSnakebar:true, message:'Apagado com Sucesso', statusSnake:'success'});  
-    //             }    
-    //             onLoad()
-    //         })    
-    //     }else return;   
-    // }

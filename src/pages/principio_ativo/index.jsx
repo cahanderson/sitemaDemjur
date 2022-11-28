@@ -14,7 +14,7 @@ export default function PrincipioAtivo(){
     const [editPrincipioAtivo, setEditPrincipioAtivo] = useState([])
     const [state, setState] = useState({
         codigo: null,
-        principioAtivo_id: '',
+        principioAtivo: '',
         tableCheckbox: false,
         filter:[],
         openSnakebar:false,
@@ -96,13 +96,15 @@ export default function PrincipioAtivo(){
             })
         }
     }
-    function pesquisar(principio_Ativo){
-        if(principioAtivo){
-            setState({...state, filter: principioAtivo?.filter((data)=>{return data.id?.includes(principio_Ativo)})})
+    function pesquisar(princAtivo){
+        console.log(princAtivo);
+        if(princAtivo){
+            setState({...state, filter: principioAtivo?.filter((data)=>{return data.nome?.toUpperCase().includes(princAtivo?.toUpperCase())})})
         }else{
-            setState({...state, filter: categoria})
+            setState({...state, filter: principioAtivo})
         }
     }
+    console.log(principioAtivo);
     function closeSnakebar(){
         setState({...state, openSnakebar:false})
     }
@@ -154,23 +156,18 @@ export default function PrincipioAtivo(){
             <Box component={Paper} padding='10px' justifyContent='center' alignItems='center'>
                 <Box display='flex' flexDirection='row' mt='20px' mb='30px' gap='20px' >
                     <Grid container spacing={3}>
-                        <Grid item xs={12} sm={3}>
+                        <Grid item xs={12} sm={12}>
                             <TextField
-                                select
                                 label="Nome"
                                 fullWidth
                                 variant="outlined"
-                                onChange={(e) => setState({...state, principioAtivo_id:e.target.value})}
-                            >
-                                {principioAtivo?.map((item, index)=>(
-                                    <MenuItem key={index} value={item.id}>{item.nome}</MenuItem>
-                                ))}
-                            </TextField>
+                                onChange={(e) => setState({...state, principioAtivo:e.target.value})}
+                            />
                         </Grid>
                     </Grid>
                     <Button       
                         variant="outlined"
-                        onClick={()=> pesquisar(state.categoria_id)}
+                        onClick={()=> pesquisar(state.principioAtivo)}
                     >
                         Pesquisar
                     </Button>

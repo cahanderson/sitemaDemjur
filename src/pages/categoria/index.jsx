@@ -14,7 +14,7 @@ export default function Item(){
     const [editCategoria, setEditCategoria] = useState([])
     const [state, setState] = useState({
         codigo: null,
-        categoria_id: '',
+        categoria: '',
         tableCheckbox: false,
         filter:[],
         statusSnake:'success',
@@ -94,9 +94,9 @@ export default function Item(){
         }
         
     }
-    function pesquisar(categoria){
-        if(categoria){
-            setState({...state, filter: categoria?.filter((data)=>{return data.id?.includes(categoria)})})
+    function pesquisar(categ){
+        if(categ){
+            setState({...state, filter: categoria?.filter((data)=>{return data.nome?.toUpperCase().includes(categ?.toUpperCase())})})
         }else{
             setState({...state, filter: categoria})
         }
@@ -154,21 +154,16 @@ export default function Item(){
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={3}>
                             <TextField
-                                select
                                 label="Categoria"
                                 fullWidth
                                 variant="outlined"
-                                onChange={(e) => setState({...state, categoria_id:e.target.value})}
-                            >
-                                {categoria?.map((item, index)=>(
-                                    <MenuItem key={index} value={item.nome}>{item.nome}</MenuItem>
-                                ))}
-                            </TextField>
+                                onChange={(e) => setState({...state, categoria:e.target.value})}
+                            />
                         </Grid>
                     </Grid>
                     <Button       
                         variant="outlined"
-                        onClick={()=> pesquisar(state.categoria_id)}
+                        onClick={()=> pesquisar(state.categoria)}
                     >
                         Pesquisar
                     </Button>

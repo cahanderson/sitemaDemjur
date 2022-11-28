@@ -35,6 +35,8 @@ export function NavBar(){
       router.push('/fornecedor')   
     }else if(event.target.value == 5){
       router.push('/usuario')   
+    }else if(event.target.value == 6){
+      router.push('/estabelecimento')   
     }
   }
   function onClose(){
@@ -77,6 +79,7 @@ export function NavBar(){
             <MenuItem value={3} onClick={handleCadastro}>Itens</MenuItem>
             <MenuItem value={4} onClick={handleCadastro}>Fornecedores</MenuItem>
             <MenuItem value={5} onClick={handleCadastro}>Usuários</MenuItem>
+            <MenuItem value={6} onClick={handleCadastro}>Estabelecimento</MenuItem>
           </Menu>
           <Button id='solicitacoes' onClick={(e)=> clickMenu(e)}>solicitações</Button>
           <Button id='movimentacoes' onClick={(e)=> clickMenu(e)}>movimentações</Button>

@@ -26,10 +26,12 @@ export default function NovaSolicitacao(){
     const [openModal, setOpenModal] = useState(false)
     const [editReu, setEditReu] = useState([])
     const [editCID, setEditCID] = useState([])
+    const [valueCID, setValueCID] = useState()
     const [valueEstabelecimento, setValueEstabelecimento] = useState(null)
     const [searchCID, setSearchCID] = useState({
         nome: "",
     })
+    console.log(editCID);
     const [cid, setCid] = useState([{
         id: '',
         codigo: '',
@@ -259,7 +261,7 @@ export default function NovaSolicitacao(){
                     return;
                 }else{
                     router.push('/solicitacao')
-                    setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
+                    // setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 }
             })   
         }else{
@@ -270,7 +272,7 @@ export default function NovaSolicitacao(){
                     return;
             }else{
                 router.push('/solicitacao')
-                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});   
+                // setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});   
             }
             })
         }
@@ -346,6 +348,7 @@ export default function NovaSolicitacao(){
             setState({...state, cid_id:newLinha})
         })
     }
+    console.log(state.cid_id)
     function onLoadEdit(data){
         console.log(data);
         const itensEdit = data.itens?.map((item)=>({
@@ -391,6 +394,7 @@ export default function NovaSolicitacao(){
         getEditReu(data.reu_acao)
         getEditCID(data.cid_id)
         setValueEstabelecimento({id:data.estabelecimento_id, nome:data.estabelecimento})
+        // onEditCid(data.cid_id)
     }
     function closeSnakebar(){
         setRetornoUsuario({...retornoUsuario, openSnakebar:false})
@@ -431,7 +435,10 @@ export default function NovaSolicitacao(){
 
     useEffect(()=>{
         if(data){
-            onLoadEdit(data)
+            Solicitacao.getById(data).
+            then((result)=>{
+                onLoadEdit(result.data)
+            })
         }
     },[data])
     useEffect(()=>{
@@ -445,7 +452,7 @@ export default function NovaSolicitacao(){
             onNewEstabelecimento(addEstabelecimento)
         }
     },[addEstabelecimento])
-    console.log(state);
+    // console.log(valueCID);
     return(
         <AppLayout>
             <CssBaseline />
@@ -565,8 +572,7 @@ export default function NovaSolicitacao(){
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={12} sm={2}>
-                            {/* <Typography>Data de entrada</Typography> */}
+                        <Grid item xs={12} sm={2}> 
                             <TextField
                                 value={state.data_entrada}
                                 type='date'
@@ -582,6 +588,7 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={8}>
                             <Autocomplete
+                                value={valueCID}
                                 multiple
                                 onBlur={editSelectCID}
                                 id="tags-standard"
@@ -721,9 +728,7 @@ export default function NovaSolicitacao(){
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            value={mask(unMask(state.beneficiario.cpf),['999.999.999-99'])}
-                            // onBlur={()=>checkCpf(state.beneficiario.cpf)}
-
+                            value={state.beneficiario.cpf ? mask(unMask(state.beneficiario.cpf),['999.999.999-99']) : null}
                             name="cpf"
                             label="CPF"
                            onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, cpf: unMask(e.target.value)}})}
@@ -805,7 +810,7 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={2}>
                             <TextField
-                            value={mask(unMask(state.beneficiario.telefone),['(99)99999999','(99)9 99999999'])}
+                            value={state.beneficiario.telefone ? mask(unMask(state.beneficiario.telefone),['(99)99999999','(99)9 99999999']) : null}
                             name="telefone"
                             label="Telefone"
                             fullWidth
@@ -827,7 +832,7 @@ export default function NovaSolicitacao(){
 
                         <Grid item xs={12} sm={2}>
                             <TextField
-                                value={mask(unMask(state.beneficiario.cep,),['99.999-999'])}
+                                value={state.beneficiario.cep ? mask(unMask(state.beneficiario.cep,),['99.999-999']) : null}
                                 id="cep"
                                 name="cep"
                                 label="CEP"
@@ -843,7 +848,6 @@ export default function NovaSolicitacao(){
                             label="Rua"
                             fullWidth
                             variant="outlined"
-
                             onChange={(e) => setState({...state, beneficiario:{...state.beneficiario, rua: e.target.value}})}
                             />
                         </Grid>

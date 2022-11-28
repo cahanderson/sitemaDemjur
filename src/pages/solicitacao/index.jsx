@@ -71,11 +71,8 @@ export default function Solicitacoes(){
         router.push('movimentacao/form_saidaPaciente')
     }
     function onEdit(id){
-        Solicitacao.getById(id).
-        then((result)=>{
-            addData(result.data)
-            router.push('/solicitacao/form')
-        })
+        addData(id)
+        router.push('/solicitacao/form')
     }
     function onDelete(id){
         if(confirm('Realmente deseja apagar?')){
