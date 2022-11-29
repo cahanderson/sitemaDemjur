@@ -30,10 +30,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/movimentacao.js"
     ],
-    "/solicitacao/form": [
+    "/solicitacao": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/solicitacao/form.js"
+      "static/chunks/pages/solicitacao.js"
     ]
   },
   "ampFirstPages": []

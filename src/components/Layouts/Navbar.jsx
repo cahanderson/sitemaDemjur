@@ -1,6 +1,6 @@
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { Button, Stack } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
@@ -63,7 +63,11 @@ export function NavBar(){
             aria-haspopup="true"
             aria-expanded={openCadastro?'true':undefined}
           >
-            cadastros
+            <Typography
+            textTransform={'capitalize'}
+            >
+              cadastros
+            </Typography>
           </Button>
           <Menu 
             id='cadastro-menu' 
@@ -81,9 +85,19 @@ export function NavBar(){
             <MenuItem value={5} onClick={handleCadastro}>Usuários</MenuItem>
             <MenuItem value={6} onClick={handleCadastro}>Estabelecimento</MenuItem>
           </Menu>
-          <Button id='solicitacoes' onClick={(e)=> clickMenu(e)}>solicitações</Button>
-          <Button id='movimentacoes' onClick={(e)=> clickMenu(e)}>movimentações</Button>
-          <Button id='inventarios' onClick={(e)=> clickMenu(e)}>inventarios</Button>
+          <Button id='solicitacoes' onClick={(e)=> clickMenu(e)}>
+            <Typography
+              textTransform={'capitalize'}
+            >
+              solicitações
+            </Typography>
+          </Button>
+          <Button id='movimentacoes' onClick={(e)=> clickMenu(e)}>
+            <Typography textTransform={'capitalize'}>movimentações</Typography>
+          </Button>
+          <Button id='inventarios' onClick={(e)=> clickMenu(e)}>
+            <Typography textTransform={'capitalize'}>inventários</Typography>
+          </Button>
           <Button 
             id='relatorios' 
             onClick={handleClickRelatorio}
@@ -91,7 +105,7 @@ export function NavBar(){
             aria-haspopup="true"
             aria-expanded={openRelatorio?'true':undefined}
           >
-            relatorios
+            <Typography textTransform={'capitalize'}>relatórios</Typography>
           </Button>
           <Menu 
             id='relatorio-menu' 

@@ -1,5 +1,4 @@
 import { createTheme } from "@mui/material";
-import { blue } from "@mui/material/colors";
 
 export const theme = createTheme({
     
@@ -29,3 +28,4 @@ export const theme = createTheme({
     },
     
 })
+

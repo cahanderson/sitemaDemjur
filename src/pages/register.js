@@ -3,14 +3,13 @@ import Button from '@/components/Button'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/auth'
 import { useState } from 'react'
-import { Avatar, Box, Container, CssBaseline, Grid, TextField, Typography } from '@mui/material'
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { Box, CssBaseline, Grid, TextField, Typography } from '@mui/material'
 import GuestLayout from '@/components/Layouts/GuestLayout'
 
 const Register = () => {
     const { register } = useAuth({
         middleware: 'guest', 
-        redirectIfAuthenticated: '/cadastroUsuarios',
+        redirectIfAuthenticated: '/',
     })
 
     const [name, setName] = useState('')
