@@ -1,9 +1,9 @@
 import { useState, useEffect, forwardRef } from "react";
 import { Alert, Box, Button, CssBaseline, Divider, Grid, Menu, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
+// import Draggable from 'react-draggable';
 import AppLayout from "@/components/Layouts/AppLayout";
 import { GridActionsCellItem } from "@mui/x-data-grid";
 import { useRouter } from "next/router";
-import {Preview} from "../../components/Modal/previewMovimentacao"
 import { Table } from "@/components/Table";
 import { Movimentacoes } from "@/lib/movimentacao";
 import useMovimentacaoEntradaStore from "@/hooks/movimentacaoEntrada";
@@ -19,6 +19,18 @@ import Slide from '@mui/material/Slide';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
+
+
+// function PaperComponent(props) {
+//     return (
+//       <Draggable
+//         handle="#draggable-dialog-title"
+//         cancel={'[class*="MuiDialogContent-root"]'}
+//       >
+//         <Paper {...props} />
+//       </Draggable>
+//     );
+//   }
 
 export default function Movimentacao(){   
     const addDataEntrada = useMovimentacaoEntradaStore(state=>state.addData);
@@ -108,9 +120,6 @@ export default function Movimentacao(){
         onLoadTipo()
     },[state.data])
 
-    const Transition = forwardRef(function Transition(props, ref) {
-        return <Slide direction="up" ref={ref} {...props} />;
-      });
     function pesquisar(buscaTipoMovimentacao,buscaDtMovimentacao,buscaNSolicitacao,buscaSolicitante,buscaCPF){
         if(buscaTipoMovimentacao !==''){    
             setState({...state, filter: data.filter((data)=>{ return data.d_tipo_movimentacao.startsWith(buscaTipoMovimentacao)})})
@@ -192,10 +201,6 @@ export default function Movimentacao(){
     function closeSnakebar(){
         setState({...state, openSnakebar:false})
     }
-    function handleClose(){
-        setOpenModal(false)
-    }
-    console.log(paramsMovimentable.itens);
     return(
         <AppLayout>
             <CssBaseline />
@@ -351,78 +356,81 @@ export default function Movimentacao(){
             <Box>
             <Dialog
                 open={openModal}
-                TransitionComponent={Transition}
-                onClose={handleClose}
+                // TransitionComponent={Transition}
+                onClose={()=>{setOpenModal(false)}}
                 maxWidth={'lg'}
                 fullWidth
             >
                 <DialogTitle color='secondary' fontSize={24} mb={2}>{"Movimentação"}</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id="alert-dialog-slide-description">
-                            <Box p={1}>
-                                <Grid container spacing={3} >
-                                    <Grid item xs={4}>
-                                        <Typography variant="h6" fontWeight={'bold'}>Tipo movimentação</Typography>
-                                        <Typography>{paramsMovimentable.d_tipo_movimentacao}</Typography>
-                                    </Grid>
-                                    <Divider orientation="vertical" flexItem />
-                                    <Grid item xs={5}>
-                                        <Typography variant="h6" fontWeight={'bold'}>Fornecedor</Typography>
-                                        <Typography>{paramsMovimentable.fornecedor?.nome}</Typography>
-                                    </Grid>
-                                    <Divider orientation="vertical" flexItem />
-                                    <Grid item xs={2}>
-                                        <Typography variant="h6" fontWeight={'bold'}>Valor</Typography>
-                                        <Typography>{paramsMovimentable.valor}</Typography>
-                                    </Grid>
-                                    
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-slide-description">
+                        <Box p={1}>
+                            <Grid container spacing={3} >
+                                <Grid item xs={4}>
+                                    <Typography variant="h6" fontWeight={'bold'}>Tipo movimentação</Typography>
+                                    <Typography>{paramsMovimentable.d_tipo_movimentacao}</Typography>
                                 </Grid>
-                                <Typography my={4} mt={10} variant='h6' >Itens da movimentação</Typography>
-                                <Box>
-                                    <List sx={{ width: '100%', maxWidth: 350}}>
-                                    {paramsMovimentable.itens?.map((i,index) =>(
-                                        <>
-                                            <ListItem alignItems="flex-start">
-                                                    <ListItemText
-                                                        primary={
-                                                            <Typography
-                                                                component='span'
-                                                                variant="body1"
-                                                                color="text.primary"
-                                                            >
-                                                                {`Item: ${i.item?.nome}`}
-                                                            </Typography>
-                                                        }
-                                                        secondary={`Quantidade: ${i.quantidade}`}
-                                                    />
-                                            </ListItem>
-                                            <Divider component="li" />
-                                        </>
-                                        ))}
-                                    </List>
-                                </Box>
+                                <Divider orientation="vertical" flexItem />
+                                <Grid item xs={5}>
+                                    <Typography variant="h6" fontWeight={'bold'}>Fornecedor</Typography>
+                                    <Typography>{paramsMovimentable.fornecedor?.nome}</Typography>
+                                </Grid>
+                                <Divider orientation="vertical" flexItem />
+                                <Grid item xs={2}>
+                                    <Typography variant="h6" fontWeight={'bold'}>Valor</Typography>
+                                    <Typography>{paramsMovimentable.valor}</Typography>
+                                </Grid>
+                                
+                            </Grid>
+                            <Typography my={4} mt={10} variant='h6' >Itens da movimentação</Typography>
+                            <Box>
+                                <List sx={{ width: '100%', maxWidth: 350}}>
+                                {paramsMovimentable.itens?.map((i,index) =>(
+                                    <>
+                                        <ListItem alignItems="flex-start">
+                                                <ListItemText
+                                                    primary={
+                                                        <Typography
+                                                            component='span'
+                                                            variant="body1"
+                                                            color="text.primary"
+                                                        >
+                                                            {`Item: ${i.item?.nome}`}
+                                                        </Typography>
+                                                    }
+                                                    secondary={`Quantidade: ${i.quantidade}`}
+                                                />
+                                        </ListItem>
+                                        <Divider component="li" />
+                                    </>
+                                    ))}
+                                </List>
                             </Box>
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions sx={paramsMovimentable?.is_efetivado?null:{display:'flex', justifyContent:'space-between'}}>
-                        <Box display={paramsMovimentable?.is_efetivado?'none':'flex'} gap={1}>
-                            <Button onClick={() => onEdit(paramsMovimentable)} variant='outlined'>Editar</Button>
-                            <Button onClick={() => onDelete(paramsMovimentable)} variant='outlined' >Excluir</Button>
-                            <Button
-                                onClick={() => onEfetivar(efetivacao)} 
-                                variant='outlined'
-                                // display={paramsMovimentable?.is_efetivado?'none':null} 
-                            >
-                                Efetivar
-                            </Button>
                         </Box>
-                        <Box id='close'>
-                            <Button onClick={handleClose} variant='contained'>Fechar</Button>
-                        </Box>
-                    </DialogActions>
-                </Dialog>
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions sx={paramsMovimentable?.is_efetivado?null:{display:'flex', justifyContent:'space-between'}}>
+                    <Box display={paramsMovimentable?.is_efetivado?'none':'flex'} gap={1}>
+                        <Button onClick={() => onEdit(paramsMovimentable)} variant='outlined'>Editar</Button>
+                        <Button onClick={() => onDelete(paramsMovimentable)} variant='outlined' >Excluir</Button>
+                        <Button
+                            onClick={() => onEfetivar(efetivacao)} 
+                            variant='outlined'
+                            // display={paramsMovimentable?.is_efetivado?'none':null} 
+                        >
+                            Efetivar
+                        </Button>
+                    </Box>
+                    <Box id='close'>
+                        <Button onClick={()=>{setOpenModal(false)}} variant='contained'>Fechar</Button>
+                    </Box>
+                </DialogActions>
+            </Dialog>
             </Box>
 
         </AppLayout>
     )
 }
+
+
+
