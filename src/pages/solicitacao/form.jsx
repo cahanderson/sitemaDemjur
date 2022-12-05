@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { Alert, Autocomplete, Box, Button, createFilterOptions, CssBaseline, Divider, Grid, IconButton, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
+import { Alert, Autocomplete, Box, Button, Chip, createFilterOptions, CssBaseline, Divider, Grid, IconButton, MenuItem, Paper, Snackbar, TextField, Typography } from "@mui/material";
 import AddCircleSharpIcon from '@mui/icons-material/AddCircleSharp';
 import ClearIcon from '@mui/icons-material/Clear';
 import AppLayout from "@/components/Layouts/AppLayout";
@@ -24,14 +24,14 @@ export default function NovaSolicitacao(){
     const [freq, setFreq] = useState([''])
     const [dataItens, setDataItens] = useState([''])
     const [openModal, setOpenModal] = useState(false)
-    const [editReu, setEditReu] = useState([])
+    const [editReu, setEditReu] = useState()
     const [editCID, setEditCID] = useState([])
-    const [valueCID, setValueCID] = useState()
+    const [valueCID, setValueCID] = useState([])
+    const [valueReu, setValueReu] = useState([])
     const [valueEstabelecimento, setValueEstabelecimento] = useState(null)
     const [searchCID, setSearchCID] = useState({
         nome: "",
     })
-    console.log(editCID);
     const [cid, setCid] = useState([{
         id: '',
         codigo: '',
@@ -47,14 +47,14 @@ export default function NovaSolicitacao(){
         message:'',
     })
     const [state, setState] = useState({
-        numero_solicitacao: '',
-        d_tipo: '',
-        d_representante_legal: '',
-        vara: '',
+        numero_solicitacao:'',
+        d_tipo_acao:'',
+        d_representante_legal:'',
+        vara:'',
         juiz:'',
-        reu_acao:'',
+        reu_acoes:'',
         data_entrada:'',
-        cid_id:'',
+        cids:'',
         estabelecimento_id:'',
         prescritor_id:'',
         local_tratamento:'',
@@ -78,10 +78,10 @@ export default function NovaSolicitacao(){
         },
         itens: [
             {
-                item_id: '',
-                quantidade_mensal: '',
-                d_frequencia_entrega: '',
-                quantidade_limite: ''
+                item_id:'',
+                quantidade_mensal:'',
+                d_frequencia_entrega:'',
+                quantidade_limite:null
             }
         ]
     })
@@ -114,7 +114,7 @@ export default function NovaSolicitacao(){
         Solicitacao.getCids(search)
         .then((result)=>{
             if(result instanceof Error){
-                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                setRetornoUsuario({...retornoUsuario, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setCid(result.data.results)
@@ -156,7 +156,7 @@ export default function NovaSolicitacao(){
         Solicitacao.getTipoAcao()
         .then((result)=>{
             if(result instanceof Error){
-                setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
+                // setRetornoUsuario({...message, openSnakebar:true, message:result.message, statusSnake:'error'});
                 return;
             }
             setAcao(result.data.dados)
@@ -298,59 +298,28 @@ export default function NovaSolicitacao(){
             setDataPrescritor({conselho_regional: result.data.conselho_regional, registro_conselho: result.data.registro_conselho})
         });
     }
-    function editSelectReu(){
-        let newLinha='';
-        editReu.forEach(e=>{
-            let linha = reu.find((r) => r.descricao == e)
-            if(newLinha !=''){
-                newLinha = newLinha + `,{'id':'${linha.valor}','descricao':'${linha.descricao}'}`
-            }else{
-                newLinha = `{'id':'${linha.valor}','descricao':'${linha.descricao}'}`
-            }
-            setState({...state, reu_acao:newLinha})
+    function getEditCID(value){
+        let valueC=[];
+        value.map(item=>{
+            cid.forEach(i=>{
+                if(item == i.codigo){
+                    valueC.push(i)
+                }
+            })
         })
     }
     function getEditReu(value){
-        let linha='';
-        let newLinha = [];
-        linha = value.split("},{");
-        linha.forEach(n=>{
-            if(newLinha!=''){
-                newLinha.push(n.replace(/[^0-9]/g,''))
-            }else{
-                newLinha[0] = n.replace(/[^0-9]/g,'')
-            }
-        })
-        setEditReu(newLinha)
-    }
-    function getEditCID(value){
-        let linha='';
-        let newLinha = [];
-        linha = value.split("},{");
-        linha.forEach(n=>{
-            if(newLinha!=''){
-                newLinha.push(parseInt(n.replace(/[^0-9]/g,'')))
-            }else{
-                newLinha[0] = parseInt(n.replace(/[^0-9]/g,''))
-            }
-        })
-        setEditCID(newLinha)
-    }
-    function editSelectCID(){
-        let newLinha='';
-        editCID.forEach(e=>{
-            let linha = cid.find(c=>c.nome == e)
-            if(newLinha !=''){
-                newLinha = newLinha + `,{'id':'${linha.id}','descricao':'${linha.nome}'}`
-            }else{
-                newLinha = `{'id':'${linha.id}','descricao':'${linha.nome}'}`
-            }
-            setState({...state, cid_id:newLinha})
+        let valueR=[];
+        value.map(item=>{
+            reu.forEach(i=>{
+                if(item == i.id){
+                    // valueR.push(i)
+                    setValueReu([...valueReu,i])
+                }
+            })
         })
     }
-    console.log(state.cid_id)
     function onLoadEdit(data){
-        console.log(data);
         const itensEdit = data.itens?.map((item)=>({
             id:item.id,
             item_id:item.item_id,
@@ -359,14 +328,14 @@ export default function NovaSolicitacao(){
             quantidade_limite:item.quantidade_limite,
         }));
         setState({
+            cids:["A00", "A022"],
             numero_solicitacao: data.numero_solicitacao,
-            d_tipo: data.d_tipo,
+            d_tipo_acao: data.d_tipo_acao,
             d_representante_legal:data.d_representante_legal ,
             vara:data.vara,
             juiz:data.juiz,
-            reu_acao:data.reu_acao,
+            reu_acoes:["1","2"],
             data_entrada:data.data_entrada,
-            cid_id:data.cid_id,
             estabelecimento_id:data.estabelecimento_id,
             prescritor_id:data.prescritor_id,
             local_tratamento:data.local_tratamento,
@@ -391,11 +360,38 @@ export default function NovaSolicitacao(){
             itens: itensEdit,
         })
         setDataId(data.id)
-        getEditReu(data.reu_acao)
-        getEditCID(data.cid_id)
+        getEditReu([6,7])
+        getEditCID(editCID)
         setValueEstabelecimento({id:data.estabelecimento_id, nome:data.estabelecimento})
-        // onEditCid(data.cid_id)
     }
+    //useMemo para guardar as informações da linha para os autocomplete
+
+    const selectedValueCID = useMemo(()=>{
+        let value=[]
+        if(!state.cids) return undefined;
+        state.cids.map(r=>{
+            reu.forEach(i=>{
+                if(r===i.codigo){
+                    value.push(i)
+                }
+            })
+        })
+        return value;
+    },[state.reu_acoes, reu])
+    
+    const selectedValueReu = useMemo(()=>{
+        let value=[]
+        if(!state.reu_acoes) return undefined;
+        state.reu_acoes.map(r=>{
+            reu.forEach(i=>{
+                if(r.toString()==i.valor){
+                    value.push(i)
+                }
+            })
+        })
+        return value;
+    },[state.reu_acoes, reu])
+    
     function closeSnakebar(){
         setRetornoUsuario({...retornoUsuario, openSnakebar:false})
     }
@@ -410,6 +406,31 @@ export default function NovaSolicitacao(){
             }
         })  
     }
+
+    const reu2 = [
+        {
+            "id": 7,
+            "categoria": "TipoReu",
+            "descricao": "Estado",
+            "ordem": 2,
+            "metadata": null,
+            "ativo": "S",
+            "valor": "2"
+        },
+        {
+            "id": 8,
+            "categoria": "TipoReu",
+            "descricao": "União",
+            "ordem": 3,
+            "metadata": null,
+            "ativo": "S",
+            "valor": "3"
+        }
+    ]
+
+    // console.log(reu2,'reu2');
+    console.log(selectedValueReu,'select');
+
     useEffect(()=>{
         if(state.beneficiario.cep.length == 8){
             checkCep()
@@ -442,9 +463,7 @@ export default function NovaSolicitacao(){
         }
     },[data])
     useEffect(()=>{
-        if(searchCID.nome !=''){
-            onLoadCid(searchCID)
-        }
+        onLoadCid(searchCID)
     },[searchCID])
 
     useEffect(()=>{
@@ -452,7 +471,6 @@ export default function NovaSolicitacao(){
             onNewEstabelecimento(addEstabelecimento)
         }
     },[addEstabelecimento])
-    // console.log(valueCID);
     return(
         <AppLayout>
             <CssBaseline />
@@ -511,7 +529,7 @@ export default function NovaSolicitacao(){
                                 label="Tipo de ação"
                                 fullWidth
                                 variant="outlined"
-                                onChange={(e) => {setState({...state,d_tipo: e.target.value})}}
+                                onChange={(e) => {setState({...state,d_tipo_acao: e.target.value})}}
                             >
                                 {acao.map((a, index)=>(
                                     <MenuItem key={index} value={a.valor}>{a.descricao}</MenuItem>
@@ -555,22 +573,31 @@ export default function NovaSolicitacao(){
                         </Grid>
                         <Grid item xs={12} sm={5}>
                             <Autocomplete
-                                // value={}
-                                multiple
-                                onBlur={editSelectReu}
-                                id="tags-standard"
-                                options={reu.map((option) => option.descricao)}
-                                onChange={(_, newValue) => {
-                                    setEditReu(newValue)
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        variant="outlined"
-                                        label="Réu da ação"
-                                    />
-                                )}
+                            multiple
+                            options={reu}
+                            // defaultValue={selectedValueCID ?selectedValueCID:null}
+                            value={selectedValueCID ? selectedValueCID : reu2}
+                            getOptionLabel={(option) => option.descricao}
+                            renderTags={(value, getTagProps) =>
+                                value.map((option, index) => (
+                                  <Chip variant="outlined" label={option?.descricao} {...getTagProps({ index })} />
+                                ))
+                            }
+                            onChange={(_, newValue) => {
+                                const arrayValue = []
+                                newValue.map(item=>{
+                                    arrayValue.push(parseInt(item.valor))
+                                })
+                                setState({...state,reu_acoes:arrayValue})
+                            }}
+                            renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                label="Réu da ação"
                             />
+                            )}
+                        />
                         </Grid>
                         <Grid item xs={12} sm={2}> 
                             <TextField
@@ -587,28 +614,37 @@ export default function NovaSolicitacao(){
                             />
                         </Grid>
                         <Grid item xs={12} sm={8}>
-                            <Autocomplete
-                                value={valueCID}
-                                multiple
-                                onBlur={editSelectCID}
-                                id="tags-standard"
-                                options={cid?.map((option) => option?.nome)}
-                                onChange={(_, newValue) => {
-                                    setEditCID(newValue)
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        variant="outlined"
-                                        label="CID"
-                                        onChange={(e)=>setSearchCID({nome: e.target.value})}
-                                    />
-                                )}
-                            />
+                        <Autocomplete
+                            multiple
+                            options={cid}
+                            getOptionLabel={(option) => option.codigo + " - " + option.nome}
+                            // defaultValue={editCID}
+                            value={selectedValueCID}
+                            renderTags={(value, getTagProps) =>
+                                value.map((option, index) => (
+                                  <Chip variant="outlined" label={option?.codigo} {...getTagProps({ index })} />
+                                ))
+                            }
+                            onChange={(_, newValue) => {
+                                const arrayValue = []
+                                newValue.map(item=>{
+                                    arrayValue.push(item.codigo)
+                                })
+                                setState({...state, cids:arrayValue})
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    variant="outlined"
+                                    label="CIDs"
+                                    onChange={(e)=>setSearchCID({nome: e.target.value})}
+                                />
+                            )}
+                        />
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <Autocomplete
-                                value={valueEstabelecimento}
+                                // value={valueEstabelecimento}
                                 onChange={(event, newValue) => {
                                     if (typeof newValue === 'string') {
                                         setState({...state, estabelecimento_id: newValue.id})

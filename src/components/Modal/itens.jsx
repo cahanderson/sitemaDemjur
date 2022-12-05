@@ -71,13 +71,13 @@ export function NovoItem(props){
             setItem({...item, principio_ativo_id:props.newPrincAtivo})
         }
     },[props.newPrincAtivo])
-    console.log(props.categoria);
 
     useEffect(()=>{
         if(props.newCategoria){
             setItem({...item,categoria_id:props.newCategoria})
         }
     },[props.newCategoria])
+    console.log(valueCategoria);
     return(
         <Modal
             open={props.openModal}

@@ -52,6 +52,7 @@ export default function Paciente(){
         statusSnake:'success',
         message:'',
     })
+    console.log(itens);
 
     const columns = [
         { field: 'item_nome', headerName: 'Itens', width: 200,  },
@@ -357,7 +358,6 @@ export default function Paciente(){
                                 <TableRow>
                                     <TableCell component='th'>Itens </TableCell>
                                     <TableCell component='th'>Qtd Programada</TableCell>
-                                    <TableCell component='th'>Qtd.Limite</TableCell>
                                     <TableCell component='th'>Qtd.Atendida</TableCell>
                                     <TableCell component='th'>Mês Atual</TableCell>
                                     <TableCell component='th'>Quantidade</TableCell>
@@ -372,7 +372,6 @@ export default function Paciente(){
                                     >
                                         <TableCell >{item.item_nome}</TableCell>
                                         <TableCell >{item.quantidade}</TableCell>
-                                        <TableCell >{item.quantidade_limite}</TableCell>
                                         <TableCell >0</TableCell>
                                         <TableCell >0</TableCell>
                                         <TableCell >

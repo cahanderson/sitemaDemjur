@@ -48,8 +48,8 @@ const Login = () => {
             <GuestLayout>
                 <CssBaseline />
                 <Box display='flex' justifyContent='center'>
-                    <Typography component="h1" variant="h5">
-                        Sign up
+                    <Typography component="h1" variant="h2">
+                        SJUD
                     </Typography>
                 </Box>
                 <Box display='flex' justifyContent='center'>
@@ -62,7 +62,7 @@ const Login = () => {
                 <AuthValidationErrors className="mb-4" errors={errors} />
         
 
-                <Box component="form" onSubmit={submitForm} noValidate sx={{ mt: 3 }}>
+                <Box component="form" onSubmit={submitForm} noValidate sx={{ mt:3,  }}>
                     <TextField
                         sx={{ mb : 3 }}
                         variant='standard'
@@ -92,34 +92,18 @@ const Login = () => {
                         onChange={event => setPassword(event.target.value)}
                     />     
 
-                    <FormControlLabel
+                    {/* <FormControlLabel
                         control={<Checkbox value="remember" color="primary" />}
                         label="Remember me"
-                    />
+                    /> */}
                     <Button
                         type="submit"
                         fullWidth
-                        sx={{ mt: 5, mb: 3, borderRadius:3}}
+                        sx={{ mt: 8, mb: 3, borderRadius:3}}
                         variant="contained"
                     >
                         Login
                     </Button>
-                    <Grid container>
-                        <Grid item xs>
-                            <Link href="/forgot-password" variant="body2">
-                                <a>
-                                    Esqueceu a senha?
-                                </a>
-                            </Link>
-                        </Grid>
-                        <Grid item>
-                            <Link href="/register" variant="body2">
-                                <a>
-                                    Criar nova conta
-                                </a>
-                            </Link>
-                        </Grid>
-                    </Grid>
                 </Box> 
             </GuestLayout>
         </>

@@ -85,27 +85,22 @@ export function NavBar(){
             <MenuItem value={5} onClick={handleCadastro}>Usuários</MenuItem>
             <MenuItem value={6} onClick={handleCadastro}>Estabelecimento</MenuItem>
           </Menu>
-          <Button id='solicitacoes' onClick={(e)=> clickMenu(e)}>
-            <Typography
-              textTransform={'capitalize'}
-            >
-              solicitações
-            </Typography>
+          <Button onClick={(e)=> clickMenu(e)}>
+            <Typography id='solicitacoes'textTransform={'capitalize'}>solicitações</Typography>
           </Button>
-          <Button id='movimentacoes' onClick={(e)=> clickMenu(e)}>
-            <Typography textTransform={'capitalize'}>movimentações</Typography>
+          <Button onClick={(e)=> clickMenu(e)}>
+            <Typography id='movimentacoes' textTransform={'capitalize'}>movimentações</Typography>
           </Button>
-          <Button id='inventarios' onClick={(e)=> clickMenu(e)}>
-            <Typography textTransform={'capitalize'}>inventários</Typography>
+          <Button onClick={(e)=> clickMenu(e)}>
+            <Typography id='inventarios' textTransform={'capitalize'}>inventários</Typography>
           </Button>
-          <Button 
-            id='relatorios' 
+          <Button  
             onClick={handleClickRelatorio}
             aria-controls={openRelatorio? 'relatorio-menu' : undefined}
             aria-haspopup="true"
             aria-expanded={openRelatorio?'true':undefined}
           >
-            <Typography textTransform={'capitalize'}>relatórios</Typography>
+            <Typography id='relatorios' textTransform={'capitalize'}>relatórios</Typography>
           </Button>
           <Menu 
             id='relatorio-menu' 
