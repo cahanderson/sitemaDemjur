@@ -61,7 +61,6 @@ export default function Relatorio() {
     useEffect(()=>{
         onLoad();
     },[])
-    console.log(onRelatorio);
   return (
     <AppLayout>
         <CssBaseline />

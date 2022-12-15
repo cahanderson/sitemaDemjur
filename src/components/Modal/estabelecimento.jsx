@@ -20,7 +20,6 @@ export function NovoEstabelecimento(props){
 
     useEffect(()=>{
         if(props.editEstabelecimento?.id != null|| props.editEstabelecimento?.id != undefined){
-            console.log(props.editEstabelecimento);
            setState({
                 nome:props.editEstabelecimento.nome,
                 telefone:props.editEstabelecimento.telefone,

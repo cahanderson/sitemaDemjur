@@ -86,7 +86,6 @@ export default function Entradas(){
     }
     function onSetItem(e){
         if(e.target.name === 'item_id'){
-            console.log('inserir');
             itemAInserir.item_id = e.target.value;
             setItemAInserir({...itemAInserir})
         }else if(e.target.name === 'quantidade'){
@@ -173,8 +172,6 @@ export default function Entradas(){
             valor_unit:'',
         })
     }
-    console.log(state);
-    console.log(itemAInserir);
     function closeSnakebar(){
         setRetornoUsuario({...retornoUsuario, openSnakebar:false})
     }

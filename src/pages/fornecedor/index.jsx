@@ -116,7 +116,6 @@ export default function Item(){
     //     //     telefone=i.telefone
     //     // }
     // }))
-    // console.log(maskedFilter);
 
     function pesquisar(fornecedor,cnpj){
         if(fornecedor){

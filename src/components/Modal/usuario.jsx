@@ -42,7 +42,6 @@ export function Usuario(props){
     }));
 
     function addPermisions(e){
-        console.log(e);
     }
     return(
             <Modal

@@ -105,7 +105,6 @@ export default function Inventario(){
     function closeSnakebar(){
         setState({...state, openSnakebar:false})
     }
-    console.log(state);
     return(
         <AppLayout>
             <CssBaseline />

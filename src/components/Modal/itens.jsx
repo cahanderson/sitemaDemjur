@@ -77,7 +77,6 @@ export function NovoItem(props){
             setItem({...item,categoria_id:props.newCategoria})
         }
     },[props.newCategoria])
-    console.log(valueCategoria);
     return(
         <Modal
             open={props.openModal}
@@ -176,7 +175,6 @@ export function NovoItem(props){
                             <Autocomplete
                                 value={valueCategoria}
                                 onChange={(event, newValue) => {
-                                    console.log(newValue);
                                     if (typeof newValue === 'string') {
                                         setItem({...item, categoria_id: newValue.id})
                                     } else if (newValue && newValue.inputValue) {

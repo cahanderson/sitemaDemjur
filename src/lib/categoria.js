@@ -21,7 +21,6 @@ const getAll = async () =>{
 
 const create = async (dados) => {
   await csrf()
-  // console.log({dados});
   try {
     const { data } = await axios.post('/api/categorias', dados);
 

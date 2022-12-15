@@ -3,12 +3,14 @@ import { useAuth } from '@/hooks/auth'
 import { Box } from '@mui/material'
 import { NavBar } from './Navbar'
 import Head from 'next/head'
+import { useEffect, useState } from 'react'
 
-const AppLayout = ({ header, children }) => {
+const AppLayout = ({children }) => {
     const { user } = useAuth({ middleware: 'auth' })
+    // console.log(userAuthenticate);
+    // console.log(children._source,'teste');
 
     return (
-
         <Box minHeight='100vh' bgcolor='#F5F5F9' width='100%'>
             <Head>laravel</Head>
             <Navigation user={user} />

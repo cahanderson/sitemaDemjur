@@ -7,7 +7,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 
 export function Preview(props){
-    console.log(props.params.itens);
     return(
         <Modal
             open={props.openModal}

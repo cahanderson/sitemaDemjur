@@ -73,7 +73,7 @@ export function NovoFornecedor(props){
             open={props.openModal}
             onClose={()=>{props.onClose(), limparFornecedor()}}
             header='Novo Fornecedor'
-            onSave = {()=>{props.Save(state,props.fornecedor?.id),console.log(state);}}
+            onSave = {()=>{props.Save(state,props.fornecedor?.id)}}
 
         >
             <CssBaseline />

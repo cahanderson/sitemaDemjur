@@ -1,16 +1,29 @@
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { Button, Stack, Typography } from '@mui/material';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/auth';
+import {UsuariosService} from '../../lib/usuario'
+import { Button, Stack, Typography } from '@mui/material';
 
 export function NavBar(){
+  const { user } = useAuth({ middleware: 'auth' })
   const router = useRouter();
   const [menuRelatorio, setMenuRelatorio] = useState(null)
   const [menuCadastro, setMenuCadastro] = useState(null)
+  const [userAuthenticate, setUserAuthenticate] = useState({})
   const openRelatorio = Boolean(menuRelatorio);
   const openCadastro = Boolean(menuCadastro);
 
+  function loadUser(){
+    UsuariosService.getById(user?.id)
+    .then((result)=>{
+        if(result instanceof Error){
+            return;
+        }
+        setUserAuthenticate(result.data)
+    })
+  }
   const handleClickRelatorio = (event) =>{
     setMenuRelatorio(event.currentTarget)
   }
@@ -54,6 +67,12 @@ export function NavBar(){
       router.push('/relatorios')
     }
   };
+  useEffect(()=>{
+    loadUser()
+  },[])
+
+  // console.log(userAuthenticate.permissions);
+  // console.log(userAuthenticate.permissions.find((i)=>i.name == 'admin.solicitacoes'))
   return (
         <Stack direction='row' spacing={2}>
           <Button 
@@ -85,15 +104,29 @@ export function NavBar(){
             <MenuItem value={5} onClick={handleCadastro}>Usuários</MenuItem>
             <MenuItem value={6} onClick={handleCadastro}>Estabelecimento</MenuItem>
           </Menu>
-          <Button onClick={(e)=> clickMenu(e)}>
-            <Typography id='solicitacoes'textTransform={'capitalize'}>solicitações</Typography>
-          </Button>
-          <Button onClick={(e)=> clickMenu(e)}>
-            <Typography id='movimentacoes' textTransform={'capitalize'}>movimentações</Typography>
-          </Button>
-          <Button onClick={(e)=> clickMenu(e)}>
-            <Typography id='inventarios' textTransform={'capitalize'}>inventários</Typography>
-          </Button>
+          {
+            userAuthenticate.permissions?.findIndex((i)=>i.name == 'admin.solicitacoes') >=0?
+              <Button onClick={(e)=> clickMenu(e)}>
+                <Typography id='solicitacoes'textTransform={'capitalize'}>solicitações</Typography>
+              </Button>
+            : null  
+          }
+          {
+            userAuthenticate.permissions?.findIndex((i)=>i.name == 'admin.movimentacoes') >=0?
+              <Button onClick={(e)=> clickMenu(e)}>
+                <Typography id='movimentacoes' textTransform={'capitalize'}>movimentações</Typography>
+              </Button>
+            :
+            null
+          }
+          {
+            userAuthenticate.permissions?.findIndex((i)=>i.name == 'admin.inventarios') >=0?
+              <Button onClick={(e)=> clickMenu(e)}>
+                <Typography id='inventarios' textTransform={'capitalize'}>inventários</Typography>
+              </Button>
+            :
+            null
+          }
           <Button  
             onClick={handleClickRelatorio}
             aria-controls={openRelatorio? 'relatorio-menu' : undefined}

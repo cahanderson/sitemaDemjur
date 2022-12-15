@@ -3,8 +3,6 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Avatar, Box, Divider, IconButton, ListItemIcon, MenuItem, Toolbar, Tooltip, Typography } from '@mui/material'
 import {Menu as MenuMui} from '@mui/material';
-import PersonAdd from '@mui/icons-material/PersonAdd'
-import Settings from '@mui/icons-material/Settings'
 import Logout from '@mui/icons-material/Logout'
 
 
@@ -23,7 +21,6 @@ const Navigation = ({ user }) => {
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
-        console.log(event.currentTarget);
     };
         const handleClose = () => {
     setAnchorEl(null);

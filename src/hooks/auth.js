@@ -6,8 +6,6 @@ import { axios } from '@/lib/axios'
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
 
-    //Alterado para ('/api/userS')
-
     const { data: user, error, mutate } = useSWR('/api/user', () =>
         axios
             .get('/api/user')
@@ -39,11 +37,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
 
         setErrors([])
         setStatus(null)
-        // setState({...state, errors:[]})
-        // setState({...state, status:null})
 
-        axios
-            .post('/login', props)
+        axios.post('/login', props)
             .then(() => mutate())
             .catch(error => {
                 if (error.response.status !== 422) throw error

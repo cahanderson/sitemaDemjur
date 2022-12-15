@@ -69,7 +69,6 @@ export default function PrincipioAtivo(){
         } 
     }
     function onSave(item,id){
-        console.log(item,id);
         if(id){
             PrincAtivo.updateById(id,item).then((result)=>{
                 if(result instanceof Error){
@@ -97,14 +96,12 @@ export default function PrincipioAtivo(){
         }
     }
     function pesquisar(princAtivo){
-        console.log(princAtivo);
         if(princAtivo){
             setState({...state, filter: principioAtivo?.filter((data)=>{return data.nome?.toUpperCase().includes(princAtivo?.toUpperCase())})})
         }else{
             setState({...state, filter: principioAtivo})
         }
     }
-    console.log(principioAtivo);
     function closeSnakebar(){
         setState({...state, openSnakebar:false})
     }

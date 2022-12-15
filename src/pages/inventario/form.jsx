@@ -197,7 +197,6 @@ export default function NovoInventario(){
             setState({...state, itens:dados.itens, data:dados.data, responsavel_id:dados.responsavel_id})
         }
     },[dados])
-    console.log(state.itens)
     return(
         <AppLayout>
             <Box

@@ -190,7 +190,6 @@ export default function Saidas(){
         setState({...state, itens:itens })
     }
     function onSave(data){
-        console.log(data);
         if(dataId!=''){
             Movimentacoes.updateById(dataId,data).then((result)=>{
                 if(result instanceof Error){
@@ -229,7 +228,6 @@ export default function Saidas(){
             onLoadEdit(dados)
         }
     },[dados])
-    console.log(state.movimentable_id);
     return(
         <AppLayout>
             <Typography variant='h5' component='h1' color='secondary'>

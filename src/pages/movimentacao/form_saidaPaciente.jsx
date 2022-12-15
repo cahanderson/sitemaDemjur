@@ -52,7 +52,6 @@ export default function Paciente(){
         statusSnake:'success',
         message:'',
     })
-    console.log(itens);
 
     const columns = [
         { field: 'item_nome', headerName: 'Itens', width: 200,  },
@@ -153,7 +152,6 @@ export default function Paciente(){
     function populaItem(dados){
         let newItens = itensInseridos;
         Object.keys(dados).forEach((i)=>{
-            console.log(dados[i]);
             newItens.push(dados[i])
         })
         setItensInseridos(newItens)
@@ -264,7 +262,6 @@ export default function Paciente(){
     // useEffect(()=>{
     //     if(idSolicitacaoStore){
     //         setIdSolicitacoes(idSolicitacaoStore)
-    //         console.log(idSolicitacaoStore);
     //     }
     // },[])
     return(

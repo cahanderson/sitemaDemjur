@@ -49,7 +49,6 @@ const create = async (dados) => {
   }
 };
 const efetivar = async (id) => {
-  console.log(id);
   try {
     const { data } = await axios.post('/api/movimentacao/efetivar-movimentacao', id);
 

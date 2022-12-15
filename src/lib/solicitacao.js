@@ -181,7 +181,6 @@ const create = async (dados) => {
     const {data} = await axios.post('/api/solicitacao', dados);
 
     if (data) {
-      console.log(data);
       // return data.id;
     }
   } catch (error) {

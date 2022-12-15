@@ -133,7 +133,6 @@ export function DispensacaoCliente(props){
             open={props.openModal}
             onClose={()=>{props.onClose(), limparItem()}}
             onSave = {()=>props.onSave(itens)}
-            // onSave = {()=>console.log(itens)}
             header='Dispensação para paciente'
         >
             <Box my={1} p={2}>

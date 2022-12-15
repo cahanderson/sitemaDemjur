@@ -14,6 +14,7 @@ export default function NovaSolicitacao(){
     const filter = createFilterOptions();
     const data = useSolicitacaoStore(state=>state.datas)
     const router = useRouter();
+    let valueCid = [];
     const [dataId, setDataId] = useState('')
     const [dataEstabelecimento, setDataEstabelecimento] = useState([''])
     const [acao, setAcao] = useState(['']);
@@ -24,8 +25,6 @@ export default function NovaSolicitacao(){
     const [freq, setFreq] = useState([''])
     const [dataItens, setDataItens] = useState([''])
     const [openModal, setOpenModal] = useState(false)
-    const [editReu, setEditReu] = useState()
-    const [editCID, setEditCID] = useState([])
     const [valueCID, setValueCID] = useState([])
     const [valueReu, setValueReu] = useState([])
     const [valueEstabelecimento, setValueEstabelecimento] = useState(null)
@@ -52,9 +51,9 @@ export default function NovaSolicitacao(){
         d_representante_legal:'',
         vara:'',
         juiz:'',
-        reu_acoes:'',
+        reu_acoes:[],
         data_entrada:'',
-        cids:'',
+        cids:[],
         estabelecimento_id:'',
         prescritor_id:'',
         local_tratamento:'',
@@ -298,27 +297,6 @@ export default function NovaSolicitacao(){
             setDataPrescritor({conselho_regional: result.data.conselho_regional, registro_conselho: result.data.registro_conselho})
         });
     }
-    function getEditCID(value){
-        let valueC=[];
-        value.map(item=>{
-            cid.forEach(i=>{
-                if(item == i.codigo){
-                    valueC.push(i)
-                }
-            })
-        })
-    }
-    function getEditReu(value){
-        let valueR=[];
-        value.map(item=>{
-            reu.forEach(i=>{
-                if(item == i.id){
-                    // valueR.push(i)
-                    setValueReu([...valueReu,i])
-                }
-            })
-        })
-    }
     function onLoadEdit(data){
         const itensEdit = data.itens?.map((item)=>({
             id:item.id,
@@ -328,13 +306,12 @@ export default function NovaSolicitacao(){
             quantidade_limite:item.quantidade_limite,
         }));
         setState({
-            cids:["A00", "A022"],
             numero_solicitacao: data.numero_solicitacao,
             d_tipo_acao: data.d_tipo_acao,
-            d_representante_legal:data.d_representante_legal ,
+            d_representante_legal:data.d_representante_legal,
             vara:data.vara,
             juiz:data.juiz,
-            reu_acoes:["1","2"],
+            reu_acoes:data.reu_acoes,
             data_entrada:data.data_entrada,
             estabelecimento_id:data.estabelecimento_id,
             prescritor_id:data.prescritor_id,
@@ -360,37 +337,36 @@ export default function NovaSolicitacao(){
             itens: itensEdit,
         })
         setDataId(data.id)
-        getEditReu([6,7])
-        getEditCID(editCID)
-        setValueEstabelecimento({id:data.estabelecimento_id, nome:data.estabelecimento})
+        setValueEstabelecimento({id:data.estabelecimento_id, nome:data.estabelecimento.nome})
+        setValueCID(data.cids)
     }
     //useMemo para guardar as informações da linha para os autocomplete
 
-    const selectedValueCID = useMemo(()=>{
-        let value=[]
-        if(!state.cids) return undefined;
-        state.cids.map(r=>{
-            reu.forEach(i=>{
-                if(r===i.codigo){
-                    value.push(i)
-                }
-            })
-        })
-        return value;
-    },[state.reu_acoes, reu])
+    // const selectedValueCID = useMemo(()=>{
+    //     let value=[]
+    //     if(!state.cids) return undefined;
+    //     state.cids.map(r=>{
+    //         reu.forEach(i=>{
+    //             if(r===i.codigo){
+    //                 value.push(i)
+    //             }
+    //         })
+    //     })
+    //     return value;
+    // },[state.reu_acoes, reu])
     
-    const selectedValueReu = useMemo(()=>{
-        let value=[]
-        if(!state.reu_acoes) return undefined;
-        state.reu_acoes.map(r=>{
-            reu.forEach(i=>{
-                if(r.toString()==i.valor){
-                    value.push(i)
-                }
-            })
-        })
-        return value;
-    },[state.reu_acoes, reu])
+    // const selectedValueReu = useMemo(()=>{
+    //     let value=[]
+    //     if(!state.reu_acoes) return undefined;
+    //     state.reu_acoes.map(r=>{
+    //         reu.forEach(i=>{
+    //             if(r.toString()==i.valor){
+    //                 value.push(i)
+    //             }
+    //         })
+    //     })
+    //     return value;
+    // },[state.reu_acoes, reu])
     
     function closeSnakebar(){
         setRetornoUsuario({...retornoUsuario, openSnakebar:false})
@@ -406,30 +382,6 @@ export default function NovaSolicitacao(){
             }
         })  
     }
-
-    const reu2 = [
-        {
-            "id": 7,
-            "categoria": "TipoReu",
-            "descricao": "Estado",
-            "ordem": 2,
-            "metadata": null,
-            "ativo": "S",
-            "valor": "2"
-        },
-        {
-            "id": 8,
-            "categoria": "TipoReu",
-            "descricao": "União",
-            "ordem": 3,
-            "metadata": null,
-            "ativo": "S",
-            "valor": "3"
-        }
-    ]
-
-    // console.log(reu2,'reu2');
-    console.log(selectedValueReu,'select');
 
     useEffect(()=>{
         if(state.beneficiario.cep.length == 8){
@@ -575,8 +527,8 @@ export default function NovaSolicitacao(){
                             <Autocomplete
                             multiple
                             options={reu}
-                            // defaultValue={selectedValueCID ?selectedValueCID:null}
-                            value={selectedValueCID ? selectedValueCID : reu2}
+                            value={state.reu_acoes}
+                            // value={state.reu_acoes}
                             getOptionLabel={(option) => option.descricao}
                             renderTags={(value, getTagProps) =>
                                 value.map((option, index) => (
@@ -614,37 +566,37 @@ export default function NovaSolicitacao(){
                             />
                         </Grid>
                         <Grid item xs={12} sm={8}>
-                        <Autocomplete
-                            multiple
-                            options={cid}
-                            getOptionLabel={(option) => option.codigo + " - " + option.nome}
-                            // defaultValue={editCID}
-                            value={selectedValueCID}
-                            renderTags={(value, getTagProps) =>
-                                value.map((option, index) => (
-                                  <Chip variant="outlined" label={option?.codigo} {...getTagProps({ index })} />
+                            <Autocomplete
+                                multiple
+                                options={cid}
+                                getOptionLabel={(option) => option.codigo +'-'+ option.nome}
+                                defaultValue={[valueCID[0]]}
+                                renderTags={(value, getTagProps) =>
+                                    value.map((option, index) => (
+                                    <Chip variant="outlined" label={option?.codigo} {...getTagProps({ index })} />
                                 ))
-                            }
-                            onChange={(_, newValue) => {
-                                const arrayValue = []
-                                newValue.map(item=>{
-                                    arrayValue.push(item.codigo)
-                                })
-                                setState({...state, cids:arrayValue})
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="CIDs"
-                                    onChange={(e)=>setSearchCID({nome: e.target.value})}
-                                />
-                            )}
-                        />
+                                }
+                                onChange={(_, newValue) => {
+                                    // const arrayValue = []
+                                    // newValue.map(item=>{
+                                    //     arrayValue.push(item.codigo)
+                                    // })
+                                    // setState({...state, cids:arrayValue})
+                                    // // setValueCID(...valueCID,newValue)
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="outlined"
+                                        label="CIDs"
+                                        onChange={(e)=>setSearchCID({nome: e.target.value})}
+                                    />
+                                )}
+                            />
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <Autocomplete
-                                // value={valueEstabelecimento}
+                                value={valueEstabelecimento}
                                 onChange={(event, newValue) => {
                                     if (typeof newValue === 'string') {
                                         setState({...state, estabelecimento_id: newValue.id})
